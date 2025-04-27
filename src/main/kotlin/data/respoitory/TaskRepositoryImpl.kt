@@ -2,9 +2,12 @@ package org.example.data.respoitory
 
 import org.example.domain.model.Task
 import org.example.domain.repository.TaskRepository
+import org.example.data.storge.DataSource
 import java.util.*
 
-class TaskRepositoryImpl : TaskRepository {
+class TaskRepositoryImpl(
+    private val dataSource: DataSource<Task>
+) : TaskRepository {
     override fun createTask(task: Task): Task {
         TODO("Not yet implemented")
     }

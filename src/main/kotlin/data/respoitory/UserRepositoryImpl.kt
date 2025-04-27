@@ -2,9 +2,12 @@ package org.example.data.respoitory
 
 import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
+import org.example.data.storge.DataSource
 import java.util.*
 
-class UserRepositoryImpl : UserRepository {
+class UserRepositoryImpl(
+    private val dataSource: DataSource<User>
+) : UserRepository {
     override fun createUser(user: User): User {
         TODO("Not yet implemented")
     }

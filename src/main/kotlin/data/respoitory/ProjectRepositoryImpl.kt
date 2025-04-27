@@ -2,9 +2,12 @@ package org.example.data.respoitory
 
 import org.example.domain.model.Project
 import org.example.domain.repository.ProjectRepository
+import org.example.data.storge.DataSource
 import java.util.UUID
 
-class ProjectRepositoryImpl: ProjectRepository {
+class ProjectRepositoryImpl(
+    private val dataSource: DataSource<Project>
+): ProjectRepository {
     override fun createProject(project: Project): Project {
         TODO("Not yet implemented")
     }
