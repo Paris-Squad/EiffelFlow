@@ -1,7 +1,7 @@
 package org.example.domain.model
 
 
-enum class ActionType {
+enum class AuditAction {
     CREATE,
     UPDATE,
     DELETE

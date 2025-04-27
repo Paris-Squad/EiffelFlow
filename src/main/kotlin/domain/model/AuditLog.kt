@@ -7,7 +7,7 @@ data class AuditLog(
     val auditId: UUID = UUID.randomUUID(),
     val itemId: UUID,
     val userId: UUID,
-    val actionType: ActionType,
+    val actionType: AuditAction,
     val auditTime: LocalDateTime,
     val changedField: String?,
     val oldValue: String?,
