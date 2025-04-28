@@ -1,5 +1,10 @@
+import org.gradle.testing.jacoco.tasks.JacocoReport
+import java.io.File
+import java.util.regex.Pattern
+
 plugins {
     kotlin("jvm") version "2.1.10"
+    id("jacoco")
 }
 
 group = "org.example"
@@ -21,7 +26,59 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.named("jacocoTestReport"))
+    doFirst {
+        println("Running tests in: ${testClassesDirs.files}")
+    }
 }
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/test/html"))
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("org/example/domain/model/**")
+                exclude("org/example/MainKt.class")
+            }
+        })
+    )
+}
+
+
+tasks.register("verifyTestCoverage") {
+    group = "verification"
+    description = "Verifies that test coverage is 100%"
+    dependsOn("test", "jacocoTestReport")
+    inputs.files(tasks.named<JacocoReport>("jacocoTestReport").map { it.outputs.files })
+
+    doLast {
+        val buildDir = layout.buildDirectory.get().asFile
+        val htmlReportFile = File(buildDir, "reports/jacoco/test/html/index.html")
+
+        val content = htmlReportFile.readText()
+        val pattern = Pattern.compile("Total.*?([0-9]{1,3})%")
+        val matcher = pattern.matcher(content)
+
+        if (matcher.find()) {
+            val coveragePercent = matcher.group(1).toInt()
+            logger.lifecycle("Test coverage: $coveragePercent%")
+
+            if (coveragePercent < 100) {
+                throw GradleException("Code coverage is less than 100% (actual: $coveragePercent%)")
+            }
+
+            logger.lifecycle("✓ Test coverage is 100%")
+        } else {
+            throw GradleException("Could not parse coverage information from report")
+        }
+    }
+}
+
 kotlin {
     jvmToolchain(23)
 }
