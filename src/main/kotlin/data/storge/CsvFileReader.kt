@@ -2,7 +2,6 @@ package org.example.data.storge
 
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.IOException
 
 class CsvStorageManager(
     private val file: File
