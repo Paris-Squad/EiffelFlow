@@ -21,12 +21,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests with coverage check
-        run: |
-          echo "Listing test files:"
-          find src/test -type f -name "*.kt" | sort
-          echo "Running tests and generating coverage report..."
-          ./gradlew test jacocoTestReport
-          echo "Coverage report generated at:"
-          find build/reports/jacoco -type f -name "*.html" | sort
-          echo "Verifying coverage requirements..."
-          ./gradlew verifyTestCoverage
+        run: ./gradlew verifyTestCoverage
