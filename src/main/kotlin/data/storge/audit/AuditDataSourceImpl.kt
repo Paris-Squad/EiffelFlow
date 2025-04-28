@@ -6,7 +6,7 @@ import org.example.domain.model.entities.AuditLog
 import java.util.UUID
 
 class AuditDataSourceImpl(
-    private val auditMapper: Mapper<List<String>, AuditLog>,
+    private val auditMapper: Mapper<String, AuditLog>,
     private val csvManager: CsvStorageManager
 ) : AuditDataSource {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {

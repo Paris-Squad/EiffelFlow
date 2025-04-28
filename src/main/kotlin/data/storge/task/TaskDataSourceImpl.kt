@@ -7,7 +7,7 @@ import org.example.domain.model.entities.Task
 import java.util.UUID
 
 class TaskDataSourceImpl(
-    private val taskMapper: Mapper<List<String>, Task>,
+    private val taskMapper: Mapper<String, Task>,
     private val stateCsvMapper: StateCsvMapper,
     private val csvManager: CsvStorageManager
 ) : TaskDataSource {

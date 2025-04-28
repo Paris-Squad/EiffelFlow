@@ -7,7 +7,7 @@ import org.example.domain.model.entities.Project
 import java.util.UUID
 
 class ProjectDataSourceImpl(
-    private val projectMapper: Mapper<List<String>, Project>,
+    private val projectMapper: Mapper<String, Project>,
     private val stateCsvMapper: StateCsvMapper,
     private val csvManager: CsvStorageManager
 ) : ProjectDataSource {
