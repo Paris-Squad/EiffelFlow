@@ -1,22 +1,19 @@
 package org.example.data.respoitory
 
-import org.example.domain.model.AuditLog
+import org.example.data.storge.audit.AuditDataSource
+import org.example.domain.model.entities.AuditLog
 import org.example.domain.repository.AuditRepository
-import org.example.data.storge.DataSource
-import java.util.*
+import java.util.UUID
 
 class AuditRepositoryImpl(
-    private val dataSource: DataSource<AuditLog>
-) : AuditRepository {
-    override fun logChange(auditLog: AuditLog) {
+    private val auditDataSource: AuditDataSource
+): AuditRepository {
+
+    override fun getAuditLogById(auditLogID: UUID): Result<AuditLog> {
         TODO("Not yet implemented")
     }
 
-    override fun getLogByItemId(itemId: UUID): AuditLog {
-        TODO("Not yet implemented")
-    }
-
-    override fun getAllLogs(): List<AuditLog> {
+    override fun getAuditLogs(): Result<List<AuditLog>> {
         TODO("Not yet implemented")
     }
 }

@@ -1,4 +1,4 @@
-package org.example.domain.model
+package org.example.domain.model.entities
 
 import kotlinx.datetime.LocalDateTime
 import java.util.UUID

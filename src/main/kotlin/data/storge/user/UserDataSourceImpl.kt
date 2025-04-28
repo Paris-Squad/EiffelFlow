@@ -1,15 +1,14 @@
-package org.example.data.respoitory
+package org.example.data.storge.user
 
-import org.example.data.storge.audit.AuditDataSource
-import org.example.data.storge.user.UserDataSource
+import org.example.data.storge.CsvStorageManager
+import org.example.data.storge.Mapper
 import org.example.domain.model.entities.User
-import org.example.domain.repository.UserRepository
 import java.util.UUID
 
-class UserRepositoryImpl(
-    private val userDataSource: UserDataSource,
-    private val auditDataSource: AuditDataSource,
-) : UserRepository {
+class UserDataSourceImpl(
+    private val userMapper: Mapper<List<String>, User>,
+    private val csvManager: CsvStorageManager
+) : UserDataSource {
     override fun createUser(user: User): Result<User> {
         TODO("Not yet implemented")
     }
@@ -28,6 +27,10 @@ class UserRepositoryImpl(
 
     override fun getUsers(): Result<List<User>> {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+        const val FILE_NAME = "users.csv"
     }
 
 }
