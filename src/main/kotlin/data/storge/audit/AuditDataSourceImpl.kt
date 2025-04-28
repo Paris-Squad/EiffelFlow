@@ -10,9 +10,7 @@ class AuditDataSourceImpl(
     private val csvManager: CsvStorageManager
 ) : AuditDataSource {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
-       val auditLogString = auditMapper.mapTo(auditLog)
-        csvManager.writeLinesToFile(auditLogString.joinToString { "," })
-        return Result.success(auditLog)
+        TODO("Not yet implemented")
     }
 
     override fun updateAuditLog(auditLog: AuditLog): Result<AuditLog> {

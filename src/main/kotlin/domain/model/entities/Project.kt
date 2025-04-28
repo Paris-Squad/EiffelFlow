@@ -5,8 +5,8 @@ import java.util.UUID
 
 data class Project(
     val projectId: UUID = UUID.randomUUID(),
-    val title: String,
-    val description: String,
+    val projectName: String,
+    val projectDescription: String,
     val createdAt: LocalDateTime,
     val adminId: UUID,
     val states: List<State>

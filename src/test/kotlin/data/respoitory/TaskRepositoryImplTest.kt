@@ -88,4 +88,13 @@ class TaskRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+
+    @Test
+    fun `getTaskById should return list of projects`() {
+        try {
+            taskRepository.getTaskById(UUID.randomUUID())
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
 }

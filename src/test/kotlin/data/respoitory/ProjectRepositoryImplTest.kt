@@ -27,8 +27,8 @@ class ProjectRepositoryImplTest {
     @Test
     fun `createProject should return the created project`() {
         val project = Project(
-            title = "Test",
-            description = "Test",
+            projectName = "Test",
+            projectDescription = "Test",
             createdAt = LocalDateTime(2023, 1, 1, 12, 0),
             adminId = UUID.randomUUID(),
             states = listOf(
@@ -49,8 +49,8 @@ class ProjectRepositoryImplTest {
     @Test
     fun `updateProject should return the updated project`() {
         val project = Project(
-            title = "Test Project",
-            description = "Updated Description",
+            projectName = "Test Project",
+            projectDescription = "Updated Description",
             createdAt = LocalDateTime(2023, 1, 1, 12, 0),
             adminId = UUID.randomUUID(),
             states = emptyList()
@@ -78,6 +78,15 @@ class ProjectRepositoryImplTest {
     fun `getProjects should return list of projects`() {
         try {
             projectRepository.getProjects()
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    @Test
+    fun `getProjectById should return list of projects`() {
+        try {
+            projectRepository.getProjectById(UUID.randomUUID())
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
