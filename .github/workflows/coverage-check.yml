@@ -1,0 +1,32 @@
+name: Test Coverage Check
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '23'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run tests with coverage check
+        run: |
+          echo "Listing test files:"
+          find src/test -type f -name "*.kt" | sort
+          echo "Running tests and generating coverage report..."
+          ./gradlew test jacocoTestReport
+          echo "Coverage report generated at:"
+          find build/reports/jacoco -type f -name "*.html" | sort
+          echo "Verifying coverage requirements..."
+          ./gradlew verifyTestCoverage
