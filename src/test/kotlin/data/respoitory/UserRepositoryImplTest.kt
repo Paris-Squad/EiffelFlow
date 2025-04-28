@@ -1,9 +1,12 @@
 package data.respoitory
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.mockk
 import org.example.data.respoitory.UserRepositoryImpl
-import org.example.domain.model.RoleType
-import org.example.domain.model.User
+import org.example.data.storge.audit.AuditDataSource
+import org.example.data.storge.user.UserDataSource
+import org.example.domain.model.entities.RoleType
+import org.example.domain.model.entities.User
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -11,10 +14,12 @@ import java.util.UUID
 // todo change all of the test
 class UserRepositoryImplTest {
     private lateinit var userRepository: UserRepositoryImpl
+    private val userDataSource: UserDataSource = mockk()
+    private val auditDataSource: AuditDataSource = mockk()
 
     @BeforeEach
     fun setUp() {
-        userRepository = UserRepositoryImpl()
+        userRepository = UserRepositoryImpl(userDataSource, auditDataSource)
     }
 
     @Test
@@ -63,7 +68,7 @@ class UserRepositoryImplTest {
         val userId = UUID.randomUUID()
 
         try {
-            userRepository.getUser(userId)
+            userRepository.getUserById(userId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

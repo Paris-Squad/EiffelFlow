@@ -1,5 +1,4 @@
-package org.example.domain.model
-
+package org.example.domain.model.entities
 
 enum class AuditAction {
     CREATE,

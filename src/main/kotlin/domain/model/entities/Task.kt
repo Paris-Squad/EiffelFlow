@@ -1,4 +1,4 @@
-package org.example.domain.model
+package org.example.domain.model.entities
 
 import kotlinx.datetime.LocalDateTime
 import java.util.UUID
@@ -10,7 +10,7 @@ data class Task(
     val createdAt: LocalDateTime,
     val creatorId: UUID,
     val projectId: UUID,
-    val stateId: UUID,
     val assignedId: UUID,
+    val state: State,
     val role: RoleType
 )

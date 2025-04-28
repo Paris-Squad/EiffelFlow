@@ -1,10 +1,14 @@
 package data.respoitory
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
 import org.example.data.respoitory.TaskRepositoryImpl
-import org.example.domain.model.RoleType
-import org.example.domain.model.Task
+import org.example.data.storge.audit.AuditDataSource
+import org.example.data.storge.task.TaskDataSource
+import org.example.domain.model.entities.RoleType
+import org.example.domain.model.entities.State
+import org.example.domain.model.entities.Task
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -13,10 +17,12 @@ import java.util.UUID
 class TaskRepositoryImplTest {
 
     private lateinit var taskRepository: TaskRepositoryImpl
+    private val taskDataSource: TaskDataSource = mockk()
+    private val auditDataSource: AuditDataSource = mockk()
 
     @BeforeEach
     fun setUp() {
-        taskRepository = TaskRepositoryImpl()
+        taskRepository = TaskRepositoryImpl(taskDataSource, auditDataSource)
     }
 
     @Test
@@ -27,9 +33,11 @@ class TaskRepositoryImplTest {
             createdAt = LocalDateTime(2023, 1, 1, 12, 0),
             creatorId = UUID.randomUUID(),
             projectId = UUID.randomUUID(),
-            stateId = UUID.randomUUID(),
             assignedId = UUID.randomUUID(),
-            role = RoleType.MATE
+            role = RoleType.MATE,
+            state = State(
+                name = "test"
+            )
         )
 
         try {
@@ -47,9 +55,11 @@ class TaskRepositoryImplTest {
             createdAt = LocalDateTime(2023, 1, 1, 12, 0),
             creatorId = UUID.randomUUID(),
             projectId = UUID.randomUUID(),
-            stateId = UUID.randomUUID(),
             assignedId = UUID.randomUUID(),
-            role = RoleType.MATE
+            role = RoleType.MATE,
+            state = State(
+                name = "test"
+            )
         )
 
         try {
