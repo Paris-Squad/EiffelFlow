@@ -1,10 +1,9 @@
 package data.respoitory
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.datetime.LocalDateTime
+import io.mockk.mockk
 import org.example.data.respoitory.AuditRepositoryImpl
-import org.example.domain.model.AuditAction
-import org.example.domain.model.AuditLog
+import org.example.data.storge.audit.AuditDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -13,29 +12,11 @@ import java.util.UUID
 class AuditRepositoryImplTest {
 
     private lateinit var auditRepository: AuditRepositoryImpl
+    private val auditDataSource: AuditDataSource = mockk()
 
     @BeforeEach
     fun setUp() {
-        auditRepository = AuditRepositoryImpl()
-    }
-
-    @Test
-    fun `logChange should store audit log`() {
-        val auditLog = AuditLog(
-            itemId = UUID.randomUUID(),
-            userId = UUID.randomUUID(),
-            actionType = AuditAction.CREATE,
-            auditTime = LocalDateTime(2023, 1, 1, 12, 0),
-            changedField = "test",
-            oldValue = null,
-            newValue = "test"
-        )
-
-        try {
-            auditRepository.logChange(auditLog)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        auditRepository = AuditRepositoryImpl(auditDataSource)
     }
 
     @Test
@@ -43,7 +24,7 @@ class AuditRepositoryImplTest {
         val itemId = UUID.randomUUID()
 
         try {
-            auditRepository.getLogByItemId(itemId)
+            auditRepository.getAuditLogById(itemId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -52,7 +33,7 @@ class AuditRepositoryImplTest {
     @Test
     fun `getAllLogs should return all audit logs`() {
         try {
-            auditRepository.getAllLogs()
+            auditRepository.getAuditLogs()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

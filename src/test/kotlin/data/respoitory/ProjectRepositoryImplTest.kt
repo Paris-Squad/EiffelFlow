@@ -1,10 +1,13 @@
 package data.respoitory
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
 import org.example.data.respoitory.ProjectRepositoryImpl
-import org.example.domain.model.Project
-import org.example.domain.model.State
+import org.example.data.storge.audit.AuditDataSource
+import org.example.data.storge.project.ProjectDataSource
+import org.example.domain.model.entities.Project
+import org.example.domain.model.entities.State
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -13,10 +16,12 @@ import java.util.UUID
 class ProjectRepositoryImplTest {
 
     private lateinit var projectRepository: ProjectRepositoryImpl
+    private val projectDataSource: ProjectDataSource = mockk()
+    private val auditDataSource: AuditDataSource = mockk()
 
     @BeforeEach
     fun setUp() {
-        projectRepository = ProjectRepositoryImpl()
+        projectRepository = ProjectRepositoryImpl(projectDataSource, auditDataSource)
     }
 
     @Test
