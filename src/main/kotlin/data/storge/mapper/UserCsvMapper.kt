@@ -9,22 +9,10 @@ import java.util.UUID
 class UserCsvMapper : Mapper<String, User> {
 
     override fun mapFrom(input: String): User {
-        val parts = input.split(",")
-
-        return User(
-            userId = UUID.fromString(parts[UserCsvColumnIndex.USER_ID]),
-            username = parts[UserCsvColumnIndex.USERNAME],
-            password = parts[UserCsvColumnIndex.PASSWORD],
-            role = RoleType.valueOf(parts[UserCsvColumnIndex.ROLE])
-        )
+        TODO("Not yet implemented")
     }
 
     override fun mapTo(output: User): String {
-        return listOf(
-            output.userId.toString(),
-            output.username,
-            output.password,
-            output.role.name
-        ).joinToString(",")
+        TODO("Not yet implemented")
     }
 }
