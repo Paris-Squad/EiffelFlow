@@ -13,20 +13,23 @@ class UserCsvMapperTest {
 
     @Test
     fun `should map CSV line to User entity correctly`() {
-        try {
-            val result = userCsvMapper.mapFrom(CSV_STRING_LINE)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+
+        //Given / When
+        val result = userCsvMapper.mapFrom(CSV_STRING_LINE)
+
+        // Then
+        assertThat(result).isEqualTo(USER)
+
     }
 
     @Test
     fun `should map User entity to CSV line correctly`() {
-        try {
-            val result = userCsvMapper.mapTo(USER)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+
+        //Given / When
+        val result = userCsvMapper.mapTo(USER)
+
+        // Then
+        assertThat(result).isEqualTo(CSV_STRING_LINE)
     }
 
     companion object {
