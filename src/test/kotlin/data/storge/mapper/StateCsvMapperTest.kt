@@ -11,7 +11,7 @@ class StateCsvMapperTest {
     private val stateCsvMapper = StateCsvMapper()
 
     @Test
-    fun `should map CSV line to Project entity correctly`() {
+    fun `should map CSV line to State entity correctly`() {
 
         //Given / When
         val result = stateCsvMapper.mapFrom(CSV_STRING_LINE)
@@ -22,7 +22,7 @@ class StateCsvMapperTest {
     }
 
     @Test
-    fun `should map Project entity to CSV line correctly`() {
+    fun `should map State entity to CSV line correctly`() {
 
         //Given / When
         val result = stateCsvMapper.mapTo(STATE)
@@ -38,6 +38,5 @@ class StateCsvMapperTest {
         )
 
         private const val CSV_STRING_LINE = "123e4567-e89b-12d3-a456-426614174000,In Progress"
-
     }
 }

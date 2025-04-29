@@ -25,7 +25,7 @@ val appModule = module {
 
     single<AuditCsvMapper> { AuditCsvMapper() }
     single<ProjectCsvMapper> { ProjectCsvMapper() }
-    single<TaskCsvMapper> { TaskCsvMapper() }
+    single<TaskCsvMapper> { TaskCsvMapper(get()) }
     single<StateCsvMapper> { StateCsvMapper() }
     single<UserCsvMapper> { UserCsvMapper() }
 

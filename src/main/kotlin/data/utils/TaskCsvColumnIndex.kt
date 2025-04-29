@@ -8,6 +8,7 @@ object TaskCsvColumnIndex {
     const val CREATOR_ID = 4
     const val PROJECT_ID = 5
     const val ASSIGNED_ID = 6
-    const val STATE = 7
-    const val ROLE = 8
+    const val STATE_ID = 7
+    const val STATE_NAME = 8
+    const val ROLE = 9
 }
