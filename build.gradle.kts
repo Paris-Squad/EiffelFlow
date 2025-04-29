@@ -22,6 +22,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("com.google.truth:truth:1.4.2")
+    testImplementation("io.insert-koin:koin-test:4.0.3")
 }
 
 tasks.test {

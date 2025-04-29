@@ -10,7 +10,6 @@ class UserCsvMapper : Mapper<String, User> {
 
     override fun mapFrom(input: String): User {
         val parts = input.split(",")
-
         return User(
             userId = UUID.fromString(parts[UserCsvColumnIndex.USER_ID]),
             username = parts[UserCsvColumnIndex.USERNAME],
