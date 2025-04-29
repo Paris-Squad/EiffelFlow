@@ -26,7 +26,7 @@ class AuditRepositoryImplTest {
         try {
             auditRepository.getAuditLogById(itemId)
         } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+            assertThat(e.message).contains("Fail test")
         }
     }
 
