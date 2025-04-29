@@ -1,28 +1,29 @@
-package data.respoitory
+package data.storge.task
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
-import org.example.data.respoitory.TaskRepositoryImpl
-import org.example.data.storge.audit.AuditDataSource
+import org.example.data.storge.CsvStorageManager
+import org.example.data.storge.mapper.StateCsvMapper
+import org.example.data.storge.mapper.TaskCsvMapper
 import org.example.data.storge.task.TaskDataSource
+import org.example.data.storge.task.TaskDataSourceImpl
 import org.example.domain.model.entities.RoleType
 import org.example.domain.model.entities.State
 import org.example.domain.model.entities.Task
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
-//todo change those testcases
-class TaskRepositoryImplTest {
-
-    private lateinit var taskRepository: TaskRepositoryImpl
-    private val taskDataSource: TaskDataSource = mockk()
-    private val auditDataSource: AuditDataSource = mockk()
+class TaskDataSourceImplTest {
+    private lateinit var taskDataSource: TaskDataSource
+    private val csvStorageManager: CsvStorageManager = mockk()
+    private val stateCsvMapper: StateCsvMapper = mockk()
+    private val taskCsvMapper: TaskCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        taskRepository = TaskRepositoryImpl(taskDataSource, auditDataSource)
+        taskDataSource = TaskDataSourceImpl(taskCsvMapper, stateCsvMapper, csvStorageManager)
     }
 
     @Test
@@ -41,7 +42,7 @@ class TaskRepositoryImplTest {
         )
 
         try {
-            taskRepository.createTask(task)
+            taskDataSource.createTask(task)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -63,7 +64,7 @@ class TaskRepositoryImplTest {
         )
 
         try {
-            taskRepository.updateTask(task)
+            taskDataSource.updateTask(task)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -74,7 +75,7 @@ class TaskRepositoryImplTest {
         val taskId = UUID.randomUUID()
 
         try {
-            taskRepository.deleteTask(taskId)
+            taskDataSource.deleteTask(taskId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -83,7 +84,7 @@ class TaskRepositoryImplTest {
     @Test
     fun `getTasks should return list of tasks`() {
         try {
-            taskRepository.getTasks()
+            taskDataSource.getTasks()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -92,7 +93,7 @@ class TaskRepositoryImplTest {
     @Test
     fun `getTaskById should return list of projects`() {
         try {
-            taskRepository.getTaskById(UUID.randomUUID())
+            taskDataSource.getTaskById(UUID.randomUUID())
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

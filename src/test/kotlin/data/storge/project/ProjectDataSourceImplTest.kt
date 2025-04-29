@@ -1,27 +1,29 @@
-package data.respoitory
+package data.storge.project
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
-import org.example.data.respoitory.ProjectRepositoryImpl
-import org.example.data.storge.audit.AuditDataSource
+import org.example.data.storge.CsvStorageManager
+import org.example.data.storge.mapper.ProjectCsvMapper
+import org.example.data.storge.mapper.StateCsvMapper
 import org.example.data.storge.project.ProjectDataSource
+import org.example.data.storge.project.ProjectDataSourceImpl
 import org.example.domain.model.entities.Project
 import org.example.domain.model.entities.State
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
-//todo change all of the test
-class ProjectRepositoryImplTest {
+class ProjectDataSourceImplTest {
 
-    private lateinit var projectRepository: ProjectRepositoryImpl
-    private val projectDataSource: ProjectDataSource = mockk()
-    private val auditDataSource: AuditDataSource = mockk()
+    private lateinit var projectDataSource: ProjectDataSource
+    private val csvStorageManager: CsvStorageManager = mockk()
+    private val stateCsvMapper: StateCsvMapper = mockk()
+    private val projectMapper: ProjectCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        projectRepository = ProjectRepositoryImpl(projectDataSource, auditDataSource)
+        projectDataSource = ProjectDataSourceImpl(projectMapper, stateCsvMapper, csvStorageManager)
     }
 
     @Test
@@ -40,7 +42,7 @@ class ProjectRepositoryImplTest {
         )
 
         try {
-            projectRepository.createProject(project)
+            projectDataSource.createProject(project)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -57,7 +59,7 @@ class ProjectRepositoryImplTest {
         )
 
         try {
-            projectRepository.updateProject(project)
+            projectDataSource.updateProject(project)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -68,7 +70,7 @@ class ProjectRepositoryImplTest {
         val projectId = UUID.randomUUID()
 
         try {
-            projectRepository.deleteProject(projectId)
+            projectDataSource.deleteProject(projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -77,7 +79,7 @@ class ProjectRepositoryImplTest {
     @Test
     fun `getProjects should return list of projects`() {
         try {
-            projectRepository.getProjects()
+            projectDataSource.getProjects()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -86,7 +88,7 @@ class ProjectRepositoryImplTest {
     @Test
     fun `getProjectById should return list of projects`() {
         try {
-            projectRepository.getProjectById(UUID.randomUUID())
+            projectDataSource.getProjectById(UUID.randomUUID())
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

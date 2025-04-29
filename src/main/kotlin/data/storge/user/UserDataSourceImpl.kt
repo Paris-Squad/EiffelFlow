@@ -6,7 +6,7 @@ import org.example.domain.model.entities.User
 import java.util.UUID
 
 class UserDataSourceImpl(
-    private val userMapper: Mapper<List<String>, User>,
+    private val userMapper: Mapper<String, User>,
     private val csvManager: CsvStorageManager
 ) : UserDataSource {
     override fun createUser(user: User): Result<User> {

@@ -8,8 +8,6 @@ interface AuditDataSource {
 
     fun createAuditLog(auditLog: AuditLog): Result<AuditLog>
 
-    fun updateAuditLog(auditLog: AuditLog): Result<AuditLog>
-
     fun getAuditLogById(auditLogID: UUID): Result<AuditLog>
 
     fun getAuditLogs(): Result<List<AuditLog>>
