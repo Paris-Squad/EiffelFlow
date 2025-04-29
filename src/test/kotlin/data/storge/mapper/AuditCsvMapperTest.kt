@@ -14,19 +14,24 @@ class AuditCsvMapperTest {
 
     @Test
     fun `test mapFrom CSV to AuditLog`() {
-        val csv =
-            "123e4567-e89b-12d3-a456-426614174000,123e4567-e89b-12d3-a456-426614174001,Task,123e4567-e89b-12d3-a456-426614174002,User1,CREATE,2024-01-01T10:00:00,Title,null,NewTitle"
+        //Given / When
+        val result = auditCsvMapper.mapFrom(CSV_STRING_LINE)
 
-        try {
-            val auditLog = auditCsvMapper.mapFrom(csv)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        //Then
+        assertThat(result).isEqualTo(AUDIT_LOG)
     }
 
     @Test
     fun `test mapTo AuditLog to CSV`() {
-        val auditLog = AuditLog(
+        //Given / When
+        val result = auditCsvMapper.mapTo(AUDIT_LOG)
+
+        //Then
+        assertThat(result).isEqualTo(CSV_STRING_LINE)
+    }
+
+    companion object {
+        private val AUDIT_LOG = AuditLog(
             auditId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
             itemId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001"),
             itemName = "Task",
@@ -39,10 +44,8 @@ class AuditCsvMapperTest {
             newValue = "NewTitle"
         )
 
-        try {
-            val csv = auditCsvMapper.mapTo(auditLog)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        private const val CSV_STRING_LINE =
+            "123e4567-e89b-12d3-a456-426614174000,123e4567-e89b-12d3-a456-426614174001,Task,123e4567-e89b-12d3-a456-426614174002,User1,CREATE,1999-08-07T22:22:22,Title,,NewTitle"
+
     }
 }
