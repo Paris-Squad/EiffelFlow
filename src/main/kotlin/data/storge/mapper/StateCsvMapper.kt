@@ -2,13 +2,24 @@ package org.example.data.storge.mapper
 
 import org.example.data.storge.Mapper
 import org.example.domain.model.entities.State
+import org.example.data.utils.StateCsvColumnIndex
+import java.util.UUID
 
 class StateCsvMapper : Mapper<String, State> {
+
     override fun mapFrom(input: String): State {
-        TODO("Not yet implemented")
+        val parts = input.split(",")
+
+        return State(
+            stateId = UUID.fromString(parts[StateCsvColumnIndex.STATE_ID]),
+            name = parts[StateCsvColumnIndex.STATE_NAME]
+        )
     }
 
     override fun mapTo(output: State): String {
-        TODO("Not yet implemented")
+        return listOf(
+            output.stateId.toString(),
+            output.name
+        ).joinToString(",")
     }
 }
