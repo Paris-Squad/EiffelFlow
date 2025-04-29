@@ -1,50 +1,49 @@
-package domain.usecase.project
+package presentation.presenter.project
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import org.example.domain.model.EiffelFlowException
-import org.example.domain.repository.ProjectRepository
 import org.example.domain.usecase.project.GetProjectUseCase
+import org.example.presentation.presenter.project.GetProjectPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.MockProjects
 import java.util.UUID
 
+class ProjectPresenterTest {
 
-class GetProjectsUseCaseTest {
-
-    private val projectRepository: ProjectRepository = mockk(relaxed = true)
-    private lateinit var getProjectsUseCase: GetProjectUseCase
+    private val getProjectUseCase: GetProjectUseCase = mockk()
+    private lateinit var getProjectPresenter: GetProjectPresenter
 
     @BeforeEach
     fun setup() {
-        getProjectsUseCase = GetProjectUseCase(projectRepository)
+        getProjectPresenter = GetProjectPresenter(getProjectUseCase)
     }
 
     @Test
-    fun `should return Result of empty list of Projects when there are no projects`() {
+    fun `should return Result of empty list of Projects when no projects founded`() {
         // Given
-        every { projectRepository.getProjects() } returns Result.success(emptyList())
+        every { getProjectUseCase.getProjects() } returns Result.success(emptyList())
 
         // When / Then
         try {
-            val result = getProjectsUseCase.getProjects()
+            val result = getProjectPresenter.getProjects()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
 
     @Test
-    fun `should return Result of Projects when at least one project exists`() {
+    fun `should return Result of Projects when Projects are found`() {
         // Given
         every {
-            projectRepository.getProjects()
+            getProjectUseCase.getProjects()
         } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
 
         // When / Then
         try {
-            val result = getProjectsUseCase.getProjects()
+            val result = getProjectPresenter.getProjects()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -54,11 +53,11 @@ class GetProjectsUseCaseTest {
     fun `should return Result of ElementNotFoundException when projects cannot be retrieved`() {
         // Given
         val exception = EiffelFlowException.ElementNotFoundException("Projects not found")
-        every { projectRepository.getProjects() } returns Result.failure(exception)
+        every { getProjectUseCase.getProjects() } returns Result.failure(exception)
 
         // When / Then
         try {
-            val result = getProjectsUseCase.getProjects()
+            val result = getProjectPresenter.getProjects()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -69,12 +68,12 @@ class GetProjectsUseCaseTest {
         // Given
         val projectId = MockProjects.CORRECT_PROJECT.projectId
         every {
-            projectRepository.getProjectById(projectId)
+            getProjectUseCase.getProjectById(projectId)
         } returns Result.success(MockProjects.CORRECT_PROJECT)
 
         // When / Then
         try {
-            val result = getProjectsUseCase.getProjectById(projectId)
+            val result = getProjectPresenter.getProjectById(projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -85,15 +84,14 @@ class GetProjectsUseCaseTest {
         // Given
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
         every {
-            projectRepository.getProjectById(UUID.randomUUID())
+            getProjectUseCase.getProjectById(UUID.randomUUID())
         } returns Result.failure(exception)
 
         // When / Then
         try {
-            val result = getProjectsUseCase.getProjectById(UUID.randomUUID())
+            val result = getProjectPresenter.getProjectById(UUID.randomUUID())
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
 }
-
