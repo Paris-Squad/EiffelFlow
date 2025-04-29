@@ -9,7 +9,7 @@ class AuditRepositoryImpl(
     private val auditDataSource: AuditDataSource
 ): AuditRepository {
 
-    override fun getAuditLogById(auditLogID: UUID): Result<AuditLog> {
+    override fun getAuditLogById(auditLogID: UUID): Result<List<AuditLog>> {
         TODO("Not yet implemented")
     }
 
