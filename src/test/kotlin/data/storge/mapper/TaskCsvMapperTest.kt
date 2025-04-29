@@ -36,23 +36,23 @@ class TaskCsvMapperTest {
 
     companion object {
         private val STATE = State(
-            stateId = UUID.fromString("123e4567-e89b-12d3-a456-426614174004"),
+            stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
             name = "In Progress"
         )
 
         private val TASK = Task(
-            taskId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+            taskId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
             title = "Title",
             description = "Desc",
             createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
-            creatorId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001"),
-            projectId = UUID.fromString("123e4567-e89b-12d3-a456-426614174002"),
-            assignedId = UUID.fromString("123e4567-e89b-12d3-a456-426614174003"),
+            creatorId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5740"),
+            projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
+            assignedId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5742"),
             state = STATE,
             role = RoleType.ADMIN
         )
 
         private const val CSV_STRING_LINE =
-            "123e4567-e89b-12d3-a456-426614174000,Title,Desc,1999-08-07T22:22:22,123e4567-e89b-12d3-a456-426614174001,123e4567-e89b-12d3-a456-426614174002,123e4567-e89b-12d3-a456-426614174003,123e4567-e89b-12d3-a456-426614174004,In Progress,ADMIN"
+            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Title,Desc,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5740,02ad4499-5d4c-4450-8fd1-8294f1bb5741,02ad4499-5d4c-4450-8fd1-8294f1bb5742,02ad4499-5d4c-4450-8fd1-8294f1bb5749,In Progress,ADMIN"
     }
 }

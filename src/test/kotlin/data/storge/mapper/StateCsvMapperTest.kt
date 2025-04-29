@@ -33,10 +33,10 @@ class StateCsvMapperTest {
 
     companion object {
         private val STATE = State(
-            stateId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+            stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
             name = "In Progress"
         )
 
-        private const val CSV_STRING_LINE = "123e4567-e89b-12d3-a456-426614174000,In Progress"
+        private const val CSV_STRING_LINE = "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"
     }
 }

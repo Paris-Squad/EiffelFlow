@@ -32,10 +32,10 @@ class AuditCsvMapperTest {
 
     companion object {
         private val AUDIT_LOG = AuditLog(
-            auditId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
-            itemId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001"),
+            auditId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
+            itemId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5740"),
             itemName = "Task",
-            userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174002"),
+            userId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
             userName = "User1",
             actionType = AuditAction.CREATE,
             auditTime = LocalDateTime.parse("1999-08-07T22:22:22"),
@@ -45,6 +45,6 @@ class AuditCsvMapperTest {
         )
 
         private const val CSV_STRING_LINE =
-            "123e4567-e89b-12d3-a456-426614174000,123e4567-e89b-12d3-a456-426614174001,Task,123e4567-e89b-12d3-a456-426614174002,User1,CREATE,1999-08-07T22:22:22,Title,,NewTitle"
+            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,02ad4499-5d4c-4450-8fd1-8294f1bb5740,Task,02ad4499-5d4c-4450-8fd1-8294f1bb5741,User1,CREATE,1999-08-07T22:22:22,Title,,NewTitle"
     }
 }

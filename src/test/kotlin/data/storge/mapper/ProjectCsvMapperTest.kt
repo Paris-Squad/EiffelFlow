@@ -34,16 +34,16 @@ class ProjectCsvMapperTest {
 
     companion object {
         private val PROJECT = Project(
-            projectId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+            projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
             projectName = "Project1",
             projectDescription = "Description1",
             createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
-            adminId = UUID.fromString("123e4567-e89b-12d3-a456-426614174002"),
+            adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
             states = emptyList()
         )
 
         private const val CSV_STRING_LINE =
-            "123e4567-e89b-12d3-a456-426614174000,Project1,Description1,1999-08-07T22:22:22,123e4567-e89b-12d3-a456-426614174002"
+            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
 
     }
 }
