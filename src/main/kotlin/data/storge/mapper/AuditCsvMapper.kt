@@ -9,10 +9,34 @@ import java.util.UUID
 
 class AuditCsvMapper : Mapper<String, AuditLog> {
     override fun mapFrom(input: String): AuditLog {
-        TODO("Not yet implemented")
+        val parts = input.split(",")
+
+        return AuditLog(
+            auditId = UUID.fromString(parts[AuditCsvColumnIndex.AUDIT_ID]),
+            itemId = UUID.fromString(parts[AuditCsvColumnIndex.ITEM_ID]),
+            itemName = parts[AuditCsvColumnIndex.ITEM_NAME],
+            userId = UUID.fromString(parts[AuditCsvColumnIndex.USER_ID]),
+            userName = parts[AuditCsvColumnIndex.USER_NAME],
+            actionType = AuditAction.valueOf(parts[AuditCsvColumnIndex.ACTION_TYPE]),
+            auditTime = LocalDateTime.parse(parts[AuditCsvColumnIndex.AUDIT_TIME]),
+            changedField = parts[AuditCsvColumnIndex.CHANGED_FIELD].takeIf { it.isNotBlank() },
+            oldValue = parts[AuditCsvColumnIndex.OLD_VALUE].takeIf { it.isNotBlank() },
+            newValue = parts[AuditCsvColumnIndex.NEW_VALUE].takeIf { it.isNotBlank() },
+        )
     }
 
     override fun mapTo(output: AuditLog): String {
-        TODO("Not yet implemented")
+        return listOf(
+            output.auditId.toString(),
+            output.itemId.toString(),
+            output.itemName,
+            output.userId.toString(),
+            output.userName,
+            output.actionType.name,
+            output.auditTime.toString(),
+            output.changedField ?: "",
+            output.oldValue ?: "",
+            output.newValue ?: ""
+        ).joinToString(",")
     }
 }
