@@ -19,9 +19,9 @@ class AuditCsvMapper : Mapper<String, AuditLog> {
             userName = parts[AuditCsvColumnIndex.USER_NAME],
             actionType = AuditAction.valueOf(parts[AuditCsvColumnIndex.ACTION_TYPE]),
             auditTime = LocalDateTime.parse(parts[AuditCsvColumnIndex.AUDIT_TIME]),
-            changedField = parts.getOrNull(AuditCsvColumnIndex.CHANGED_FIELD)?.takeIf { it.isNotBlank() },
-            oldValue = parts.getOrNull(AuditCsvColumnIndex.OLD_VALUE)?.takeIf { it.isNotBlank() },
-            newValue = parts.getOrNull(AuditCsvColumnIndex.NEW_VALUE)?.takeIf { it.isNotBlank() },
+            changedField = parts[AuditCsvColumnIndex.CHANGED_FIELD].takeIf { it.isNotBlank() },
+            oldValue = parts[AuditCsvColumnIndex.OLD_VALUE].takeIf { it.isNotBlank() },
+            newValue = parts[AuditCsvColumnIndex.NEW_VALUE].takeIf { it.isNotBlank() },
         )
     }
 
