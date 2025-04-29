@@ -14,7 +14,8 @@ import org.example.domain.model.entities.Project
 import org.example.domain.model.entities.State
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import utils.MockProjects
+import java.util.UUID
 
 class ProjectDataSourceImplTest {
 
@@ -80,6 +81,8 @@ class ProjectDataSourceImplTest {
 
     @Test
     fun `should return Result of empty list of Projects when the file is empty`() {
+        every { csvStorageManager.readLinesFromFile() } returns "".split("\n")
+
         // Then
         try {
             val result = projectDataSource.getProjects()
@@ -91,7 +94,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in CSV file`() {
         //Given
-        every { csvStorageManager.writeLinesToFile(CSV_STRING_LINE) }
+        every { csvStorageManager.readLinesFromFile() } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -116,7 +119,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in CSV file`() {
         //Given
-        every { csvStorageManager.writeLinesToFile(CSV_STRING_LINE) }
+        every { csvStorageManager.readLinesFromFile() } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -128,6 +131,7 @@ class ProjectDataSourceImplTest {
 
     @Test
     fun `should return Result of ElementNotFoundException when searching for project doesn't exists in CSV file`() {
+        //Given
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
 
         // When / Then
@@ -136,19 +140,5 @@ class ProjectDataSourceImplTest {
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
-    }
-
-    companion object {
-        private val PROJECT = Project(
-            projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
-            projectName = "Project1",
-            projectDescription = "Description1",
-            createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
-            adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
-            states = emptyList()
-        )
-
-        private const val CSV_STRING_LINE =
-            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
     }
 }

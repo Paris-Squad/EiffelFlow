@@ -13,6 +13,7 @@ import org.example.domain.model.entities.State
 import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.MockProjects
 import java.util.UUID
 
 //todo change all of the test
@@ -93,7 +94,7 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in data source`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(listOf(PROJECT))
+        every { projectDataSource.getProjects() } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
 
         // When / Then
         try {
@@ -120,11 +121,11 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
-        every { projectDataSource.getProjectById(PROJECT.projectId) } returns Result.success(PROJECT)
+        every { projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId) } returns Result.success(MockProjects.CORRECT_PROJECT)
 
         // When / Then
         try {
-            val result = projectRepository.getProjectById(PROJECT.projectId)
+            val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -141,19 +142,5 @@ class ProjectRepositoryImplTest {
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
-    }
-
-    companion object {
-        private val PROJECT = Project(
-            projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
-            projectName = "Project1",
-            projectDescription = "Description1",
-            createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
-            adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
-            states = emptyList()
-        )
-
-        private const val CSV_STRING_LINE =
-            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
     }
 }
