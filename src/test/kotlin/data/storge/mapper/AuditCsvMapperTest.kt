@@ -13,7 +13,7 @@ class AuditCsvMapperTest {
     private val auditCsvMapper = AuditCsvMapper()
 
     @Test
-    fun `test mapFrom CSV to AuditLog`() {
+    fun `should map CSV line to AuditLog entity correctly`() {
         //Given / When
         val result = auditCsvMapper.mapFrom(CSV_STRING_LINE)
 
@@ -22,7 +22,7 @@ class AuditCsvMapperTest {
     }
 
     @Test
-    fun `test mapTo AuditLog to CSV`() {
+    fun `should map AuditLog entity to CSV line correctly`() {
         //Given / When
         val result = auditCsvMapper.mapTo(AUDIT_LOG)
 
@@ -46,6 +46,5 @@ class AuditCsvMapperTest {
 
         private const val CSV_STRING_LINE =
             "123e4567-e89b-12d3-a456-426614174000,123e4567-e89b-12d3-a456-426614174001,Task,123e4567-e89b-12d3-a456-426614174002,User1,CREATE,1999-08-07T22:22:22,Title,,NewTitle"
-
     }
 }
