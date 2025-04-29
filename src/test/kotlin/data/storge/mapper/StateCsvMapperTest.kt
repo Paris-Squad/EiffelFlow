@@ -12,20 +12,23 @@ class StateCsvMapperTest {
 
     @Test
     fun `should map CSV line to State entity correctly`() {
-        try {
-            val result = stateCsvMapper.mapFrom(CSV_STRING_LINE)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+
+        //Given / When
+        val result = stateCsvMapper.mapFrom(CSV_STRING_LINE)
+
+        // Then
+        assertThat(result).isEqualTo(STATE)
+
     }
 
     @Test
     fun `should map State entity to CSV line correctly`() {
-        try {
-            val result = stateCsvMapper.mapTo(STATE)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+
+        //Given / When
+        val result = stateCsvMapper.mapTo(STATE)
+
+        // Then
+        assertThat(result).isEqualTo(CSV_STRING_LINE)
     }
 
     companion object {
