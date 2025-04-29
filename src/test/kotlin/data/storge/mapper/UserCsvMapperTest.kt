@@ -12,30 +12,34 @@ class UserCsvMapperTest {
     private val userCsvMapper = UserCsvMapper()
 
     @Test
-    fun `test mapFrom CSV to User`() {
-        val csv = "123e4567-e89b-12d3-a456-426614174000,username,password,ADMIN"
+    fun `should map CSV line to User entity correctly`() {
 
-        try {
-            val user = userCsvMapper.mapFrom(csv)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        //Given / When
+        val result = userCsvMapper.mapFrom(CSV_STRING_LINE)
+
+        // Then
+        assertThat(result).isEqualTo(USER)
+
     }
 
     @Test
-    fun `test mapTo User to CSV`() {
-        val user = User(
-            userId = UUID.randomUUID(),
+    fun `should map User entity to CSV line correctly`() {
+
+        //Given / When
+        val result = userCsvMapper.mapTo(USER)
+
+        // Then
+        assertThat(result).isEqualTo(CSV_STRING_LINE)
+    }
+
+    companion object {
+        private val USER = User(
+            userId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
             username = "username",
             password = "password",
             role = RoleType.ADMIN
         )
 
-
-        try {
-            val csv = userCsvMapper.mapTo(user)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        private const val CSV_STRING_LINE = "02ad4499-5d4c-4450-8fd1-8294f1bb5748,username,password,ADMIN"
     }
 }
