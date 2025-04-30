@@ -4,14 +4,11 @@ import org.example.domain.model.entities.AuditLog
 import org.example.domain.repository.AuditRepository
 import java.util.UUID
 
-class AuditUseCase(
+class GetProjectAuditUseCase(
     private val repository: AuditRepository
 ) {
-    fun getAllAuditLogs(): Result<List<AuditLog>> {
-        TODO("Not yet implemented")
-    }
 
-    fun getAuditLogsById(auditId: UUID): Result<List<AuditLog>> {
+    fun getProjectAuditLogsById(auditId: UUID): Result<List<AuditLog>> {
         TODO("Not yet implemented")
     }
 }
