@@ -2,6 +2,7 @@ package data.storage
 
 import com.google.common.truth.Truth.assertThat
 import org.example.data.storage.CsvStorageManager
+import org.example.domain.model.exception.EiffelFlowException
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
@@ -89,7 +90,45 @@ class CsvStorageManagerTest {
         assertThat(DUMMY_FILE_CONTENT.split("\n")).containsExactlyElementsIn(result)
     }
 
-    companion object{
-        private const val DUMMY_FILE_CONTENT = "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress\n02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"
+    @Test
+    fun `updateLinesToFile should replace line in file when line exists`() {
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "update_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+        val oldLine = "line2"
+        val newLine = "updated line"
+
+        // When
+        csvStorageManager.updateLinesToFile(newLine, oldLine)
+
+        // Then
+        val expectedContent = "line1\nupdated line\nline3"
+        val result = csvStorageManager.readLinesFromFile()
+        assertThat(expectedContent.split("\n")).containsExactlyElementsIn(result)
+    }
+
+    @Throws(EiffelFlowException.LineNotFoundException::class)
+    @Test
+    fun `updateLinesToFile should threw LineNotFoundException when line does not exist`() {
+        // Given
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "no_change_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+        val nonExistentLine = "line4"
+        val newLine = "updated line"
+
+        //when and Then
+        assertThrows<EiffelFlowException.LineNotFoundException> {
+            csvStorageManager.updateLinesToFile(newLine, nonExistentLine)
+        }
+    }
+
+    companion object {
+        private const val DUMMY_FILE_CONTENT =
+            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress\n02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"
     }
 }

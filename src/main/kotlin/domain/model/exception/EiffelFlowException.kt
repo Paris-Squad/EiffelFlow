@@ -17,4 +17,7 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
 
     class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
 
+    class LineNotFoundException(line: String? = null) :
+        EiffelFlowException("Line not found $line")
+
 }
