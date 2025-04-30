@@ -1,7 +1,12 @@
 package org.example.data.repository
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.project.ProjectDataSource
+import org.example.domain.model.entities.AuditAction
+import org.example.domain.model.entities.AuditLog
 import org.example.domain.model.entities.Project
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
@@ -12,7 +17,33 @@ class ProjectRepositoryImpl(
 ) : ProjectRepository {
 
     override fun createProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
+
+        val createdProject = projectDataSource.createProject(project)
+
+        return createdProject.fold(
+            onSuccess = { createdProject ->
+                val auditLog = AuditLog(
+                    auditId = UUID.randomUUID(),
+                    itemId = createdProject.projectId,
+                    itemName = createdProject.projectName,
+                    userId = createdProject.adminId,
+                    userName = "Admin",
+                    actionType = AuditAction.CREATE,
+                    auditTime = currentTime,
+                    changedField = null,
+                    oldValue = null,
+                    newValue = createdProject.projectName
+                )
+
+                return auditDataSource.createAuditLog(auditLog).fold(
+                    onSuccess = { Result.success(createdProject) },
+                    onFailure = { Result.failure(it) }
+                )
+            },
+            onFailure = { throwable ->
+                Result.failure(throwable)
+            }
+        )
     }
 
     override fun updateProject(project: Project): Result<Project> {
@@ -29,5 +60,9 @@ class ProjectRepositoryImpl(
 
     override fun getProjects(): Result<List<Project>> {
         TODO("Not yet implemented")
+    }
+
+    companion object{
+       private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     }
 }
