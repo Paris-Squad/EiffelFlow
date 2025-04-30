@@ -3,6 +3,8 @@ package org.example.data.repository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.example.common.Constants.PROJECT
+import org.example.common.Constants.USER
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.project.ProjectDataSource
 import org.example.domain.model.entities.AuditAction
@@ -47,7 +49,30 @@ class ProjectRepositoryImpl(
     }
 
     override fun updateProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
+
+        val currentProjectData=getProjectById(project.projectId)
+
+        return projectDataSource.updateProject(project).also { result ->
+            result.onSuccess { updatedProject ->
+
+                val auditLog = AuditLog(
+                    itemId = updatedProject.projectId,
+                    itemName = PROJECT,
+                    userId = updatedProject.adminId,
+                    userName = "Admin",
+                    actionType = AuditAction.CREATE,
+                    auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                    changedField = null,
+                    oldValue = null,
+                    newValue = updatedProject.toString()
+                )
+                auditDataSource.createAuditLog(auditLog)
+            }
+        }
+    }
+
+    private fun getChangedField(oldProject: Project,newProject: Project){
+
     }
 
     override fun deleteProject(projectId: UUID): Result<Project> {
@@ -62,7 +87,7 @@ class ProjectRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    companion object{
-       private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    companion object {
+        private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     }
 }
