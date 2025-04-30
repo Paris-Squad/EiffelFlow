@@ -16,6 +16,8 @@ import org.example.domain.usecase.auth.ValidateUserNameUseCase
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.UserMock.adminUser
+import utils.UserMock.validUser
 import java.io.FileNotFoundException
 
 class RegisterUseCaseTest {
@@ -44,21 +46,14 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.failure(repositoryException)
 
-        val result = registerUseCase.register(username, password, mateRole, adminRole)
+        val result = registerUseCase.register(username, password, mateRole, adminUser)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(repositoryException::class.java)
     }
 
     @Test
-    fun `register with no caller role should fail with unauthorized exception`() {
-        val result = registerUseCase.register(username, password, mateRole)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UnauthorizedRegistrationException::class.java)
-    }
-
-    @Test
     fun `register with non-admin caller role should fail with unauthorized exception`() {
-        val result = registerUseCase.register(username, password, mateRole, mateRole)
+        val result = registerUseCase.register(username, password, mateRole, validUser)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UnauthorizedRegistrationException::class.java)
     }
@@ -69,9 +64,9 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.success(emptyList())
         every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any()) } returns Result.success(createdUser)
+        every { userRepository.createUser(any() , any()) } returns Result.success(createdUser)
 
-        val result = registerUseCase.register(username, password, mateRole, RoleType.ADMIN)
+        val result = registerUseCase.register(username, password, mateRole, adminUser)
 
         assertEquals(createdUser, result.getOrNull())
     }
@@ -82,9 +77,9 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.success(emptyList())
         every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any()) } returns Result.success(createdUser)
+        every { userRepository.createUser(any() , any()) } returns Result.success(createdUser)
 
-        val result = registerUseCase.register(username, password, mateRole, adminRole)
+        val result = registerUseCase.register(username, password, mateRole, adminUser)
 
         assertEquals(createdUser, result.getOrNull())
     }
@@ -96,7 +91,7 @@ class RegisterUseCaseTest {
 
         every { validateUsernameUseCase.validateUserName(username) } returns Result.failure(validationException)
 
-        val result = registerUseCase.register(username, password, mateRole, adminRole)
+        val result = registerUseCase.register(username, password, mateRole, adminUser)
 
         assertTrue(result.isFailure)
         assertEquals(validationException, result.exceptionOrNull())
@@ -110,7 +105,7 @@ class RegisterUseCaseTest {
 
         every { validatePasswordUseCase.validatePassword(password) } returns Result.failure(validationException)
 
-        val result = registerUseCase.register(username, password, mateRole, adminRole)
+        val result = registerUseCase.register(username, password, mateRole, adminUser)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(validationException::class.java)
     }
@@ -121,7 +116,7 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.success(existingUsers)
 
-        val result = registerUseCase.register(username, password, mateRole, adminRole)
+        val result = registerUseCase.register(username, password, mateRole, adminUser)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UsernameAlreadyExistsException::class.java)
     }
@@ -132,9 +127,9 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.success(emptyList())
         every { hashPasswordUseCase.hashPassword(any()) } returns "hashedPassword"
-        every { userRepository.createUser(any()) } returns Result.failure(repositoryException)
+        every { userRepository.createUser(any(),any()) } returns Result.failure(repositoryException)
 
-        val result = registerUseCase.register(username, password, mateRole , adminRole)
+        val result = registerUseCase.register(username, password, mateRole , adminUser)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(repositoryException::class.java)
     }
@@ -145,9 +140,7 @@ class RegisterUseCaseTest {
         private const val username = "testuser"
         private const val password = "P@ssw0rd"
         private const val hashedPassword = "hashedP@ssw0rd"
-
         private val mateRole = RoleType.MATE
-        private val adminRole = RoleType.ADMIN
     }
 
 }

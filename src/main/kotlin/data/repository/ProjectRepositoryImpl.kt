@@ -27,7 +27,7 @@ class ProjectRepositoryImpl(
                     itemId = createdProject.projectId,
                     itemName = createdProject.projectName,
                     userId = createdProject.adminId,
-                    userName = "Admin",
+                    editorName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = currentTime,
                     changedField = null,
