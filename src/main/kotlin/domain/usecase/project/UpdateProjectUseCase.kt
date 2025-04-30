@@ -5,6 +5,6 @@ import org.example.domain.repository.ProjectRepository
 
 class UpdateProjectUseCase (private val repository: ProjectRepository) {
     fun updateProject(project : Project) : Result<Project>{
-        return repository.createProject(project)
+        return repository.updateProject(project)
     }
 }

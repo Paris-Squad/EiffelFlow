@@ -50,8 +50,6 @@ class ProjectRepositoryImpl(
 
     override fun updateProject(project: Project): Result<Project> {
 
-
-
         return projectDataSource.updateProject(project).also { result ->
             result.onSuccess { updatedProject ->
 
