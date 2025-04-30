@@ -5,11 +5,12 @@ import io.mockk.every
 import io.mockk.mockk
 import org.example.data.repository.AuditRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
-import org.example.domain.model.EiffelFlowException
+import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
+import java.util.UUID
 
 class AuditRepositoryImplTest {
 
@@ -79,7 +80,7 @@ class AuditRepositoryImplTest {
 
         // When / Then
         try {
-            val result = auditRepository.getAuditLogs()
+            val result = auditRepository.getAuditLogById(MockAuditLog.AUDIT_LOG.auditId)
             assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockAuditLog.AUDIT_LOG))
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -96,7 +97,7 @@ class AuditRepositoryImplTest {
 
         // When / Then
         try {
-            val result = auditRepository.getAuditLogs()
+            val result = auditRepository.getAuditLogById(UUID.randomUUID())
             assertThat(result.exceptionOrNull()).isInstanceOf(
                 EiffelFlowException.ElementNotFoundException::class.java
             )
