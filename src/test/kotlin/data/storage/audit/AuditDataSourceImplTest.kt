@@ -89,7 +89,7 @@ class AuditDataSourceImplTest {
 
         // When / Then
         try {
-            val result = auditDataSource.getAuditLogById(UUID.randomUUID())
+            val result = auditDataSource.getItemAuditLogById(UUID.randomUUID())
             assertThat(result.getOrNull()).isEmpty()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -106,7 +106,7 @@ class AuditDataSourceImplTest {
 
         // When / Then
         try {
-            val result = auditDataSource.getAuditLogById(auditLogId)
+            val result = auditDataSource.getItemAuditLogById(auditLogId)
             assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockAuditLog.AUDIT_LOG))
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -120,7 +120,7 @@ class AuditDataSourceImplTest {
 
         // When / Then
         try {
-            val result = auditDataSource.getAuditLogById(UUID.randomUUID())
+            val result = auditDataSource.getItemAuditLogById(UUID.randomUUID())
             assertThat(result.exceptionOrNull()).isInstanceOf(
                 EiffelFlowException.ElementNotFoundException::class.java
             )

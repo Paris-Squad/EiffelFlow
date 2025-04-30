@@ -75,12 +75,12 @@ class AuditRepositoryImplTest {
     fun `getAuditLogById should return Result with AuditLog list when there is AuditLogs exist in data source`() {
         // Given
         every {
-            auditDataSource.getAuditLogById(MockAuditLog.AUDIT_LOG.auditId)
+            auditDataSource.getItemAuditLogById(MockAuditLog.AUDIT_LOG.auditId)
         } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
 
         // When / Then
         try {
-            val result = auditRepository.getAuditLogById(MockAuditLog.AUDIT_LOG.auditId)
+            val result = auditRepository.getItemAuditLogById(MockAuditLog.AUDIT_LOG.auditId)
             assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockAuditLog.AUDIT_LOG))
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -92,12 +92,12 @@ class AuditRepositoryImplTest {
         // Given
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
         every {
-            auditDataSource.getAuditLogById(any())
+            auditDataSource.getItemAuditLogById(any())
         } returns Result.failure(exception)
 
         // When / Then
         try {
-            val result = auditRepository.getAuditLogById(UUID.randomUUID())
+            val result = auditRepository.getItemAuditLogById(UUID.randomUUID())
             assertThat(result.exceptionOrNull()).isInstanceOf(
                 EiffelFlowException.ElementNotFoundException::class.java
             )
