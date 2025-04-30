@@ -50,7 +50,7 @@ class ProjectRepositoryImpl(
 
     override fun updateProject(project: Project): Result<Project> {
 
-        val currentProjectData=getProjectById(project.projectId)
+
 
         return projectDataSource.updateProject(project).also { result ->
             result.onSuccess { updatedProject ->
