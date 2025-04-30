@@ -23,5 +23,3 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
 
 }
 
-//ProjectNotFoundException
-//ProjectUpdateException(e.message)
