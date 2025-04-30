@@ -5,6 +5,6 @@ import org.example.domain.repository.ProjectRepository
 
 class CreateProjectUseCase(private val repository: ProjectRepository) {
     fun createProject(project : Project) : Result<Project>{
-        return repository.createProject(project)
+        TODO("Not yet implemented")
     }
 }
