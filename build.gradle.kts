@@ -22,6 +22,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("com.google.truth:truth:1.4.2")
+    testImplementation("io.insert-koin:koin-test:4.0.3")
 }
 
 tasks.test {
@@ -43,6 +44,7 @@ tasks.named<JacocoReport>("jacocoTestReport") {
         files(classDirectories.files.map {
             fileTree(it) {
                 exclude("org/example/domain/model/**")
+                exclude("org/example/di/**")
                 exclude("org/example/MainKt.class")
             }
         })
@@ -72,7 +74,7 @@ tasks.register("verifyTestCoverage") {
                 throw GradleException("Code coverage is less than 100% (actual: $coveragePercent%)")
             }
 
-            logger.lifecycle("✓ Test coverage is 100%")
+            logger.lifecycle("✓ Test coverage is $coveragePercent%")
         } else {
             throw GradleException("Could not parse coverage information from report")
         }

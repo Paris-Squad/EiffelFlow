@@ -1,19 +1,19 @@
 package org.example.di
 
-import org.example.data.respoitory.AuditRepositoryImpl
-import org.example.data.respoitory.ProjectRepositoryImpl
-import org.example.data.respoitory.TaskRepositoryImpl
-import org.example.data.respoitory.UserRepositoryImpl
-import org.example.data.storge.CsvStorageManager
-import org.example.data.storge.audit.AuditDataSource
-import org.example.data.storge.audit.AuditDataSourceImpl
-import org.example.data.storge.mapper.*
-import org.example.data.storge.project.ProjectDataSource
-import org.example.data.storge.project.ProjectDataSourceImpl
-import org.example.data.storge.task.TaskDataSource
-import org.example.data.storge.task.TaskDataSourceImpl
-import org.example.data.storge.user.UserDataSource
-import org.example.data.storge.user.UserDataSourceImpl
+import org.example.data.repository.AuditRepositoryImpl
+import org.example.data.repository.ProjectRepositoryImpl
+import org.example.data.repository.TaskRepositoryImpl
+import org.example.data.repository.UserRepositoryImpl
+import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.audit.AuditDataSource
+import org.example.data.storage.audit.AuditDataSourceImpl
+import org.example.data.storage.mapper.*
+import org.example.data.storage.project.ProjectDataSource
+import org.example.data.storage.project.ProjectDataSourceImpl
+import org.example.data.storage.task.TaskDataSource
+import org.example.data.storage.task.TaskDataSourceImpl
+import org.example.data.storage.user.UserDataSource
+import org.example.data.storage.user.UserDataSourceImpl
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.repository.TaskRepository
@@ -25,7 +25,7 @@ val appModule = module {
 
     single<AuditCsvMapper> { AuditCsvMapper() }
     single<ProjectCsvMapper> { ProjectCsvMapper() }
-    single<TaskCsvMapper> { TaskCsvMapper() }
+    single<TaskCsvMapper> { TaskCsvMapper(get()) }
     single<StateCsvMapper> { StateCsvMapper() }
     single<UserCsvMapper> { UserCsvMapper() }
 
