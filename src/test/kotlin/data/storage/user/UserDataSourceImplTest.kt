@@ -47,6 +47,24 @@ class UserDataSourceImplTest {
     }
 
     @Test
+    fun `createUser should return failure when an exception occurs`() {
+        val user = User(
+            userId = UUID.randomUUID(),
+            username = "test",
+            password = "test",
+            role = RoleType.ADMIN
+        )
+        val exception = IOException("Failed to write file")
+
+        every { userMapper.mapTo(user) } returns "user_csv_string"
+        every { csvManager.writeLinesToFile(any()) } throws exception
+
+        val result = userDataSource.createUser(user)
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UserCreationException::class.java)
+    }
+
+    @Test
     fun `updateUser should return the updated user`() {
         val user = User(
             username = "test",
@@ -96,7 +114,7 @@ class UserDataSourceImplTest {
         val result = userDataSource.getUsers()
 
         assertThat(result.getOrNull()).hasSize(2)
-  }
+    }
 
     @Test
     fun `getUsers should return empty list when file not found`() {
