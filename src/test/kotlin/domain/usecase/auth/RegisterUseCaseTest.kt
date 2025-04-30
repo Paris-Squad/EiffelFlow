@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.example.common.ValidationMessages
 import org.example.domain.model.entities.RoleType
 import org.example.domain.model.entities.User
 import org.example.domain.model.exception.EiffelFlowException
@@ -45,7 +46,6 @@ class RegisterUseCaseTest {
 
         val result = registerUseCase.register(username, password, mateRole, adminRole)
 
-        assertTrue(result.isFailure)
         assertThat(result.exceptionOrNull()).isInstanceOf(repositoryException::class.java)
     }
 
@@ -53,7 +53,6 @@ class RegisterUseCaseTest {
     fun `register with no caller role should fail with unauthorized exception`() {
         val result = registerUseCase.register(username, password, mateRole)
 
-        assertTrue(result.isFailure)
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UnauthorizedRegistrationException::class.java)
     }
 
@@ -61,7 +60,6 @@ class RegisterUseCaseTest {
     fun `register with non-admin caller role should fail with unauthorized exception`() {
         val result = registerUseCase.register(username, password, mateRole, mateRole)
 
-        assertTrue(result.isFailure)
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UnauthorizedRegistrationException::class.java)
     }
 
@@ -75,7 +73,6 @@ class RegisterUseCaseTest {
 
         val result = registerUseCase.register(username, password, mateRole, RoleType.ADMIN)
 
-        assertTrue(result.isSuccess)
         assertEquals(createdUser, result.getOrNull())
     }
 
@@ -89,13 +86,13 @@ class RegisterUseCaseTest {
 
         val result = registerUseCase.register(username, password, mateRole, adminRole)
 
-        assertTrue(result.isSuccess)
         assertEquals(createdUser, result.getOrNull())
     }
 
     @Test
     fun `register should fail when username validation fails`() {
-        val validationException = EiffelFlowException.UserNameValidationException(setOf("Invalid username"))
+        val validationException =
+            EiffelFlowException.UserNameValidationException(setOf(ValidationMessages.ValidationRule.USERNAME_TOO_LONG))
 
         every { validateUsernameUseCase.validateUserName(username) } returns Result.failure(validationException)
 
@@ -109,7 +106,7 @@ class RegisterUseCaseTest {
 
     @Test
     fun `register should fail when password validation fails`() {
-        val validationException = EiffelFlowException.PasswordValidationException(setOf("Invalid password"))
+        val validationException = EiffelFlowException.PasswordValidationException(setOf(ValidationMessages.ValidationRule.PASSWORD_TOO_SHORT))
 
         every { validatePasswordUseCase.validatePassword(password) } returns Result.failure(validationException)
 
@@ -145,9 +142,9 @@ class RegisterUseCaseTest {
    
 
     companion object {
-        private val username = "testuser"
-        private val password = "P@ssw0rd"
-        private val hashedPassword = "hashedP@ssw0rd"
+        private const val username = "testuser"
+        private const val password = "P@ssw0rd"
+        private const val hashedPassword = "hashedP@ssw0rd"
 
         private val mateRole = RoleType.MATE
         private val adminRole = RoleType.ADMIN
