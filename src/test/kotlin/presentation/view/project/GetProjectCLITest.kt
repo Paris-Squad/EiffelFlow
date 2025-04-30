@@ -3,7 +3,7 @@ package presentation.view.project
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.EiffelFlowException
+import org.example.domain.model.exception.EiffelFlowException
 import org.example.presentation.presenter.project.GetProjectPresenter
 import org.example.presentation.view.project.GetProjectCLI
 import org.junit.jupiter.api.BeforeEach

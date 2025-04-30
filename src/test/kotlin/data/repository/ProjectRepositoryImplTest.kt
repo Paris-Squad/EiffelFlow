@@ -17,7 +17,7 @@ import io.mockk.every
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.domain.model.EiffelFlowException
+import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.Assertions
 import utils.MockProjects
 

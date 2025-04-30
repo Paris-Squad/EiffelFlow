@@ -9,7 +9,7 @@ import org.example.data.storage.mapper.ProjectCsvMapper
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.data.storage.project.ProjectDataSource
 import org.example.data.storage.project.ProjectDataSourceImpl
-import org.example.domain.model.EiffelFlowException
+import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.model.entities.Project
 import org.example.domain.model.entities.State
 import org.junit.jupiter.api.BeforeEach
