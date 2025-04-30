@@ -17,4 +17,6 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
 
     class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
 
+    class TaskNotFoundException : EiffelFlowException("task not found")
+
 }
