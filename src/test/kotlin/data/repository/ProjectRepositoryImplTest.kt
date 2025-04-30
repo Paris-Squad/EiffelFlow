@@ -146,18 +146,6 @@ class ProjectRepositoryImplTest {
     @Test
     fun `deleteProject should throw UnableToDeleteProjectException when deleteProject returns failure`(){
         // Given
-        val auditLog = AuditLog(
-            auditId = UUID.randomUUID(),
-            itemId = project.projectId,
-            itemName = project.projectName,
-            userId = project.adminId,
-            userName = "Admin",
-            actionType = AuditAction.DELETE,
-            auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-            changedField = null,
-            oldValue = null,
-            newValue = project.projectName
-        )
         val projectId = UUID.randomUUID()
         every { projectDataSource.deleteProject(any()) } returns Result.failure(EiffelFlowException.UnableToDeleteProjectException())
 
@@ -173,18 +161,6 @@ class ProjectRepositoryImplTest {
     @Test
     fun `deleteProject should throw UnableToCreateAuditLogException when createAuditLog returns failure`(){
         // Given
-        val auditLog = AuditLog(
-            auditId = UUID.randomUUID(),
-            itemId = project.projectId,
-            itemName = project.projectName,
-            userId = project.adminId,
-            userName = "Admin",
-            actionType = AuditAction.DELETE,
-            auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-            changedField = null,
-            oldValue = null,
-            newValue = project.projectName
-        )
         val projectId = UUID.randomUUID()
         every { projectDataSource.deleteProject(any()) } returns Result.success(project)
         every { auditDataSource.createAuditLog(any()) } returns Result.failure(
