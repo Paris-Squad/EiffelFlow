@@ -19,4 +19,6 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
 
     class ElementNotFoundException(message: String) : EiffelFlowException(message)
 
+    class ProjectCreationException(message: String) : EiffelFlowException(message)
+
 }
