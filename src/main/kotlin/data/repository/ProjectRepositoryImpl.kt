@@ -54,13 +54,9 @@ class ProjectRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override fun getProjectById(projectID: UUID): Result<Project> {
-        TODO("Not yet implemented")
-    }
+    override fun getProjectById(projectId: UUID): Result<Project> = projectDataSource.getProjectById(projectId)
 
-    override fun getProjects(): Result<List<Project>> {
-        TODO("Not yet implemented")
-    }
+    override fun getProjects(): Result<List<Project>> = projectDataSource.getProjects()
 
     companion object{
        private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

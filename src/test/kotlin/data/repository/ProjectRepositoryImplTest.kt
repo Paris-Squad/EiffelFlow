@@ -33,27 +33,30 @@ class ProjectRepositoryImplTest {
         projectRepository = ProjectRepositoryImpl(projectDataSource, auditDataSource)
     }
 
+    //region createProject
     @Test
     fun `createProject should returns the project when projectDataSource and auditDataSource succeed`() {
 
         try {
-            every { projectDataSource.createProject(any()) } returns Result.success(project)
+            every {
+                projectDataSource.createProject(any())
+            } returns Result.success(MockProjects.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.success(
                 AuditLog(
                     auditId = UUID.randomUUID(),
-                    itemId = project.projectId,
-                    itemName = project.projectName,
-                    userId = project.adminId,
+                    itemId = MockProjects.CORRECT_PROJECT.projectId,
+                    itemName = MockProjects.CORRECT_PROJECT.projectName,
+                    userId = MockProjects.CORRECT_PROJECT.adminId,
                     userName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,
-                    newValue = project.projectName
+                    newValue = MockProjects.CORRECT_PROJECT.projectName
                 )
             )
 
-            val result = projectRepository.createProject(project)
+            val result = projectRepository.createProject(MockProjects.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isSuccess)
 
@@ -68,9 +71,11 @@ class ProjectRepositoryImplTest {
     @Test
     fun `createProject should return failure when projectDataSource fails`() {
         try {
-            every { projectDataSource.createProject(any()) } returns Result.failure(Exception("Project creation failed"))
+            every {
+                projectDataSource.createProject(any())
+            } returns Result.failure(Exception("Project creation failed"))
 
-            val result = projectRepository.createProject(project)
+            val result = projectRepository.createProject(MockProjects.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
@@ -85,10 +90,14 @@ class ProjectRepositoryImplTest {
     @Test
     fun `createProject should return failure when auditDataSource fails`() {
         try {
-            every { projectDataSource.createProject(any()) } returns Result.success(project)
-            every { auditDataSource.createAuditLog(any()) } returns Result.failure(Exception("Audit log error"))
+            every {
+                projectDataSource.createProject(any())
+            } returns Result.success(MockProjects.CORRECT_PROJECT)
+            every {
+                auditDataSource.createAuditLog(any())
+            } returns Result.failure(Exception("Audit log error"))
 
-            val result = projectRepository.createProject(project)
+            val result = projectRepository.createProject(MockProjects.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
@@ -99,6 +108,7 @@ class ProjectRepositoryImplTest {
         }
 
     }
+    //endregion
 
     @Test
     fun `updateProject should return the updated project`() {
@@ -128,6 +138,7 @@ class ProjectRepositoryImplTest {
         }
     }
 
+    //region getProjects
     @Test
     fun `should return Result of empty list of Projects when there is no project in data source`() {
         //Given
@@ -167,7 +178,9 @@ class ProjectRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+    //endregion
 
+    //region getProjectById
     @Test
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
@@ -195,14 +208,5 @@ class ProjectRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
-
-    companion object {
-        val project = Project(
-            projectName = "Test Project",
-            projectDescription = "A test project",
-            createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-            adminId = UUID.randomUUID(),
-            states = emptyList()
-        )
-    }
+    //endregion
 }

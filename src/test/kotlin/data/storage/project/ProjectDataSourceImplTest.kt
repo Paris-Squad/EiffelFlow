@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.ProjectCsvMapper
-import org.example.data.storage.mapper.StateCsvMapper
 import org.example.data.storage.project.ProjectDataSource
 import org.example.data.storage.project.ProjectDataSourceImpl
 import org.example.domain.model.exception.EiffelFlowException
@@ -24,25 +23,31 @@ class ProjectDataSourceImplTest {
 
     private lateinit var projectDataSource: ProjectDataSource
     private val csvStorageManager: CsvStorageManager = mockk()
-    private val stateCsvMapper: StateCsvMapper = mockk()
     private val projectMapper: ProjectCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        projectDataSource = ProjectDataSourceImpl(projectMapper, stateCsvMapper, csvStorageManager)
+        projectDataSource = ProjectDataSourceImpl(projectMapper, csvStorageManager)
     }
 
+    //region createProject
     @Test
     fun `createProject should return success when project is written to CSV`() {
         try {
-            every { projectMapper.mapTo(correctProject) } returns correctLine
+            every {
+                projectMapper.mapTo(MockProjects.CORRECT_PROJECT)
+            } returns MockProjects.CORRECT_CSV_STRING_LINE
 
-            every { csvStorageManager.writeLinesToFile(correctLine + "\n") } just Runs
+            every {
+                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+            } just Runs
 
-            val result = projectDataSource.createProject(correctProject)
+            val result = projectDataSource.createProject(MockProjects.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isSuccess)
-            verify(exactly = 1) { csvStorageManager.writeLinesToFile(correctLine + "\n") }
+            verify(exactly = 1) {
+                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+            }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -52,18 +57,23 @@ class ProjectDataSourceImplTest {
     @Test
     fun `createProject should return failure when writeLinesToFile throws exception`() {
         try {
-            every { projectMapper.mapTo(correctProject) } returns correctLine
-            every { csvStorageManager.writeLinesToFile(correctLine + "\n") } throws Exception("Failed to write to file")
+            every { projectMapper.mapTo(MockProjects.CORRECT_PROJECT) } returns MockProjects.CORRECT_CSV_STRING_LINE
+            every {
+                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+            } throws Exception("Failed to write to file")
 
-            val result = projectDataSource.createProject(correctProject)
+            val result = projectDataSource.createProject(MockProjects.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
-            verify(exactly = 1) { csvStorageManager.writeLinesToFile(correctLine + "\n") }
+            verify(exactly = 1) {
+                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+            }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+    //endregion
 
     @Test
     fun `updateProject should return the updated project`() {
@@ -93,6 +103,7 @@ class ProjectDataSourceImplTest {
         }
     }
 
+    //region getProjects
     @Test
     fun `should return Result of empty list of Projects when the file is empty`() {
         every { csvStorageManager.readLinesFromFile() } returns "".split("\n")
@@ -129,7 +140,9 @@ class ProjectDataSourceImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+    //endregion
 
+    //region getProjectById
     @Test
     fun `should return Result of Project when the given Id match project record exists in CSV file`() {
         //Given
@@ -150,14 +163,11 @@ class ProjectDataSourceImplTest {
 
         // When / Then
         try {
-            val result =  projectDataSource.getProjectById(UUID.randomUUID())
+            val result = projectDataSource.getProjectById(UUID.randomUUID())
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+    //endregion
 
-    companion object{
-        private val correctProject = MockProjects.CORRECT_PROJECT
-        private val correctLine = MockProjects.CORRECT_CSV_STRING_LINE
-    }
 }
