@@ -2,12 +2,12 @@ package data.storage
 
 import com.google.common.truth.Truth.assertThat
 import org.example.data.storage.CsvStorageManager
-import org.example.domain.model.exception.EiffelFlowException
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.IOException
 
 class CsvStorageManagerTest {
 
@@ -109,9 +109,9 @@ class CsvStorageManagerTest {
         assertThat(expectedContent.split("\n")).containsExactlyElementsIn(result)
     }
 
-    @Throws(EiffelFlowException.LineNotFoundException::class)
+    @Throws(IOException::class)
     @Test
-    fun `updateLinesToFile should threw LineNotFoundException when line does not exist`() {
+    fun `updateLinesToFile should threw IOException when line does not exist`() {
         // Given
         val initialContent = "line1\nline2\nline3"
         val testFile = File(tempDir, "no_change_file.csv").apply {
@@ -122,7 +122,7 @@ class CsvStorageManagerTest {
         val newLine = "updated line"
 
         //when and Then
-        assertThrows<EiffelFlowException.LineNotFoundException> {
+        assertThrows<IOException> {
             csvStorageManager.updateLinesToFile(newLine, nonExistentLine)
         }
     }

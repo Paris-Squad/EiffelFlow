@@ -1,8 +1,8 @@
 package org.example.data.storage
 
-import org.example.domain.model.exception.EiffelFlowException.LineNotFoundException
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.IOException
 
 class CsvStorageManager(
     private val file: File
@@ -27,7 +27,7 @@ class CsvStorageManager(
 
 
     fun writeLinesToFile(input: String) {
-        file.appendText(input)
+        file.appendText("$input\n")
     }
 
     fun updateLinesToFile(input: String, oldLine: String) {
@@ -38,7 +38,7 @@ class CsvStorageManager(
             lines[index] = input
             file.writeText(lines.joinToString("\n"))
         } else {
-            throw LineNotFoundException(oldLine)
+            throw IOException()
         }
     }
 }
