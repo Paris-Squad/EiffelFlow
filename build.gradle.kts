@@ -46,6 +46,7 @@ tasks.named<JacocoReport>("jacocoTestReport") {
                 exclude("org/example/domain/model/**")
                 exclude("org/example/di/**")
                 exclude("org/example/MainKt.class")
+                exclude("org/example/common/**")
             }
         })
     )

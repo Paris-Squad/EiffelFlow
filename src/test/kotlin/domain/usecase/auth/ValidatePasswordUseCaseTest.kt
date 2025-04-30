@@ -1,14 +1,15 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
+import org.example.common.ValidationMessages
 import org.example.domain.model.exception.EiffelFlowException.PasswordValidationException
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
-import org.example.domain.usecase.auth.Validator
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class ValidatePasswordUseCaseTest {
 
-    private val useCase = ValidatePasswordUseCase(Validator)
+    private val useCase = ValidatePasswordUseCase()
 
     @Test
     fun `validatePassword() should return success when password meets all requirements`() {
@@ -25,7 +26,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf( PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
     }
 
     @Test
@@ -34,7 +35,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf( PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
     }
 
     @Test
@@ -43,7 +44,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf( PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
     }
 
     @Test
@@ -52,7 +53,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf( PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
     }
 
     @Test
@@ -61,7 +62,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf( PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
     }
 
     @Test
@@ -70,6 +71,73 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf( PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+    }
+
+    @Nested
+    inner class PasswordValidationTests {
+
+        @Test
+        fun `getPasswordValidationErrors() should return empty set when password meets all requirements`() {
+            val validPassword = "Valid1Pass!"
+
+            val errors = useCase.getPasswordValidationErrors(validPassword)
+
+            assertThat(errors).isEmpty()
+        }
+
+        @Test
+        fun `getPasswordValidationErrors() should return error when password is too short`() {
+            val invalidPassword = "Abc123!"
+
+            val errors = useCase.getPasswordValidationErrors(invalidPassword)
+
+            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_TOO_SHORT)
+        }
+
+        @Test
+        fun `getPasswordValidationErrors() should return error when password has no uppercase letters`() {
+            val invalidPassword = "valid1pass!"
+
+            val errors = useCase.getPasswordValidationErrors(invalidPassword)
+
+            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_UPPERCASE)
+        }
+
+        @Test
+        fun `getPasswordValidationErrors() should return error when password has no lowercase letters`() {
+            val invalidPassword = "VALID1PASS!"
+
+            val errors = useCase.getPasswordValidationErrors(invalidPassword)
+
+            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_LOWERCASE)
+        }
+
+        @Test
+        fun `getPasswordValidationErrors() should return error when password has no digits`() {
+            val invalidPassword = "ValidPass!"
+
+            val errors = useCase.getPasswordValidationErrors(invalidPassword)
+
+            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_DIGIT)
+        }
+
+        @Test
+        fun `getPasswordValidationErrors() should return error when password has no special characters`() {
+            val invalidPassword = "Valid1Pass"
+
+            val errors = useCase.getPasswordValidationErrors(invalidPassword)
+
+            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_SPECIAL_CHAR)
+        }
+
+        @Test
+        fun `getPasswordValidationErrors() should return multiple errors for multiple violations`() {
+            val invalidPassword = "pass"
+
+            val errors = useCase.getPasswordValidationErrors(invalidPassword)
+
+            assertThat(errors).hasSize(4)
+        }
     }
 }
