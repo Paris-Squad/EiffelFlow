@@ -1,9 +1,9 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import common.TaskMock.inProgressTask
-import common.TaskMock.mockTaskId
-import common.TaskMock.validTask
+import utils.TaskMock.inProgressTask
+import utils.TaskMock.mockTaskId
+import utils.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
 import org.example.domain.model.exception.EiffelFlowException
