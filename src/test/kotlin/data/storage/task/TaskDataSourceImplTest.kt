@@ -16,9 +16,9 @@ import org.example.data.storage.task.TaskDataSourceImpl
 import org.example.domain.model.entities.RoleType
 import org.example.domain.model.entities.State
 import org.example.domain.model.entities.Task
-import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.util.*
 
 class TaskDataSourceImplTest {
@@ -70,7 +70,7 @@ class TaskDataSourceImplTest {
 
     @Test
     fun `updateTask should return failure when exception is thrown from the csvStorageManager`() {
-        val exception = EiffelFlowException.LineNotFoundException()
+        val exception = IOException("Error")
         every { csvStorageManager.updateLinesToFile(ValidTaskCSV, ValidTaskCSV) } throws exception
 
         try {

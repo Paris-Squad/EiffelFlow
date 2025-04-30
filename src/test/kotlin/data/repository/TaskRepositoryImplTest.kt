@@ -7,9 +7,9 @@ import io.mockk.mockk
 import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.task.TaskDataSource
-import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.util.UUID
 
 //todo change those testcases
@@ -47,7 +47,7 @@ class TaskRepositoryImplTest {
 
     @Test
     fun `updateTask should return failure if the data source throws an exception`() {
-        val exception = EiffelFlowException.LineNotFoundException()
+        val exception = IOException("Error updating task")
         every { taskDataSource.updateTask(validTask) } returns Result.failure(exception)
 
         try {
