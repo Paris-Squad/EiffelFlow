@@ -7,7 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 
 class CreateProjectPresenterTest {
 
@@ -49,7 +49,7 @@ class CreateProjectPresenterTest {
     }
 
     companion object{
-        val project = MockProjects.CORRECT_PROJECT
+        val project = ProjectsMock.CORRECT_PROJECT
     }
 
 }

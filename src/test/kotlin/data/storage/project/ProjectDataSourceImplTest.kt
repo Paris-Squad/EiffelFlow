@@ -157,7 +157,7 @@ class ProjectDataSourceImplTest {
     }
 
     companion object{
-        private val correctProject = MockProjects.CORRECT_PROJECT
-        private val correctLine = MockProjects.CORRECT_CSV_STRING_LINE
+        private val correctProject = ProjectsMock.CORRECT_PROJECT
+        private val correctLine = ProjectsMock.CORRECT_CSV_STRING_LINE
     }
 }
