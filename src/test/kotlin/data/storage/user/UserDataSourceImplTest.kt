@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import io.mockk.verify
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.UserCsvMapper
 import org.example.data.storage.user.UserDataSource

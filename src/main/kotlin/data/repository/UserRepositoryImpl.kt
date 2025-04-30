@@ -8,6 +8,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.common.Constants.USER
+import org.example.domain.model.entities.AuditAction
+import org.example.domain.model.entities.AuditLog
 import java.util.UUID
 
 class UserRepositoryImpl(
