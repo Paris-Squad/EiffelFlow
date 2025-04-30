@@ -22,6 +22,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("com.google.truth:truth:1.4.2")
+    testImplementation("io.insert-koin:koin-test:4.0.3")
 }
 
 tasks.test {
@@ -45,6 +46,7 @@ tasks.named<JacocoReport>("jacocoTestReport") {
                 exclude("org/example/domain/model/**")
                 exclude("org/example/di/**")
                 exclude("org/example/MainKt.class")
+                exclude("org/example/common/**")
             }
         })
     )

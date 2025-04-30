@@ -2,6 +2,7 @@ package org.example.data.storage
 
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.IOException
 
 class CsvStorageManager(
     private val file: File
@@ -26,6 +27,18 @@ class CsvStorageManager(
 
 
     fun writeLinesToFile(input: String) {
-        file.appendText(input)
+        file.appendText("$input\n")
+    }
+
+    fun updateLinesToFile(input: String, oldLine: String) {
+        val lines = readLinesFromFile().toMutableList()
+        val index = lines.indexOf(oldLine)
+
+        if (index != -1) {
+            lines[index] = input
+            file.writeText(lines.joinToString("\n"))
+        } else {
+            throw IOException()
+        }
     }
 }
