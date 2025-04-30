@@ -1,7 +1,12 @@
 package data.storage.task
 
 import com.google.common.truth.Truth.assertThat
+import common.TaskMock.ValidTaskCSV
+import common.TaskMock.validTask
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.StateCsvMapper
@@ -13,17 +18,18 @@ import org.example.domain.model.entities.State
 import org.example.domain.model.entities.Task
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.util.*
 
 class TaskDataSourceImplTest {
     private lateinit var taskDataSource: TaskDataSource
     private val csvStorageManager: CsvStorageManager = mockk()
     private val stateCsvMapper: StateCsvMapper = mockk()
-    private val taskCsvMapper: TaskCsvMapper = mockk()
+    private val taskMapper: TaskCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        taskDataSource = TaskDataSourceImpl(taskCsvMapper, stateCsvMapper, csvStorageManager)
+        taskDataSource = TaskDataSourceImpl(taskMapper, stateCsvMapper, csvStorageManager)
     }
 
     @Test
@@ -49,22 +55,27 @@ class TaskDataSourceImplTest {
     }
 
     @Test
-    fun `updateTask should return the updated task`() {
-        val task = Task(
-            title = "Updated Task",
-            description = "Updated Description",
-            createdAt = LocalDateTime(2023, 1, 1, 12, 0),
-            creatorId = UUID.randomUUID(),
-            projectId = UUID.randomUUID(),
-            assignedId = UUID.randomUUID(),
-            role = RoleType.MATE,
-            state = State(
-                name = "test"
-            )
-        )
+    fun `updateTask should return success when task is valid`() {
+        every { taskMapper.mapTo(validTask) } returns ValidTaskCSV
+        every { csvStorageManager.updateLinesToFile(ValidTaskCSV, any()) } just runs
+
 
         try {
-            taskDataSource.updateTask(task)
+            val result = taskDataSource.updateTask(validTask)
+            assertThat(result.getOrNull()).isEqualTo(validTask)
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    @Test
+    fun `updateTask should return failure when exception is thrown from the csvStorageManager`() {
+        val exception = IOException("Error")
+        every { csvStorageManager.updateLinesToFile(ValidTaskCSV, ValidTaskCSV) } throws exception
+
+        try {
+            val result = taskDataSource.createTask(validTask)
+            assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

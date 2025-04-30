@@ -19,6 +19,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.Assertions
+import utils.MockProjects
 
 //todo change all of the test
 class ProjectRepositoryImplTest {
@@ -176,24 +177,74 @@ class ProjectRepositoryImplTest {
     }
 
     @Test
-    fun `getProjects should return list of projects`() {
+    fun `should return Result of empty list of Projects when there is no project in data source`() {
+        //Given
+        every { projectDataSource.getProjects() } returns Result.success(emptyList())
+
+        // When / Then
         try {
-            projectRepository.getProjects()
+            val result = projectRepository.getProjects()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
 
     @Test
-    fun `getProjectById should return list of projects`() {
+    fun `should return Result of Projects when at least one project exists in data source`() {
+        //Given
+        every { projectDataSource.getProjects() } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
+
+        // When / Then
         try {
-            projectRepository.getProjectById(UUID.randomUUID())
+            val result = projectRepository.getProjects()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
 
-    companion object{
+    @Test
+    fun `should return Result of ElementNotFoundException when project doesn't exists in data source`() {
+        //Given
+        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        every { projectDataSource.getProjects() } returns Result.failure(exception)
+
+        // When / Then
+        try {
+            val result = projectRepository.getProjects()
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    @Test
+    fun `should return Result of Project when the given Id match project record exists in data source`() {
+        //Given
+        every { projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId) } returns Result.success(
+            MockProjects.CORRECT_PROJECT
+        )
+
+        // When / Then
+        try {
+            val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    @Test
+    fun `should return Result of ElementNotFoundException when searching for project doesn't exists in data source`() {
+        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        every { projectDataSource.getProjectById(UUID.randomUUID()) } returns Result.failure(exception)
+
+        // When / Then
+        try {
+            val result = projectRepository.getProjectById(UUID.randomUUID())
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    companion object {
         val project = Project(
             projectName = "Test Project",
             projectDescription = "A test project",
