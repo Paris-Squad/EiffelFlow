@@ -4,7 +4,7 @@ import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.Mapper
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.domain.model.entities.Task
-import java.util.*
+import java.util.UUID
 
 class TaskDataSourceImpl(
     private val taskMapper: Mapper<String, Task>,
@@ -14,7 +14,7 @@ class TaskDataSourceImpl(
     override fun createTask(task: Task): Result<Task> {
         return try {
             val stateAsString = stateCsvMapper.mapTo(task.state)
-            val csvLine = taskMapper.mapTo(task).joinToString(",") + "$stateAsString\n"
+            val csvLine = taskMapper.mapTo(task)+ "$stateAsString\n"
             csvManager.writeLinesToFile(csvLine)
             Result.success(task)
         } catch (exception: Exception) {

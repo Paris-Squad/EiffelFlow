@@ -1,8 +1,8 @@
 package org.example.di
 
+import data.repository.TaskRepositoryImpl
 import org.example.data.repository.AuditRepositoryImpl
 import org.example.data.repository.ProjectRepositoryImpl
-import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.repository.UserRepositoryImpl
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.audit.AuditDataSource
