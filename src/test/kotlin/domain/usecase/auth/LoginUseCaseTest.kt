@@ -34,7 +34,7 @@ class LoginUseCaseTest {
         }
     }
     @Test
-    fun `login should return failure when credentials are incorrect`(){
+    fun `login should return failure when password are incorrect`(){
         try {
             every {userRepository.getUsers() } returns Result.success(MockUser.userList)
             val result = loginUseCase.login("validUser","validPass")
