@@ -91,8 +91,6 @@ class ProjectRepositoryImpl(
     }
 
     companion object{
-
         private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-
     }
 }
