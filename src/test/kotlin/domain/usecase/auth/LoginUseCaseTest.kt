@@ -35,13 +35,23 @@ class LoginUseCaseTest {
     }
     @Test
     fun `login should return failure when password are incorrect`(){
-        try {
-            every {userRepository.getUsers() } returns Result.success(MockUser.userList)
-            val result = loginUseCase.login("validUser","validPass")
+        //Given
+            every { userRepository.getUsers() } returns Result.success(listOf(MockUser.validUser))
+        //When
+            val result = loginUseCase.login(MockUser.validUser.username, "wrongPass")
+        //Then
             assertTrue(result.isFailure)
-            verify(exactly = 1) {userRepository.getUsers() }
-        }catch (exception: NotImplementedError){
-            assertThat(exception.message).contains("Not yet implemented")
-        }
+            assertEquals("Password validation failed: Invalid password", result.exceptionOrNull()?.message)
     }
+    @Test
+    fun `login should return failure when userName are incorrect`(){
+        //Given
+        every { userRepository.getUsers() } returns Result.success(listOf(MockUser.validUser))
+        //When
+        val result = loginUseCase.login("wrong username", MockUser.validUser.password)
+        //Then
+        assertTrue(result.isFailure)
+        assertEquals("Username validation failed: Invalid userName", result.exceptionOrNull()?.message)
+    }
+
 }
