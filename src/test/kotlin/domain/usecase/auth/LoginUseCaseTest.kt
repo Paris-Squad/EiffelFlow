@@ -53,5 +53,17 @@ class LoginUseCaseTest {
         assertTrue(result.isFailure)
         assertEquals("Username validation failed: Invalid userName", result.exceptionOrNull()?.message)
     }
+    @Test
+    fun `login should return failure when userRepository returns failure`() {
+        // Given
+        val exception = RuntimeException("Data source error")
+        every { userRepository.getUsers() } returns Result.failure(exception)
 
+        // When
+        val result = loginUseCase.login("validUser", "validPass")
+
+        // Then
+        assertTrue(result.isFailure)
+        assertEquals("Data source error", result.exceptionOrNull()?.message)
+    }
 }
