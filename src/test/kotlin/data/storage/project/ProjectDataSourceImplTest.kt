@@ -11,11 +11,14 @@ import org.example.data.storage.project.ProjectDataSource
 import org.example.data.storage.project.ProjectDataSourceImpl
 import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.model.entities.Project
-import org.example.domain.model.entities.State
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 import java.util.UUID
+import org.junit.jupiter.api.Assertions
+import io.mockk.Runs
+import io.mockk.just
+import io.mockk.verify
 
 class ProjectDataSourceImplTest {
 
@@ -30,22 +33,33 @@ class ProjectDataSourceImplTest {
     }
 
     @Test
-    fun `createProject should return the created project`() {
-        val project = Project(
-            projectName = "Test",
-            projectDescription = "Test",
-            createdAt = LocalDateTime(2023, 1, 1, 12, 0),
-            adminId = UUID.randomUUID(),
-            states = listOf(
-                State(
-                    stateId = UUID.randomUUID(),
-                    name = "To"
-                )
-            )
-        )
-
+    fun `createProject should return success when project is written to CSV`() {
         try {
-            projectDataSource.createProject(project)
+            every { projectMapper.mapTo(correctProject) } returns correctLine
+
+            every { csvStorageManager.writeLinesToFile(correctLine + "\n") } just Runs
+
+            val result = projectDataSource.createProject(correctProject)
+
+            Assertions.assertTrue(result.isSuccess)
+            verify(exactly = 1) { csvStorageManager.writeLinesToFile(correctLine + "\n") }
+
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    @Test
+    fun `createProject should return failure when writeLinesToFile throws exception`() {
+        try {
+            every { projectMapper.mapTo(correctProject) } returns correctLine
+            every { csvStorageManager.writeLinesToFile(correctLine + "\n") } throws Exception("Failed to write to file")
+
+            val result = projectDataSource.createProject(correctProject)
+
+            Assertions.assertTrue(result.isFailure)
+            verify(exactly = 1) { csvStorageManager.writeLinesToFile(correctLine + "\n") }
+
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -140,5 +154,10 @@ class ProjectDataSourceImplTest {
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
+    }
+
+    companion object{
+        private val correctProject = MockProjects.CORRECT_PROJECT
+        private val correctLine = MockProjects.CORRECT_CSV_STRING_LINE
     }
 }

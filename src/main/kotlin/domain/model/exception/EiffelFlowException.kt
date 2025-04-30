@@ -20,10 +20,12 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
     class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
 
     class ElementNotFoundException(message: String) : EiffelFlowException(message)
-
-    class TaskNotFoundException(message: String? = null) :
+    class ProjectCreationException(message: String) : EiffelFlowException(message)
+     class TaskNotFoundException(message: String? = null) :
         EiffelFlowException(message ?: "Task not found")
 
     class NoChangesException(message: String? = null) :
         EiffelFlowException(message ?: "No changes detected")
+
 }
+
