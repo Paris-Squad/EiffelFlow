@@ -17,7 +17,33 @@ class ProjectRepositoryImpl(
 ) : ProjectRepository {
 
     override fun createProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
+
+        val createdProject = projectDataSource.createProject(project)
+
+        return createdProject.fold(
+            onSuccess = { createdProject ->
+                val auditLog = AuditLog(
+                    auditId = UUID.randomUUID(),
+                    itemId = createdProject.projectId,
+                    itemName = createdProject.projectName,
+                    userId = createdProject.adminId,
+                    userName = "Admin",
+                    actionType = AuditAction.CREATE,
+                    auditTime = currentTime,
+                    changedField = null,
+                    oldValue = null,
+                    newValue = createdProject.projectName
+                )
+
+                return auditDataSource.createAuditLog(auditLog).fold(
+                    onSuccess = { Result.success(createdProject) },
+                    onFailure = { Result.failure(it) }
+                )
+            },
+            onFailure = { throwable ->
+                Result.failure(throwable)
+            }
+        )
     }
 
     override fun updateProject(project: Project): Result<Project> {
