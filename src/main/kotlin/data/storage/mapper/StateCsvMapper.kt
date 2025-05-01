@@ -11,7 +11,7 @@ class StateCsvMapper : Mapper<String, State> {
         val parts = input.split(",")
 
         return State(
-            stateId = UUID.fromString(parts[StateCsvColumnIndex.STATE_ID]),
+            stateId = UUID.fromString(parts[StateCsvColumnIndex.STATE_ID].trim()),
             name = parts[StateCsvColumnIndex.STATE_NAME]
         )
     }

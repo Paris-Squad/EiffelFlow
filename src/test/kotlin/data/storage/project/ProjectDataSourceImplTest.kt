@@ -13,7 +13,7 @@ import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.model.entities.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 import java.util.UUID
 import org.junit.jupiter.api.Assertions
 import io.mockk.Runs
@@ -108,7 +108,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in CSV file`() {
         //Given
-        every { csvStorageManager.readLinesFromFile() } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -133,7 +133,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in CSV file`() {
         //Given
-        every { csvStorageManager.readLinesFromFile() } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -157,7 +157,7 @@ class ProjectDataSourceImplTest {
     }
 
     companion object{
-        private val correctProject = MockProjects.CORRECT_PROJECT
-        private val correctLine = MockProjects.CORRECT_CSV_STRING_LINE
+        private val correctProject = ProjectsMock.CORRECT_PROJECT
+        private val correctLine = ProjectsMock.CORRECT_CSV_STRING_LINE
     }
 }

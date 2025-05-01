@@ -1,7 +1,7 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
-import org.example.common.ValidationMessages
+import org.example.common.Constants
 import org.example.domain.model.exception.EiffelFlowException.PasswordValidationException
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
 import org.junit.jupiter.api.Nested
@@ -92,7 +92,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_TOO_SHORT)
+            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_TOO_SHORT)
         }
 
         @Test
@@ -101,7 +101,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_UPPERCASE)
+            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_UPPERCASE)
         }
 
         @Test
@@ -110,7 +110,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_LOWERCASE)
+            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_LOWERCASE)
         }
 
         @Test
@@ -119,7 +119,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_DIGIT)
+            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_DIGIT)
         }
 
         @Test
@@ -128,7 +128,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(ValidationMessages.ValidationRule.PASSWORD_NO_SPECIAL_CHAR)
+            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_SPECIAL_CHAR)
         }
 
         @Test

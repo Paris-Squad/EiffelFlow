@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 
 class CreateProjectCLITest {
 
@@ -45,7 +45,7 @@ class CreateProjectCLITest {
     }
 
     companion object{
-        val project = MockProjects.CORRECT_PROJECT
+        val project = ProjectsMock.CORRECT_PROJECT
     }
 
 }

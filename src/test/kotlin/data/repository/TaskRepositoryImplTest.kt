@@ -1,14 +1,17 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
-import common.TaskMock.validTask
+import utils.TaskMock.validTask
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.task.TaskDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.TaskMock.inProgressTask
+import utils.UserMock.validUser
 import java.io.IOException
 import java.util.UUID
 
@@ -18,6 +21,8 @@ class TaskRepositoryImplTest {
     private val taskDataSource: TaskDataSource = mockk()
     private val auditDataSource: AuditDataSource = mockk()
     private lateinit var taskRepository: TaskRepositoryImpl
+
+    private val changedField = "title"
 
     @BeforeEach
     fun setUp() {
@@ -60,14 +65,12 @@ class TaskRepositoryImplTest {
 
     @Test
     fun `updateTask should return success if the task is updated`() {
-        every { taskDataSource.updateTask(validTask) } returns Result.success(validTask)
+        every { taskDataSource.updateTask(inProgressTask) } returns Result.success(inProgressTask)
+        justRun { auditDataSource.createAuditLog(any()) }
 
-        try {
-            val result = taskRepository.updateTask(validTask)
-            assertThat(result.getOrNull()).isEqualTo(validTask)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        val result = taskRepository.updateTask(inProgressTask,validTask,validUser, changedField)
+
+        assertThat(result.getOrNull()).isEqualTo(inProgressTask)
     }
 
     @Test
@@ -75,12 +78,9 @@ class TaskRepositoryImplTest {
         val exception = IOException("Error updating task")
         every { taskDataSource.updateTask(validTask) } returns Result.failure(exception)
 
-        try {
-            val result = taskRepository.updateTask(validTask)
-            assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        val result = taskRepository.updateTask(validTask, inProgressTask,validUser, changedField)
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
     }
 
     @Test
