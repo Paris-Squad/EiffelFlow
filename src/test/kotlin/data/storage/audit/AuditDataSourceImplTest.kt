@@ -70,7 +70,7 @@ class AuditDataSourceImplTest {
         // When / Then
         try {
             val result = auditDataSource.getAuditLogs()
-            assertThat(result.getOrNull()).isEmpty()
+            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
