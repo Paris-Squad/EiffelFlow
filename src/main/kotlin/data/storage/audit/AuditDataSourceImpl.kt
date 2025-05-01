@@ -49,7 +49,7 @@ class AuditDataSourceImpl(
 
     override fun getAuditLogs(): Result<List<AuditLog>> {
             val lines = csvManager.readLinesFromFile()
-            if (lines.isEmpty())  return Result.success(emptyList())
+            if (lines.isEmpty()) return Result.failure(EiffelFlowException.ElementNotFoundException("Audit logs not found"))
 
         val logs = lines.mapNotNull { line ->
             try {
