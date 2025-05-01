@@ -60,15 +60,22 @@ class TaskRepositoryImplTest {
     }
 
     @Test
-    fun `deleteTask should return the deleted task`() {
+    fun `deleteTask should call deleteTask method once`() {
         val taskId = UUID.randomUUID()
-
         every { taskDataSource.deleteTask(taskId) } returns Result.success(validTask)
 
+        taskRepository.deleteTask(taskId)
+
+        verify(exactly = 1) { taskRepository.deleteTask(taskId) }
+    }
+
+    @Test
+    fun `deleteTask should return the deleted task`() {
+        val taskId = UUID.randomUUID()
+        every { taskDataSource.deleteTask(taskId) } returns Result.success(validTask)
 
         val result = taskRepository.deleteTask(taskId)
 
-        verify(exactly = 1) { taskRepository.deleteTask(taskId) }
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(validTask)
     }
