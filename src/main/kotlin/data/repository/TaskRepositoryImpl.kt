@@ -23,18 +23,7 @@ class TaskRepositoryImpl(
     override fun updateTask(task: Task, oldTask: Task, editor: User, changedField: String): Result<Task> {
         return taskDataSource.updateTask(task = task, oldTask = oldTask).also { result ->
             result.onSuccess { updatedTask ->
-                val auditLog = AuditLog(
-                    itemId = task.taskId,
-                    itemName = task.title,
-                    userId = editor.userId,
-                    editorName = editor.username,
-                    actionType = AuditAction.UPDATE,
-                    auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                    changedField = changedField,
-                    oldValue = oldTask.toString(),
-                    newValue = updatedTask.toString()
-                )
-                auditDataSource.createAuditLog(auditLog)
+                createAuditLogForTaskUpdate(task, oldTask, editor, changedField, updatedTask)
             }
         }
     }
@@ -49,5 +38,20 @@ class TaskRepositoryImpl(
 
     override fun getTasks(): Result<List<Task>> {
         return taskDataSource.getTasks()
+    }
+
+    private fun createAuditLogForTaskUpdate(task: Task, oldTask: Task, editor: User, changedField: String, updatedTask: Task) {
+        val auditLog = AuditLog(
+            itemId = task.taskId,
+            itemName = task.title,
+            userId = editor.userId,
+            editorName = editor.username,
+            actionType = AuditAction.UPDATE,
+            auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+            changedField = changedField,
+            oldValue = oldTask.toString(),
+            newValue = updatedTask.toString()
+        )
+        auditDataSource.createAuditLog(auditLog)
     }
 }
