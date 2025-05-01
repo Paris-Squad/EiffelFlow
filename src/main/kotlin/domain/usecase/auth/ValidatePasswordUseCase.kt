@@ -1,6 +1,6 @@
 package org.example.domain.usecase.auth
 
-import org.example.domain.exception.EiffelFlowException.PasswordValidationException
+import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.common.Constants
 
 class ValidatePasswordUseCase {
@@ -8,7 +8,7 @@ class ValidatePasswordUseCase {
         val validationResult = getPasswordValidationErrors(password)
 
         return if (validationResult.isNotEmpty()) {
-            Result.failure(PasswordValidationException(validationResult))
+            Result.failure(AuthenticationException(validationResult))
         } else Result.success(Unit)
     }
 

@@ -87,7 +87,7 @@ class RegisterUseCaseTest {
     @Test
     fun `register should fail when username validation fails`() {
         val validationException =
-            EiffelFlowException.UserNameValidationException(setOf(Constants.ValidationRule.USERNAME_TOO_LONG))
+            EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.USERNAME_TOO_LONG))
 
         every { validateUsernameUseCase.validateUserName(username) } returns Result.failure(validationException)
 
@@ -101,7 +101,7 @@ class RegisterUseCaseTest {
 
     @Test
     fun `register should fail when password validation fails`() {
-        val validationException = EiffelFlowException.PasswordValidationException(setOf(Constants.ValidationRule.PASSWORD_TOO_SHORT))
+        val validationException = EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.PASSWORD_TOO_SHORT))
 
         every { validatePasswordUseCase.validatePassword(password) } returns Result.failure(validationException)
 

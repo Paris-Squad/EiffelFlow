@@ -34,9 +34,9 @@ class LoginUseCase(
 
     private fun validateUser(users: List<User>, username: String, password: String): User{
         val user=users.find { it.username==username }
-            ?: throw EiffelFlowException.UserNameValidationException(setOf(Constants.ValidationRule.INVALID_USERNAME))
+            ?: throw EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.INVALID_USERNAME))
         if(user.password!=password){
-            throw EiffelFlowException.PasswordValidationException(setOf(Constants.ValidationRule.INVALID_PASSWORD))
+            throw EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.INVALID_PASSWORD))
         }
         return user
     }

@@ -1,14 +1,14 @@
 package org.example.domain.usecase.auth
 
 import org.example.common.Constants
-import org.example.domain.exception.EiffelFlowException.UserNameValidationException
+import org.example.domain.exception.EiffelFlowException.AuthenticationException
 
 class ValidateUserNameUseCase {
     fun validateUserName(userName: String): Result<Unit> {
         val validationResult = getUserNameValidationErrors(userName)
 
         return if (validationResult.isNotEmpty()) {
-            Result.failure(UserNameValidationException(validationResult))
+            Result.failure(AuthenticationException(validationResult))
         } else Result.success(Unit)
     }
 

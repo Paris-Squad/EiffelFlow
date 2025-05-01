@@ -2,7 +2,7 @@ package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
 import org.example.common.Constants
-import org.example.domain.exception.EiffelFlowException.PasswordValidationException
+import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -35,7 +35,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -44,7 +44,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -53,7 +53,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -62,7 +62,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -71,7 +71,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Nested
