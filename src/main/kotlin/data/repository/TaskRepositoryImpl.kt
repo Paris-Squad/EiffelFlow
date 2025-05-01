@@ -21,7 +21,7 @@ class TaskRepositoryImpl(
     }
 
     override fun updateTask(task: Task, oldTask: Task, editor: User, changedField: String): Result<Task> {
-        return taskDataSource.updateTask(task = task).also { result ->
+        return taskDataSource.updateTask(task = task, oldTask = oldTask).also { result ->
             result.onSuccess { updatedTask ->
                 val auditLog = AuditLog(
                     itemId = task.taskId,
@@ -44,10 +44,10 @@ class TaskRepositoryImpl(
     }
 
     override fun getTaskById(taskId: UUID): Result<Task> {
-        TODO("Not yet implemented")
+        return taskDataSource.getTaskById(taskId)
     }
 
     override fun getTasks(): Result<List<Task>> {
-        TODO("Not yet implemented")
+        return taskDataSource.getTasks()
     }
 }
