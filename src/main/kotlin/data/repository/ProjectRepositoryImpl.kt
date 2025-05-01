@@ -50,27 +50,32 @@ class ProjectRepositoryImpl(
     }
 
     override fun updateProject(project: Project): Result<Project> {
-
         return projectDataSource.updateProject(project).also { result ->
             result.onSuccess { updatedProject ->
-                val oldProject =getProjectById(project.projectId)
-                val changedObject=oldProject.getChangedFields(project)
-
-                val auditLog = AuditLog(
-                    itemId = updatedProject.projectId,
-                    itemName = updatedProject.projectName,
-                    userId = updatedProject.adminId,
-                    userName = "Admin",
-                    actionType = AuditAction.UPDATE,
-                    auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                    changedField = changedObject.keys.toString(),
-                    oldValue = changedObject.values.first().first.toString(),
-                    newValue = changedObject.values.first().second.toString(),
-                )
-                auditDataSource.createAuditLog(auditLog)
+                onUpdateProjectSuccess(project, updatedProject)
             }
         }
     }
+
+    private fun onUpdateProjectSuccess(originalProject: Project, updatedProject: Project) {
+        val oldProject = getProjectById(originalProject.projectId)
+        val changedObject = oldProject.getChangedFields(originalProject)
+
+        val auditLog = AuditLog(
+            itemId = updatedProject.projectId,
+            itemName = updatedProject.projectName,
+            userId = updatedProject.adminId,
+            userName = "Admin",
+            actionType = AuditAction.UPDATE,
+            auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+            changedField = changedObject.keys.toString(),
+            oldValue = changedObject.values.first().first.toString(),
+            newValue = changedObject.values.first().second.toString(),
+        )
+        auditDataSource.createAuditLog(auditLog)
+    }
+
+
 
 
     override fun deleteProject(projectId: UUID): Result<Project> {
