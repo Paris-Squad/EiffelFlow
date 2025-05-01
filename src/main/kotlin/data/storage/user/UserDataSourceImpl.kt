@@ -14,8 +14,7 @@ class UserDataSourceImpl(
     override fun createUser(user: User): Result<User> {
         return try {
             val userAsCsv = userMapper.mapTo(user)
-            val line = userAsCsv + "\n"
-            csvManager.writeLinesToFile(line)
+            csvManager.writeLinesToFile(userAsCsv)
             Result.success(user)
         } catch (e: Exception) {
             Result.failure(EiffelFlowException.UserCreationException(e.message))
