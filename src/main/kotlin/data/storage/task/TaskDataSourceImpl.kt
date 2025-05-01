@@ -35,7 +35,7 @@ class TaskDataSourceImpl(
         return try {
             val lines = csvManager.readLinesFromFile()
             val taskLine = lines.find { taskMapper.mapFrom(it).taskId == taskId }
-                ?: return Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+                ?: return Result.failure(EiffelFlowException.NotFoundException("Task not found"))
 
             val task = taskMapper.mapFrom(taskLine)
             csvManager.deleteLineFromFile(taskLine)
@@ -52,7 +52,7 @@ class TaskDataSourceImpl(
         return if (task != null) {
             Result.success(taskMapper.mapFrom(task))
         } else {
-            Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+            Result.failure(EiffelFlowException.NotFoundException("Task not found"))
         }
     }
 
@@ -61,7 +61,7 @@ class TaskDataSourceImpl(
         return if (lines.isNotEmpty()) {
             Result.success(lines)
         } else {
-            Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+            Result.failure(EiffelFlowException.NotFoundException("Task not found"))
         }
     }
 

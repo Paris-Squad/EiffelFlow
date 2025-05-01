@@ -57,7 +57,7 @@ class EditTaskUseCaseTest {
 
     @Test
     fun `editTask should fail when task is not found`() {
-        val exception = EiffelFlowException.TaskNotFoundException()
+        val exception = EiffelFlowException.NotFoundException("Task not found")
         every { taskRepository.getTaskById(validTask.taskId) } returns Result.failure(exception)
 
         val result = editTaskUseCase.editTask(validTask, validUser)

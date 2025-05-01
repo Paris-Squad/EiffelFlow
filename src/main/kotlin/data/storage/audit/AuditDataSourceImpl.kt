@@ -41,7 +41,7 @@ class AuditDataSourceImpl(
                 }.filter { it.itemId == itemId }
 
         return if (auditLogs.isEmpty()) {
-            Result.failure(EiffelFlowException.ElementNotFoundException("Audit logs not found for item ID: $itemId"))
+            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $itemId"))
         } else {
             Result.success(auditLogs)
         }
@@ -49,7 +49,7 @@ class AuditDataSourceImpl(
 
     override fun getAuditLogs(): Result<List<AuditLog>> {
             val lines = csvManager.readLinesFromFile()
-            if (lines.isEmpty()) return Result.failure(EiffelFlowException.ElementNotFoundException("Audit logs not found"))
+            if (lines.isEmpty()) return Result.failure(EiffelFlowException.NotFoundException("Audit logs not found"))
 
         val logs = lines.mapNotNull { line ->
             try {
@@ -60,7 +60,7 @@ class AuditDataSourceImpl(
         }
 
         return if (logs.isEmpty()) {
-                Result.failure(EiffelFlowException.ElementNotFoundException("Audit logs not found"))
+                Result.failure(EiffelFlowException.NotFoundException("Audit logs not found"))
             } else {
                 Result.success(logs)
             }

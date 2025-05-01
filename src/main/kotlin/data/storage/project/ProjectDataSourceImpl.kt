@@ -16,10 +16,10 @@ class ProjectDataSourceImpl(
             csvManager.readLinesFromFile()
                 .map(projectMapper::mapFrom)
                 .ifEmpty {
-                    throw EiffelFlowException.ElementNotFoundException("No projects found")
+                    throw EiffelFlowException.NotFoundException("No projects found")
                 }
         }.recoverCatching {
-            throw EiffelFlowException.ElementNotFoundException("No projects found")
+            throw EiffelFlowException.NotFoundException("No projects found")
         }
     }
 
@@ -28,9 +28,9 @@ class ProjectDataSourceImpl(
             csvManager.readLinesFromFile()
                 .map(projectMapper::mapFrom)
                 .firstOrNull { it.projectId == projectId }
-                ?: throw EiffelFlowException.ElementNotFoundException("Project not found")
+                ?: throw EiffelFlowException.NotFoundException("Project not found")
         }.recoverCatching {
-            throw EiffelFlowException.ElementNotFoundException("Project not found")
+            throw EiffelFlowException.NotFoundException("Project not found")
         }
     }
 

@@ -39,7 +39,7 @@ class GetProjectAuditUseCaseTest {
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             auditRepository.getItemAuditLogById(any())
         } returns Result.failure(exception)

@@ -141,7 +141,7 @@ class ProjectDataSourceImplTest {
     }
 
     //region getProjects
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of empty list of Projects when the file is empty`() {
         //Given
@@ -151,7 +151,7 @@ class ProjectDataSourceImplTest {
         val result = projectDataSource.getProjects()
 
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test
@@ -173,7 +173,7 @@ class ProjectDataSourceImplTest {
             .containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when CSV file throw exception`() {
         //Given
@@ -186,7 +186,7 @@ class ProjectDataSourceImplTest {
 
         // Then
         assertThat(result.exceptionOrNull())
-            .isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
+            .isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
     //endregion
 
@@ -208,17 +208,17 @@ class ProjectDataSourceImplTest {
         assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when searching for project doesn't exists in CSV file`() {
         // When
         val result = projectDataSource.getProjectById(UUID.randomUUID())
 
         //Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when searching for project and CSV file throw exception`() {
         //Given
@@ -230,7 +230,7 @@ class ProjectDataSourceImplTest {
         val result = projectDataSource.getProjectById(UUID.randomUUID())
 
         //Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
     //endregion
 

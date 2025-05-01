@@ -70,7 +70,7 @@ class AuditDataSourceImplTest {
         // When / Then
         try {
             val result = auditDataSource.getAuditLogs()
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
+            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -100,7 +100,7 @@ class AuditDataSourceImplTest {
         try {
             val result = auditDataSource.getAuditLogs()
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.ElementNotFoundException::class.java
+                EiffelFlowException.NotFoundException::class.java
             )
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -152,7 +152,7 @@ class AuditDataSourceImplTest {
         // When / Then
         try {
             val result = auditDataSource.getItemAuditLogById(UUID.randomUUID())
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.ElementNotFoundException::class.java)
+            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

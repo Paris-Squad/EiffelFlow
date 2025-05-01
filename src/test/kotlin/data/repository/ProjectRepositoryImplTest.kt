@@ -204,11 +204,11 @@ class ProjectRepositoryImplTest {
 
 
     //region getProjects
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of failure when data source fail to load projects`() {
         //Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             projectDataSource.getProjects()
         } returns Result.failure(exception)
@@ -253,10 +253,10 @@ class ProjectRepositoryImplTest {
             .isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when searching for project doesn't exists in data source`() {
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             projectDataSource.getProjectById(any())
         } returns Result.failure(exception)

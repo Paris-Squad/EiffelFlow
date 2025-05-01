@@ -56,14 +56,14 @@ class AuditRepositoryImplTest {
     @Test
     fun `getAuditLogs should should return Result of ElementNotFoundException when there is no AuditLogs exist in data source`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every { auditDataSource.getAuditLogs() } returns Result.failure(exception)
 
         // When / Then
         try {
             val result = auditRepository.getAuditLogs()
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.ElementNotFoundException::class.java
+                EiffelFlowException.NotFoundException::class.java
             )
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -91,7 +91,7 @@ class AuditRepositoryImplTest {
     @Test
     fun `getAuditLogById should return Result with ElementNotFoundException when AuditLog doesn't exists in data source`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             auditDataSource.getItemAuditLogById(any())
         } returns Result.failure(exception)
@@ -100,7 +100,7 @@ class AuditRepositoryImplTest {
         try {
             val result = auditRepository.getItemAuditLogById(UUID.randomUUID())
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.ElementNotFoundException::class.java
+                EiffelFlowException.NotFoundException::class.java
             )
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")

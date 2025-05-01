@@ -96,7 +96,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.deleteTask(nonExistentTaskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test
@@ -132,7 +132,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.getTasks()
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test
@@ -154,6 +154,6 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.getTaskById(nonExistentTaskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 }

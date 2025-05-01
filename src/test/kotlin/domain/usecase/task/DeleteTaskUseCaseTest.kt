@@ -38,12 +38,14 @@ class DeleteTaskUseCaseTest {
     fun `deleteTask should return failure when task not found`() {
         val taskIdNotFound = UUID.randomUUID()
 
-        every { taskRepository.deleteTask(taskIdNotFound) } returns Result.failure(EiffelFlowException.TaskNotFoundException())
+        every {
+            taskRepository.deleteTask(taskIdNotFound)
+        } returns Result.failure(EiffelFlowException.NotFoundException("Task not found: $taskIdNotFound"))
 
         val result = deleteTaskUseCase.deleteTask(taskIdNotFound)
 
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test

@@ -35,12 +35,12 @@ class GetProjectPresenterTest {
         assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
 
     @Test
     fun `should return Result of ElementNotFoundException when projects cannot be retrieved`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Projects not found")
+        val exception = EiffelFlowException.NotFoundException("Projects not found")
         every { getProjectUseCase.getProjects() } returns Result.failure(exception)
 
         // When
@@ -65,12 +65,12 @@ class GetProjectPresenterTest {
         assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
-    @Throws(EiffelFlowException.ElementNotFoundException::class)
+    @Throws(EiffelFlowException.NotFoundException::class)
 
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             getProjectUseCase.getProjectById(any())
         } returns Result.failure(exception)
