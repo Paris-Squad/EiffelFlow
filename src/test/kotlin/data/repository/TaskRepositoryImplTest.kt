@@ -13,9 +13,10 @@ import utils.TaskMock
 import utils.TaskMock.inProgressTask
 import utils.UserMock.validUser
 import java.io.IOException
-import java.util.*
+import java.util.UUID
 import org.example.data.repository.TaskRepositoryImpl
 import utils.TaskMock.validAuditLog
+import io.mockk.verify
 
 class TaskRepositoryImplTest {
 
@@ -81,7 +82,6 @@ class TaskRepositoryImplTest {
         }
     }
 
-
     @Test
     fun `updateTask should return success if the task is updated`() {
         every { taskDataSource.updateTask(inProgressTask, validTask) } returns Result.success(inProgressTask)
@@ -103,14 +103,24 @@ class TaskRepositoryImplTest {
     }
 
     @Test
+    fun `deleteTask should call deleteTask method once`() {
+        val taskId = UUID.randomUUID()
+        every { taskDataSource.deleteTask(taskId) } returns Result.success(validTask)
+
+        taskRepository.deleteTask(taskId)
+
+        verify(exactly = 1) { taskRepository.deleteTask(taskId) }
+    }
+
+    @Test
     fun `deleteTask should return the deleted task`() {
         val taskId = UUID.randomUUID()
+        every { taskDataSource.deleteTask(taskId) } returns Result.success(validTask)
 
-        try {
-            taskRepository.deleteTask(taskId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        val result = taskRepository.deleteTask(taskId)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(validTask)
     }
 
     @Test

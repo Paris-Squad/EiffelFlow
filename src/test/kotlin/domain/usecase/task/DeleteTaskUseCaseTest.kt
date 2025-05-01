@@ -1,6 +1,5 @@
 package domain.usecase.task
 
-
 import com.google.common.truth.Truth.assertThat
 import domain.usecase.task.TaskMock.validTask
 import io.mockk.every
@@ -17,40 +16,46 @@ class DeleteTaskUseCaseTest {
 
     private lateinit var taskRepository: TaskRepository
     private lateinit var deleteTaskUseCase: DeleteTaskUseCase
-    private lateinit var mockTaskId: UUID
-
+    private lateinit var taskIdToDelete: UUID
 
     @BeforeEach
     fun setUp() {
         taskRepository = mockk()
         deleteTaskUseCase = DeleteTaskUseCase(taskRepository)
-        mockTaskId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
+        taskIdToDelete = UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
     }
 
     @Test
     fun `deleteTask should return success when task exists`() {
-        every { taskRepository.deleteTask(mockTaskId) } returns Result.success(validTask)
+        every { taskRepository.deleteTask(taskIdToDelete) } returns Result.success(validTask)
 
-        try {
-            val result = deleteTaskUseCase.deleteTask(mockTaskId)
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isEqualTo(validTask)
-            verify(exactly = 1) { taskRepository.deleteTask(mockTaskId) }
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(validTask)
     }
 
     @Test
-    fun `deleteTask should return failure when task is not found`() {
-        every { taskRepository.deleteTask(mockTaskId) } returns Result.failure(EiffelFlowException.TaskNotFoundException())
-        try {
-            val result = deleteTaskUseCase.deleteTask(mockTaskId)
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
-            verify(exactly = 1) { taskRepository.deleteTask(mockTaskId) }
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+    fun `deleteTask should return failure when task not found`() {
+        val taskIdNotFound = UUID.randomUUID()
+
+        every { taskRepository.deleteTask(taskIdNotFound) } returns Result.failure(EiffelFlowException.TaskNotFoundException())
+
+        val result = deleteTaskUseCase.deleteTask(taskIdNotFound)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+    }
+
+    @Test
+    fun `deleteTask should return failure when there is an error during deletion`() {
+        val taskIdWithError = UUID.randomUUID()
+
+        every { taskRepository.deleteTask(taskIdWithError) } returns Result.failure(EiffelFlowException.TaskDeletionException())
+
+        val result = deleteTaskUseCase.deleteTask(taskIdWithError)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(Exception::class.java)
     }
 }
