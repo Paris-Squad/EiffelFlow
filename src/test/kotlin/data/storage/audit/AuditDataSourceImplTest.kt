@@ -51,7 +51,7 @@ class AuditDataSourceImplTest {
                 itemId = UUID.randomUUID(),
                 itemName = "test",
                 userId = UUID.randomUUID(),
-                userName = "test",
+                editorName = "test",
                 actionType = AuditAction.CREATE,
                 auditTime = LocalDateTime.parse("1222-09-09T12:22:22"),
                 changedField = "eee",
