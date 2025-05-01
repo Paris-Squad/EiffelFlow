@@ -95,7 +95,7 @@ class LoginUseCaseTest {
 
         every { validatePasswordUseCase.validatePassword(UserMock.invalidUser.password) } returns Result.failure(validationException)
 
-        val result = loginUseCase.login(UserMock.validUser.username, MockUser.invalidUser.password)
+        val result = loginUseCase.login(UserMock.validUser.username, UserMock.invalidUser.password)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(validationException::class.java)
     }
