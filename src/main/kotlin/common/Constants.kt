@@ -1,6 +1,6 @@
 package org.example.common
 
-object ValidationMessages {
+object Constants {
     enum class ValidationRule(val message: String) {
         USERNAME_TOO_SHORT(message = "Username must be at least 3 characters long"),
         USERNAME_TOO_LONG(message = "Username must be at most 30 characters long"),
@@ -12,7 +12,14 @@ object ValidationMessages {
         PASSWORD_NO_DIGIT(message = "Password must contain at least one digit"),
         PASSWORD_NO_SPECIAL_CHAR(message = "Password must contain at least one special character"),
        INVALID_PASSWORD(message = "Invalid password"),
-
     }
-
+    
+    enum class TaskField(val displayName: String) {
+        TITLE("title"),
+        DESCRIPTION("description"),
+        ASSIGNEE("assignee"),
+        STATE("state"),
+        ROLE("role"),
+        PROJECT("project"),
+    }
 }
