@@ -20,7 +20,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.Assertions
-import utils.MockProjects
+import utils.ProjectsMock
 
 //todo change all of the test
 class ProjectRepositoryImplTest {
@@ -41,23 +41,23 @@ class ProjectRepositoryImplTest {
         try {
             every {
                 projectDataSource.createProject(any())
-            } returns Result.success(MockProjects.CORRECT_PROJECT)
+            } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.success(
                 AuditLog(
                     auditId = UUID.randomUUID(),
-                    itemId = MockProjects.CORRECT_PROJECT.projectId,
-                    itemName = MockProjects.CORRECT_PROJECT.projectName,
-                    userId = MockProjects.CORRECT_PROJECT.adminId,
-                    userName = "Admin",
+                    itemId = ProjectsMock.CORRECT_PROJECT.projectId,
+                    itemName = ProjectsMock.CORRECT_PROJECT.projectName,
+                    userId = ProjectsMock.CORRECT_PROJECT.adminId,
+                    editorName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,
-                    newValue = MockProjects.CORRECT_PROJECT.projectName
+                    newValue = ProjectsMock.CORRECT_PROJECT.projectName
                 )
             )
 
-            val result = projectRepository.createProject(MockProjects.CORRECT_PROJECT)
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isSuccess)
 
@@ -76,7 +76,7 @@ class ProjectRepositoryImplTest {
                 projectDataSource.createProject(any())
             } returns Result.failure(Exception("Project creation failed"))
 
-            val result = projectRepository.createProject(MockProjects.CORRECT_PROJECT)
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
@@ -93,12 +93,12 @@ class ProjectRepositoryImplTest {
         try {
             every {
                 projectDataSource.createProject(any())
-            } returns Result.success(MockProjects.CORRECT_PROJECT)
+            } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every {
                 auditDataSource.createAuditLog(any())
             } returns Result.failure(Exception("Audit log error"))
 
-            val result = projectRepository.createProject(MockProjects.CORRECT_PROJECT)
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
@@ -159,7 +159,9 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in data source`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
+        every {
+            projectDataSource.getProjects()
+        } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
         // When / Then
         try {
@@ -175,16 +177,16 @@ class ProjectRepositoryImplTest {
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
         every {
-            projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
-        } returns Result.success(MockProjects.CORRECT_PROJECT)
+            projectDataSource.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
+        } returns Result.success(ProjectsMock.CORRECT_PROJECT)
 
         // When
-        val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+        val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
 
 
         // Then
         assertThat(result.getOrNull())
-            .isEqualTo(MockProjects.CORRECT_PROJECT)
+            .isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)

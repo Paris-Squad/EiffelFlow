@@ -12,7 +12,7 @@ import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.model.entities.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 import java.util.UUID
 import org.junit.jupiter.api.Assertions
 import io.mockk.Runs
@@ -123,8 +123,8 @@ class ProjectDataSourceImplTest {
     fun `should return Result of Projects when there are projects exist in CSV file`() {
         //Given
         every {
-            projectMapper.mapFrom(MockProjects.CORRECT_CSV_STRING_LINE)
-        } returns MockProjects.CORRECT_PROJECT
+            projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
+        } returns ProjectsMock.CORRECT_PROJECT
 
         every {
             csvStorageManager.readLinesFromFile()
@@ -161,10 +161,10 @@ class ProjectDataSourceImplTest {
         //Given
         every {
             projectMapper.mapFrom(MockProjects.CORRECT_CSV_STRING_LINE)
-        } returns MockProjects.CORRECT_PROJECT
+        } returns ProjectsMock.CORRECT_PROJECT
         every {
             csvStorageManager.readLinesFromFile()
-        } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
+        } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When
         val result = projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId)

@@ -12,12 +12,8 @@ class RegisterUseCase(
     private val validateUsernameUseCase: ValidateUserNameUseCase,
     private val hashPasswordUseCase: HashPasswordUseCase
 ) {
-    fun register(username: String, password: String, role: RoleType): Result<User> {
-        return Result.failure(EiffelFlowException.UnauthorizedRegistrationException())
-    }
-
-    fun register(username: String, password: String, role: RoleType, callerRole: RoleType): Result<User> {
-        if (callerRole != RoleType.ADMIN) {
+    fun register(username: String, password: String, role: RoleType, creator: User): Result<User> {
+        if (creator.role != RoleType.ADMIN) {
             return Result.failure(EiffelFlowException.UnauthorizedRegistrationException())
         }
 
@@ -30,7 +26,7 @@ class RegisterUseCase(
         val availabilityCheck = checkUsernameAvailability(username)
         if (availabilityCheck.isFailure) return Result.failure(availabilityCheck.exceptionOrNull()!!)
 
-        return createUser(username, password, role)
+        return createUser(username, password, role, creator)
     }
 
     private fun validateUsername(username: String): Result<Unit> =
@@ -55,11 +51,12 @@ class RegisterUseCase(
         }
     }
 
-    private fun createUser(username: String, password: String, role: RoleType): Result<User> {
+    private fun createUser(username: String, password: String, role: RoleType, creator: User): Result<User> {
         val hashedPassword = hashPasswordUseCase.hashPassword(password)
 
         return userRepository.createUser(
-            User(username = username, password = hashedPassword, role = role)
+            user = User(username = username, password = hashedPassword, role = role),
+            createdBy = creator
         )
     }
 }

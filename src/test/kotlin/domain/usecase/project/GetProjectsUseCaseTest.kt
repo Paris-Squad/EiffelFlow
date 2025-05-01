@@ -8,7 +8,7 @@ import org.example.domain.repository.ProjectRepository
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 import java.util.UUID
 import kotlin.jvm.Throws
 
@@ -28,7 +28,7 @@ class GetProjectsUseCaseTest {
         // Given
         every {
             projectRepository.getProjects()
-        } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
+        } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
         // When
         val result = getProjectsUseCase.getProjects()
@@ -54,10 +54,10 @@ class GetProjectsUseCaseTest {
     @Test
     fun `should return Result of Project when project with given id exists`() {
         // Given
-        val projectId = MockProjects.CORRECT_PROJECT.projectId
+        val projectId = ProjectsMock.CORRECT_PROJECT.projectId
         every {
             projectRepository.getProjectById(projectId)
-        } returns Result.success(MockProjects.CORRECT_PROJECT)
+        } returns Result.success(ProjectsMock.CORRECT_PROJECT)
 
         // When
         val result = getProjectsUseCase.getProjectById(projectId)
