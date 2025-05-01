@@ -47,7 +47,6 @@ val appModule = module {
     single<TaskDataSource> {
         TaskDataSourceImpl(
             taskMapper = get<TaskCsvMapper>(),
-            stateCsvMapper = get<StateCsvMapper>(),
             csvManager = CsvStorageManager(File(TaskDataSourceImpl.FILE_NAME))
         )
     }

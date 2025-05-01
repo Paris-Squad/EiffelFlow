@@ -13,18 +13,42 @@ class ProjectCsvMapperTest {
 
     @Test
     fun `should map CSV line to Project entity correctly`() {
-
         //Given / When
         val result = projectCsvMapper.mapFrom(CSV_STRING_LINE)
 
         // Then
         assertThat(result).isEqualTo(PROJECT)
+    }
 
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part not start with opening bracket not found`() {
+        //Given / When
+        val result = projectCsvMapper.mapFrom(CSV_STRING_LINE.replace('[', '{'))
+
+        // Then
+        assertThat(result).isEqualTo(PROJECT.copy(states = emptyList()))
+    }
+
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part not start with closing bracket not found`() {
+        //Given / When
+        val result = projectCsvMapper.mapFrom(CSV_STRING_LINE.replace(']', '{'))
+
+        // Then
+        assertThat(result).isEqualTo(PROJECT.copy(states = emptyList()))
+    }
+
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part is blank`() {
+        //Given / When
+        val result = projectCsvMapper.mapFrom(CSV_STRING_LINE_WITH_EMPTY_STATES)
+
+        // Then
+        assertThat(result).isEqualTo(PROJECT.copy(states = emptyList()))
     }
 
     @Test
     fun `should map Project entity to CSV line correctly`() {
-
         //Given / When
         val result = projectCsvMapper.mapTo(PROJECT)
 
@@ -45,5 +69,7 @@ class ProjectCsvMapperTest {
         private const val CSV_STRING_LINE =
             "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
 
+        private const val CSV_STRING_LINE_WITH_EMPTY_STATES = 
+            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741,[]"
     }
 }
