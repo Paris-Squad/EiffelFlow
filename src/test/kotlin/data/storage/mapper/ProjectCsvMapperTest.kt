@@ -2,13 +2,12 @@ package data.storage.mapper
 
 import com.google.common.truth.Truth.assertThat
 import org.example.data.storage.mapper.ProjectCsvMapper
-import org.example.data.storage.mapper.StateCsvMapper
 import utils.ProjectsMock
 import kotlin.test.Test
 
 class ProjectCsvMapperTest {
 
-    private val stateCsvMapper = StateCsvMapper()
+
     private val projectCsvMapper = ProjectCsvMapper()
 
     @Test
@@ -37,6 +36,16 @@ class ProjectCsvMapperTest {
 
         //Given / When
         val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE.replace(']', '{'))
+
+        // Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
+    }
+
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part is blank`() {
+
+        //Given / When
+        val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE_WITH_EMPTY_STATES)
 
         // Then
         assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
