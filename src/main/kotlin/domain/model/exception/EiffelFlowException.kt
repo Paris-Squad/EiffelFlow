@@ -16,6 +16,9 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
         EiffelFlowException("Username validation failed: ${errors.joinToString(", ") { it.message }}")
 
     class UsernameAlreadyExistsException : EiffelFlowException("Username already exists")
+    class UnableToDeleteProjectException : EiffelFlowException("unable to delete project")
+    class UnableToCreateAuditLogException : EiffelFlowException("unable to create AuditLog")
+    class UnableToFindTheCorrectProject : EiffelFlowException("unable to find project")
 
     class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
 

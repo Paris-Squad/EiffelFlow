@@ -1,8 +1,7 @@
 package data.storage.project
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.ProjectCsvMapper
@@ -16,9 +15,6 @@ import org.junit.jupiter.api.Test
 import utils.MockProjects
 import java.util.UUID
 import org.junit.jupiter.api.Assertions
-import io.mockk.Runs
-import io.mockk.just
-import io.mockk.verify
 
 class ProjectDataSourceImplTest {
 
@@ -84,13 +80,39 @@ class ProjectDataSourceImplTest {
 
     @Test
     fun `deleteProject should return the deleted project`() {
-        val projectId = UUID.randomUUID()
+        //  Given
+        val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
+        every { csvStorageManager.readLinesFromFile() } returns
+                correctLine.split("\n")
+        every { projectMapper.mapFrom(correctLine) } returns correctProject
+        every { csvStorageManager.writeLinesToFile(any()) } returns Unit
 
-        try {
-            projectDataSource.deleteProject(projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectDataSource.deleteProject(projectId)
+
+        // Then
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(correctProject)
+        verify { csvStorageManager.readLinesFromFile() }
+        verify { csvStorageManager.writeLinesToFile(any()) }
+    }
+
+    @Test
+    fun `deleteProject should return failure when project not found`(){
+        // Given
+        val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
+        every { csvStorageManager.readLinesFromFile() } returns
+                correctLine.split("\n")
+        every { projectMapper.mapFrom(correctLine) } returns correctProject
+
+        // When
+        val result = projectDataSource.deleteProject(differentProjectId)
+
+        // Then
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(
+            EiffelFlowException.UnableToFindTheCorrectProject::class.java
+        )
     }
 
     @Test
