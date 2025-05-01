@@ -12,11 +12,11 @@ class TaskDataSourceImpl(
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
         return try {
-            val taskCsv = taskMapper.mapTo(task)
-            csvManager.writeLinesToFile(taskCsv)
+            val csvLine = taskMapper.mapTo(task)
+            csvManager.writeLinesToFile(csvLine)
             Result.success(task)
-        } catch (e: Exception) {
-            Result.failure(EiffelFlowException.TaskCreationException(e.message))
+        } catch (exception: Exception) {
+            Result.failure( EiffelFlowException.TaskCreationException(exception.message))
         }
     }
 
