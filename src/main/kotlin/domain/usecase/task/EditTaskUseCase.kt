@@ -11,8 +11,7 @@ class EditTaskUseCase(private val taskRepository: TaskRepository) {
         val taskResult = taskRepository.getTaskById(request.taskId)
         if (taskResult.isFailure) return taskResult
 
-        val originalTask = taskResult.getOrNull()
-        if (originalTask == null) return Result.failure(EiffelFlowException.TaskNotFoundException())
+        val originalTask = taskResult.getOrThrow()
         if (originalTask == request) return Result.failure(EiffelFlowException.NoChangesException())
 
         val changedField = detectChangedField(originalTask, request)

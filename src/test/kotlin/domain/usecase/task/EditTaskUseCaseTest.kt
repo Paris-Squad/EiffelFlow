@@ -1,8 +1,6 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import utils.TaskMock.inProgressTask
-import utils.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,8 +12,10 @@ import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.EditTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.TaskMock.inProgressTask
+import utils.TaskMock.validTask
 import utils.UserMock.validUser
-import java.util.UUID
+import java.util.*
 
 class EditTaskUseCaseTest {
 
@@ -208,8 +208,21 @@ class EditTaskUseCaseTest {
         }
     }
 
+    @Throws
     @Test
-    fun `editTask  should identify when multiple fields are updated`() {
+    fun `editTask  should threw NoChangesException when no fields changed`() {
+        val originalTask = validTask
+        val updatedTask = validTask.copy() // Same task, no changes
+
+        every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
+
+        val result = editTaskUseCase.editTask(updatedTask, validUser)
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NoChangesException::class.java)
+    }
+
+    @Test
+    fun `editTask should identify when multiple fields are updated`() {
         val originalTask = validTask
         val updatedTask = originalTask.copy(
             title = "Updated Title", description = "Updated Description", assignedId = UUID.randomUUID()
