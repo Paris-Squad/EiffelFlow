@@ -5,7 +5,7 @@ import org.example.domain.model.entities.Project
 import org.example.domain.model.entities.State
 import java.util.UUID
 
-object MockProjects {
+object ProjectsMock {
     val CORRECT_PROJECT = Project(
         projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
         projectName = "Project1",
@@ -14,24 +14,19 @@ object MockProjects {
         adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
         states = listOf(
             State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
+                stateId = UUID.fromString("8d4f05a4-5717-4562-b3fc-2c963f66afa7"),
+                name = "Backlog"
             ),
             State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
-            ),
-            State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
-            ),
-            State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
+                stateId = UUID.fromString("9e4f05a4-5717-4562-b3fc-2c963f66afa8"),
                 name = "In Progress"
             )
         )
     )
 
     const val CORRECT_CSV_STRING_LINE =
-        "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
+        "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741,[8d4f05a4-5717-4562-b3fc-2c963f66afa7,Backlog;9e4f05a4-5717-4562-b3fc-2c963f66afa8,In Progress]"
+
+    const val CORRECT_CSV_STRING_LINE_WITH_EMPTY_STATES =
+        "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741,"
 }

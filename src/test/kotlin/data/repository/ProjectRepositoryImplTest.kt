@@ -19,7 +19,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.Assertions
-import utils.MockProjects
+import utils.ProjectsMock
 
 //todo change all of the test
 class ProjectRepositoryImplTest {
@@ -44,7 +44,7 @@ class ProjectRepositoryImplTest {
                     itemId = project.projectId,
                     itemName = project.projectName,
                     userId = project.adminId,
-                    userName = "Admin",
+                    editorName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
@@ -193,7 +193,7 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in data source`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
+        every { projectDataSource.getProjects() } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
         // When / Then
         try {
@@ -220,13 +220,13 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
-        every { projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId) } returns Result.success(
-            MockProjects.CORRECT_PROJECT
+        every { projectDataSource.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId) } returns Result.success(
+            ProjectsMock.CORRECT_PROJECT
         )
 
         // When / Then
         try {
-            val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+            val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

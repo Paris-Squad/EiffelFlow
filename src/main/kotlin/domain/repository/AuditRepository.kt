@@ -5,7 +5,7 @@ import java.util.UUID
 
 interface AuditRepository {
 
-    fun getAuditLogById(auditLogID: UUID): Result<AuditLog>
+    fun getItemAuditLogById(itemId: UUID): Result<List<AuditLog>>
 
     fun getAuditLogs(): Result<List<AuditLog>>
 }
