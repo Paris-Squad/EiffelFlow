@@ -127,6 +127,73 @@ class CsvStorageManagerTest {
         }
     }
 
+    @Test
+    fun `should throw FileNotFoundException when file does not exist for clearFile`() {
+        // Given
+        val nonExistentFile = File(tempDir, "notExistFile.csv")
+        val csvStorageManager = CsvStorageManager(nonExistentFile)
+
+        // When/Then
+        assertThrows<FileNotFoundException> {
+            csvStorageManager.clearFile()
+        }
+    }
+
+    @Test
+    fun `should clear content when file exists for clearFile`() {
+        // Given
+        val testFile = File(tempDir, "file_to_clear.csv").apply {
+            writeText(DUMMY_FILE_CONTENT)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+
+        // When
+        csvStorageManager.clearFile()
+
+        // Then
+        assertThat(testFile.readText()).isEmpty()
+    }
+
+    @Test
+    fun `deleteLineFromFile should remove line from file when line exists`() {
+        // Given
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "delete_line_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+        val lineToDelete = "line2"
+
+        // When
+        csvStorageManager.deleteLineFromFile(lineToDelete)
+
+        // Then
+        val expectedContent = "line1\nline3"
+        val result = csvStorageManager.readLinesFromFile()
+        assertThat(expectedContent.split("\n")).containsExactlyElementsIn(result)
+    }
+
+    @Test
+    fun `deleteLineFromFile should throw IOException when line does not exist`() {
+        // Given
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "nonexistent_line_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+        val nonExistentLine = "line4"
+
+        // When/Then
+        val exception = assertThrows<IOException> {
+            csvStorageManager.deleteLineFromFile(nonExistentLine)
+        }
+        assertThat(exception.message).isEqualTo("Line not found in file.")
+
+        // Verify file content was not modified
+        val result = csvStorageManager.readLinesFromFile()
+        assertThat(initialContent.split("\n")).containsExactlyElementsIn(result)
+    }
+
     companion object {
         private const val DUMMY_FILE_CONTENT =
             "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress\n02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"

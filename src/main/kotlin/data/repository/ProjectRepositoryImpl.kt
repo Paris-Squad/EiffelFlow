@@ -22,6 +22,7 @@ class ProjectRepositoryImpl(
 
         return createdProject.fold(
             onSuccess = { createdProject ->
+                val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                 val auditLog = AuditLog(
                     auditId = UUID.randomUUID(),
                     itemId = createdProject.projectId,
@@ -51,14 +52,40 @@ class ProjectRepositoryImpl(
     }
 
     override fun deleteProject(projectId: UUID): Result<Project> {
-        TODO("Not yet implemented")
+        val deletedProject = projectDataSource.deleteProject(projectId)
+
+        return deletedProject.fold(
+            onSuccess = {project->
+                val auditLog = AuditLog(
+                    auditId = UUID.randomUUID(),
+                    itemId = project.projectId,
+                    itemName = project.projectName,
+                    userId = project.adminId,
+                    editorName = "Admin",
+                    actionType = AuditAction.DELETE,
+                    auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                    changedField = null,
+                    oldValue = null,
+                    newValue = project.projectName
+                )
+                return auditDataSource.createAuditLog(auditLog).fold(
+                    onSuccess = {
+                        Result.success(project)
+                    },
+                    onFailure = {
+                        Result.failure(it)
+                    }
+                )
+            },
+            onFailure = {
+                Result.failure(it)
+            }
+        )
+
     }
 
     override fun getProjectById(projectId: UUID): Result<Project> = projectDataSource.getProjectById(projectId)
 
     override fun getProjects(): Result<List<Project>> = projectDataSource.getProjects()
 
-    companion object{
-       private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    }
 }

@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.example.common.Constants
+import org.example.data.repository.AuthRepositoryImpl
 import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.LoginUseCase
@@ -21,11 +22,12 @@ class LoginUseCaseTest {
     private val userRepository: UserRepository = mockk(relaxed = true)
     private val validatePasswordUseCase: ValidatePasswordUseCase = mockk(relaxed = true)
     private val validateUsernameUseCase: ValidateUserNameUseCase = mockk(relaxed = true)
+    private val authRepositoryImpl: AuthRepositoryImpl=mockk(relaxed = true)
     private lateinit var loginUseCase: LoginUseCase
 
     @BeforeEach
     fun setup(){
-        loginUseCase = LoginUseCase(userRepository, validatePasswordUseCase, validateUsernameUseCase)
+        loginUseCase = LoginUseCase(userRepository, validatePasswordUseCase, validateUsernameUseCase,authRepositoryImpl)
     }
 
     @Test

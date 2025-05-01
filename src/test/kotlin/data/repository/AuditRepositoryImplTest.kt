@@ -57,6 +57,7 @@ class AuditRepositoryImplTest {
     fun `getAuditLogs should should return Result of ElementNotFoundException when there is no AuditLogs exist in data source`() {
         // Given
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        every { auditDataSource.getAuditLogs() } returns Result.failure(exception)
 
         // When / Then
         try {

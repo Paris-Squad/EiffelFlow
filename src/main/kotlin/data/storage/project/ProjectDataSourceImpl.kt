@@ -35,11 +35,26 @@ class ProjectDataSourceImpl(
     }
 
     override fun createProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
+        return try {
+            val csvLine = projectMapper.mapTo(project)
+            csvManager.writeLinesToFile(csvLine + "\n")
+            Result.success(project)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override fun deleteProject(projectID: UUID): Result<Project> {
-        TODO("Not yet implemented")
+        val lines = csvManager.readLinesFromFile().toMutableList()
+
+        val removedLine = lines.find { line->
+            val project = projectMapper.mapFrom(line)
+            project.projectId == projectID
+        } ?: return Result.failure(EiffelFlowException.UnableToFindTheCorrectProject())
+
+        lines.remove(removedLine)
+        csvManager.writeLinesToFile(lines.joinToString("\n"))
+        return Result.success(projectMapper.mapFrom(removedLine))
     }
 
     override fun updateProject(project: Project): Result<Project> {

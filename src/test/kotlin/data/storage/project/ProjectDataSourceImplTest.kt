@@ -96,11 +96,46 @@ class ProjectDataSourceImplTest {
 
     @Test
     fun `deleteProject should return the deleted project`() {
-        val projectId = UUID.randomUUID()
-
         try {
-            projectDataSource.deleteProject(projectId)
-        } catch (e: NotImplementedError) {
+            //  Given
+            val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
+            every { csvStorageManager.readLinesFromFile() } returns
+                    ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
+            every { projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns ProjectsMock.CORRECT_PROJECT
+            every { csvStorageManager.writeLinesToFile(any()) } returns Unit
+
+            // When
+            val result = projectDataSource.deleteProject(projectId)
+
+            // Then
+            assertThat(result.isSuccess).isTrue()
+            assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
+            verify { csvStorageManager.readLinesFromFile() }
+            verify { csvStorageManager.writeLinesToFile(any()) }
+        }catch (e: NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+
+    @Test
+    fun `deleteProject should return failure when project not found`(){
+        try {
+            // Given
+            val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
+            every { csvStorageManager.readLinesFromFile() } returns
+                    ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
+            every { projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns correctProject
+
+            // When
+            val result = projectDataSource.deleteProject(differentProjectId)
+
+            // Then
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.UnableToFindTheCorrectProject::class.java
+            )
+        }catch (e: NotImplementedError){
             assertThat(e.message).contains("Not yet implemented")
         }
     }
