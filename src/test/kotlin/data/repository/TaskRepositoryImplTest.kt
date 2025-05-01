@@ -1,6 +1,7 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
+import common.TaskMock.validAuditLog
 import common.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
@@ -25,11 +26,19 @@ class TaskRepositoryImplTest {
 
     @Test
     fun `createTask should return the created task`() {
-        try {
-            taskRepository.createTask(validTask)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // Given
+        val task = validTask
+        val fakeAuditLog = validAuditLog
+
+        every { taskDataSource.createTask(task) } returns Result.success(task)
+        every { auditDataSource.createAuditLog(any()) } returns Result.success(fakeAuditLog)
+
+        // When
+        val result = taskRepository.createTask(task)
+
+        // Then
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(task)
     }
 
     @Test

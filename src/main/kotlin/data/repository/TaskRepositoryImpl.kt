@@ -28,14 +28,16 @@ class TaskRepositoryImpl(
                     oldValue = null,
                     newValue = task.title
                 )
-                auditDataSource.createAuditLog(auditLog).fold(
+
+                return auditDataSource.createAuditLog(auditLog).fold(
                     onSuccess = { Result.success(task) },
                     onFailure = { Result.failure(it) }
                 )
             },
-            onFailure = { Result.failure(it) }
+            onFailure = { return Result.failure(it) }
         )
     }
+
 
     override fun updateTask(task: Task): Result<Task> {
         TODO("Not yet implemented")

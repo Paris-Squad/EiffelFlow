@@ -1,6 +1,8 @@
 package common
 
 import kotlinx.datetime.LocalDateTime
+import org.example.domain.model.entities.AuditAction
+import org.example.domain.model.entities.AuditLog
 import org.example.domain.model.entities.RoleType
 import org.example.domain.model.entities.State
 import org.example.domain.model.entities.Task
@@ -39,4 +41,16 @@ object TaskMock {
 
     val ValidTaskCSV =
         "Find Devil Devil Bareq,try to find Devil Bareq and put him in the jail,2023-01-01T12:00:00,${validTask.creatorId},${validTask.projectId},${validTask.assignedId},MATE,TODO"
+
+    val validAuditLog = AuditLog(
+        itemId = validTask.taskId,
+        itemName = validTask.title,
+        userId = validTask.creatorId,
+        userName = "Admin",
+        actionType = AuditAction.CREATE,
+        auditTime = validTask.createdAt,
+        changedField = null,
+        oldValue = null,
+        newValue = validTask.title
+    )
 }
