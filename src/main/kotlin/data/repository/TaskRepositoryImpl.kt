@@ -3,7 +3,7 @@ package org.example.data.repository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.data.storage.audit.AuditDataSource
+import org.example.domain.repository.AuditRepository
 import org.example.data.storage.task.TaskDataSource
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.AuditLog
@@ -14,7 +14,7 @@ import java.util.UUID
 
 class TaskRepositoryImpl(
     private val taskDataSource: TaskDataSource,
-    private val auditDataSource: AuditDataSource,
+    private val auditRepository: AuditRepository,
 ) : TaskRepository {
     override fun createTask(task: Task): Result<Task> {
         val createdTask = taskDataSource.createTask(task)
@@ -33,7 +33,7 @@ class TaskRepositoryImpl(
                     newValue = task.title
                 )
 
-                return auditDataSource.createAuditLog(auditLog).fold(
+                return auditRepository.createAuditLog(auditLog).fold(
                     onSuccess = { Result.success(task) },
                     onFailure = { Result.failure(it) }
                 )
@@ -75,6 +75,6 @@ class TaskRepositoryImpl(
             oldValue = oldTask.toString(),
             newValue = updatedTask.toString()
         )
-        auditDataSource.createAuditLog(auditLog)
+        auditRepository.createAuditLog(auditLog)
     }
 }

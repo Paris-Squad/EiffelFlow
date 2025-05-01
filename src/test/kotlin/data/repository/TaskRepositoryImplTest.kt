@@ -5,7 +5,7 @@ import utils.TaskMock.validTask
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
-import org.example.data.storage.audit.AuditDataSource
+import org.example.domain.repository.AuditRepository
 import org.example.data.storage.task.TaskDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,14 +21,14 @@ import io.mockk.verify
 class TaskRepositoryImplTest {
 
     private val taskDataSource: TaskDataSource = mockk()
-    private val auditDataSource: AuditDataSource = mockk()
+    private val auditRepository: AuditRepository = mockk()
     private lateinit var taskRepository: TaskRepositoryImpl
 
     private val changedField = "title"
 
     @BeforeEach
     fun setUp() {
-        taskRepository = TaskRepositoryImpl(taskDataSource, auditDataSource)
+        taskRepository = TaskRepositoryImpl(taskDataSource, auditRepository)
     }
 
     @Test
@@ -38,7 +38,7 @@ class TaskRepositoryImplTest {
         val fakeAuditLog = validAuditLog
 
         every { taskDataSource.createTask(task) } returns Result.success(task)
-        every { auditDataSource.createAuditLog(any()) } returns Result.success(fakeAuditLog)
+        every { auditRepository.createAuditLog(any()) } returns Result.success(fakeAuditLog)
 
         // When
         val result = taskRepository.createTask(task)
@@ -70,7 +70,7 @@ class TaskRepositoryImplTest {
         val exception = IOException("Audit failed")
 
         every { taskDataSource.createTask(validTask) } returns Result.success(validTask)
-        every { auditDataSource.createAuditLog(any()) } returns Result.failure(exception)
+        every { auditRepository.createAuditLog(any()) } returns Result.failure(exception)
 
         try {
             val result = taskRepository.createTask(validTask)
@@ -85,7 +85,7 @@ class TaskRepositoryImplTest {
     @Test
     fun `updateTask should return success if the task is updated`() {
         every { taskDataSource.updateTask(inProgressTask, validTask) } returns Result.success(inProgressTask)
-        justRun { auditDataSource.createAuditLog(any()) }
+        justRun { auditRepository.createAuditLog(any()) }
 
         val result = taskRepository.updateTask(inProgressTask, validTask, validUser, changedField)
 

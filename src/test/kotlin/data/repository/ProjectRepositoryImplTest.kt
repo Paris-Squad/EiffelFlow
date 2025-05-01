@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.ProjectRepositoryImpl
-import org.example.data.storage.audit.AuditDataSource
+import org.example.domain.repository.AuditRepository
 import org.example.data.storage.project.ProjectDataSource
 import org.example.domain.model.Project
 import org.junit.jupiter.api.BeforeEach
@@ -26,22 +26,22 @@ class ProjectRepositoryImplTest {
 
     private lateinit var projectRepository: ProjectRepository
     private val projectDataSource: ProjectDataSource = mockk()
-    private val auditDataSource: AuditDataSource = mockk()
+    private val auditRepository: AuditRepository = mockk()
 
     @BeforeEach
     fun setUp() {
-        projectRepository = ProjectRepositoryImpl(projectDataSource, auditDataSource)
+        projectRepository = ProjectRepositoryImpl(projectDataSource, auditRepository)
     }
 
     //region createProject
     @Test
-    fun `createProject should returns the project when projectDataSource and auditDataSource succeed`() {
+    fun `createProject should returns the project when projectDataSource and auditRepository succeed`() {
 
         try {
             every {
                 projectDataSource.createProject(any())
             } returns Result.success(ProjectsMock.CORRECT_PROJECT)
-            every { auditDataSource.createAuditLog(any()) } returns Result.success(
+            every { auditRepository.createAuditLog(any()) } returns Result.success(
                 AuditLog(
                     auditId = UUID.randomUUID(),
                     itemId = ProjectsMock.CORRECT_PROJECT.projectId,
@@ -60,7 +60,7 @@ class ProjectRepositoryImplTest {
 
             Assertions.assertTrue(result.isSuccess)
 
-            verify(exactly = 1) { auditDataSource.createAuditLog(any()) }
+            verify(exactly = 1) { auditRepository.createAuditLog(any()) }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -79,7 +79,7 @@ class ProjectRepositoryImplTest {
 
             Assertions.assertTrue(result.isFailure)
 
-            verify(exactly = 0) { auditDataSource.createAuditLog(any()) }
+            verify(exactly = 0) { auditRepository.createAuditLog(any()) }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -88,20 +88,20 @@ class ProjectRepositoryImplTest {
     }
 
     @Test
-    fun `createProject should return failure when auditDataSource fails`() {
+    fun `createProject should return failure when auditRepository fails`() {
         try {
             every {
                 projectDataSource.createProject(any())
             } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every {
-                auditDataSource.createAuditLog(any())
+                auditRepository.createAuditLog(any())
             } returns Result.failure(Exception("Audit log error"))
 
             val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
-            verify(exactly = 1) { auditDataSource.createAuditLog(any()) }
+            verify(exactly = 1) { auditRepository.createAuditLog(any()) }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -145,14 +145,14 @@ class ProjectRepositoryImplTest {
             )
             val projectId = UUID.randomUUID()
             every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
-            every { auditDataSource.createAuditLog(any()) } returns Result.success(auditLog)
+            every { auditRepository.createAuditLog(any()) } returns Result.success(auditLog)
 
             // When
             projectRepository.deleteProject(projectId)
 
             // Then
             verify(exactly = 1) { projectDataSource.deleteProject(any()) }
-            verify(exactly = 1) { auditDataSource.createAuditLog(any()) }
+            verify(exactly = 1) { auditRepository.createAuditLog(any()) }
         } catch (exception: NotImplementedError) {
             assertThat(exception.message).contains("Not yet implemented")
         }
@@ -187,7 +187,7 @@ class ProjectRepositoryImplTest {
             // Given
             val projectId = UUID.randomUUID()
             every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
-            every { auditDataSource.createAuditLog(any()) } returns Result.failure(
+            every { auditRepository.createAuditLog(any()) } returns Result.failure(
                 EiffelFlowException.IOException("Failed to create audit log")
             )
             // When

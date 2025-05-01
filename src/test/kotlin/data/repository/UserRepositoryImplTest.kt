@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import org.example.data.repository.UserRepositoryImpl
-import org.example.data.storage.audit.AuditDataSource
+import org.example.domain.repository.AuditRepository
 import org.example.data.storage.user.UserDataSource
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
@@ -16,12 +16,12 @@ import java.util.*
 
 class UserRepositoryImplTest {
     private val userDataSource: UserDataSource = mockk(relaxed = true)
-    private val auditDataSource: AuditDataSource = mockk(relaxed = true)
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
     private lateinit var userRepository: UserRepositoryImpl
 
     @BeforeEach
     fun setUp() {
-        userRepository = UserRepositoryImpl(userDataSource, auditDataSource)
+        userRepository = UserRepositoryImpl(userDataSource, auditRepository)
     }
 
     @Test

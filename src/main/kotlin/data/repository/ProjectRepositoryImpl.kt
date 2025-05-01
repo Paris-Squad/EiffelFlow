@@ -3,17 +3,17 @@ package org.example.data.repository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.project.ProjectDataSource
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.AuditLog
 import org.example.domain.model.Project
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
 class ProjectRepositoryImpl(
     private val projectDataSource: ProjectDataSource,
-    private val auditDataSource: AuditDataSource
+    private val auditRepository: AuditRepository
 ) : ProjectRepository {
 
     override fun createProject(project: Project): Result<Project> {
@@ -36,7 +36,7 @@ class ProjectRepositoryImpl(
                     newValue = createdProject.projectName
                 )
 
-                return auditDataSource.createAuditLog(auditLog).fold(
+                return auditRepository.createAuditLog(auditLog).fold(
                     onSuccess = { Result.success(createdProject) },
                     onFailure = { Result.failure(it) }
                 )
@@ -68,7 +68,7 @@ class ProjectRepositoryImpl(
                     oldValue = null,
                     newValue = project.projectName
                 )
-                return auditDataSource.createAuditLog(auditLog).fold(
+                return auditRepository.createAuditLog(auditLog).fold(
                     onSuccess = {
                         Result.success(project)
                     },
