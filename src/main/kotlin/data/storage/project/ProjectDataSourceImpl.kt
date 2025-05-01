@@ -21,7 +21,13 @@ class ProjectDataSourceImpl(
     }
 
     override fun createProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
+        return try {
+            val csvLine = projectMapper.mapTo(project)
+            csvManager.writeLinesToFile(csvLine + "\n")
+            Result.success(project)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override fun deleteProject(projectID: UUID): Result<Project> {

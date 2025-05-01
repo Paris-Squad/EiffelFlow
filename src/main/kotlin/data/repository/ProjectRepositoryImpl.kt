@@ -22,6 +22,7 @@ class ProjectRepositoryImpl(
 
         return createdProject.fold(
             onSuccess = { createdProject ->
+                val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                 val auditLog = AuditLog(
                     auditId = UUID.randomUUID(),
                     itemId = createdProject.projectId,
@@ -62,7 +63,4 @@ class ProjectRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    companion object{
-       private val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    }
 }
