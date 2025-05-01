@@ -127,6 +127,33 @@ class CsvStorageManagerTest {
         }
     }
 
+    @Test
+    fun `should throw FileNotFoundException when file does not exist for clearFile`() {
+        // Given
+        val nonExistentFile = File(tempDir, "notExistFile.csv")
+        val csvStorageManager = CsvStorageManager(nonExistentFile)
+
+        // When/Then
+        assertThrows<FileNotFoundException> {
+            csvStorageManager.clearFile()
+        }
+    }
+
+    @Test
+    fun `should clear content when file exists for clearFile`() {
+        // Given
+        val testFile = File(tempDir, "file_to_clear.csv").apply {
+            writeText(DUMMY_FILE_CONTENT)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+
+        // When
+        csvStorageManager.clearFile()
+
+        // Then
+        assertThat(testFile.readText()).isEmpty()
+    }
+
     companion object {
         private const val DUMMY_FILE_CONTENT =
             "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress\n02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"

@@ -41,4 +41,11 @@ class FileStorageManager(
             throw IOException()
         }
     }
+
+    @Throws(FileNotFoundException::class)
+    fun clearFile() {
+        if (file.exists().not()) throw FileNotFoundException("File ${file.path} not found.")
+
+        file.writeText("")
+    }
 }
