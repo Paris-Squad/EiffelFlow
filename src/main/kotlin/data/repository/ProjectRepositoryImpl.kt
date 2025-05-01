@@ -7,6 +7,7 @@ import org.example.common.Constants.PROJECT
 import org.example.common.Constants.USER
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.project.ProjectDataSource
+import org.example.data.utils.getChangedFields
 import org.example.domain.model.entities.AuditAction
 import org.example.domain.model.entities.AuditLog
 import org.example.domain.model.entities.Project
@@ -52,26 +53,25 @@ class ProjectRepositoryImpl(
 
         return projectDataSource.updateProject(project).also { result ->
             result.onSuccess { updatedProject ->
+                val oldProject =getProjectById(project.projectId)
+                val changedObject=oldProject.getChangedFields(project)
 
                 val auditLog = AuditLog(
                     itemId = updatedProject.projectId,
                     itemName = PROJECT,
                     userId = updatedProject.adminId,
                     userName = "Admin",
-                    actionType = AuditAction.CREATE,
+                    actionType = AuditAction.UPDATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                    changedField = null,
-                    oldValue = null,
-                    newValue = updatedProject.toString()
+                    changedField = changedObject.keys.toString(),
+                    oldValue = changedObject.values.first().first.toString(),
+                    newValue = changedObject.values.first().second.toString(),
                 )
                 auditDataSource.createAuditLog(auditLog)
             }
         }
     }
 
-    private fun getChangedField(oldProject: Project,newProject: Project){
-
-    }
 
     override fun deleteProject(projectId: UUID): Result<Project> {
         TODO("Not yet implemented")
