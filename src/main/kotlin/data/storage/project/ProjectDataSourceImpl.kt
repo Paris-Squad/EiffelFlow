@@ -30,26 +30,16 @@ class ProjectDataSourceImpl(
     }
 
     override fun updateProject(project: Project): Result<Project> {
-        return try {
-            val projects = getProjects().getOrThrow()
-            if (projects.none { it.projectId == project.projectId }) {
-                return Result.failure(EiffelFlowException.ProjectNotFoundException())
-            }
 
-            val updatedProjects = projects.map { if (it.projectId == project.projectId) project else it }
-            val newStateLines = project.states.map { state ->
-                "${project.projectId},${stateCsvMapper.mapTo(state)}"
-            }
+          return try {
 
-            val content = (updatedProjects + newStateLines).joinToString("\n")
+            val lines = csvManager.readLinesFromFile()
+            val oldProject = lines.firstOrNull {
+                projectMapper.mapFrom(it).projectId == project.projectId
+            } ?:  return Result.failure(EiffelFlowException.ProjectNotFoundException())
 
-            csvManager.writeLinesToFile(content)
-            csvManager.writeLinesToFile("") // Clear file
-            updatedProjects.forEach { p ->
-                val line = "${projectMapper.mapTo(p)}\n"
-                csvManager.writeLinesToFile(line)
-            }
-
+            val newProject=projectMapper.mapTo(project);
+            csvManager.updateLinesToFile( newProject, oldProject)
             Result.success(project)
         } catch (e: Exception) {
             Result.failure(EiffelFlowException.ProjectUpdateException(e.message))

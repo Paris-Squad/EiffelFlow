@@ -33,5 +33,5 @@ object MockProjects {
     )
 
     const val CORRECT_CSV_STRING_LINE =
-        "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
+        "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741,\"[02ad4499-5d4c-4450-8fd1-8294f1bb5749,02ad4499-5d4c-4450-8fd1-8294f1bb5749,In Progress;02ad4499-5d4c-4450-8fd1-8294f1bb5749, In Progress, 02ad4499-5d4c-4450-8fd1-8294f1bb5749Done,In Progress]"
 }

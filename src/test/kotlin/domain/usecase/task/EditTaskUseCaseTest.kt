@@ -17,8 +17,7 @@ class EditTaskUseCaseTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var editTaskUseCase: EditTaskUseCase
 
-    @BeforeEach
-    fun setUp() {
+    @BeforeEach    fun setUp() {
         taskRepository = mockk()
         editTaskUseCase = EditTaskUseCase(taskRepository)
     }
