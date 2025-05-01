@@ -9,7 +9,7 @@ import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
-import utils.MockProjects
+import utils.ProjectsMock
 
 class GetProjectAuditUseCaseTest {
 
@@ -30,7 +30,7 @@ class GetProjectAuditUseCaseTest {
 
         // When / Then
         try {
-            val result = getProjectAuditUseCase.getProjectAuditLogsById(MockProjects.CORRECT_PROJECT.projectId)
+            val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -46,7 +46,7 @@ class GetProjectAuditUseCaseTest {
 
         // When / Then
         try {
-            val result = getProjectAuditUseCase.getProjectAuditLogsById(MockProjects.CORRECT_PROJECT.projectId)
+            val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

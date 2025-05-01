@@ -11,7 +11,7 @@ object MockAuditLog {
         itemId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5740"),
         itemName = "Task",
         userId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
-        userName = "User1",
+        editorName = "User1",
         actionType = AuditAction.CREATE,
         auditTime = LocalDateTime.parse("1999-08-07T22:22:22"),
         changedField = "Title",

@@ -9,7 +9,7 @@ import org.example.presentation.presenter.audit.GetProjectAuditLogsPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
-import utils.MockProjects
+import utils.ProjectsMock
 
 class GetProjectAuditLogPresenterTest {
 
@@ -30,7 +30,7 @@ class GetProjectAuditLogPresenterTest {
 
         // When / Then
         try {
-            val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(MockProjects.CORRECT_PROJECT.projectId)
+            val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
@@ -46,7 +46,7 @@ class GetProjectAuditLogPresenterTest {
 
         // When / Then
         try {
-            val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(MockProjects.CORRECT_PROJECT.projectId)
+            val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
