@@ -44,7 +44,6 @@ val appModule = module {
     single<ProjectDataSource> {
         ProjectDataSourceImpl(
             projectMapper = get<ProjectCsvMapper>(),
-            stateCsvMapper = get<StateCsvMapper>(),
             csvManager = CsvStorageManager(File(ProjectDataSourceImpl.FILE_NAME))
         )
     }

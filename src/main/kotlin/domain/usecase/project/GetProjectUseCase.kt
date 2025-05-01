@@ -6,11 +6,7 @@ import java.util.UUID
 
 class GetProjectUseCase(private val repository: ProjectRepository) {
 
-    fun getProjects(): Result<List<Project>> {
-        TODO("Not yet implemented")
-    }
+    fun getProjects(): Result<List<Project>> = repository.getProjects()
 
-    fun getProjectById(projectId: UUID): Result<Project> {
-        TODO("Not yet implemented")
-    }
+    fun getProjectById(projectId: UUID): Result<Project> = repository.getProjectById(projectId)
 }

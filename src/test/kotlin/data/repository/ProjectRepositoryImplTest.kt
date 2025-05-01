@@ -18,13 +18,13 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.Assertions
 import utils.ProjectsMock
 
-//todo change all of the test
 class ProjectRepositoryImplTest {
 
-    private lateinit var projectRepository: ProjectRepositoryImpl
+    private lateinit var projectRepository: ProjectRepository
     private val projectDataSource: ProjectDataSource = mockk()
     private val auditDataSource: AuditDataSource = mockk()
 
@@ -33,27 +33,30 @@ class ProjectRepositoryImplTest {
         projectRepository = ProjectRepositoryImpl(projectDataSource, auditDataSource)
     }
 
+    //region createProject
     @Test
     fun `createProject should returns the project when projectDataSource and auditDataSource succeed`() {
 
         try {
-            every { projectDataSource.createProject(any()) } returns Result.success(project)
+            every {
+                projectDataSource.createProject(any())
+            } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.success(
                 AuditLog(
                     auditId = UUID.randomUUID(),
-                    itemId = project.projectId,
-                    itemName = project.projectName,
-                    userId = project.adminId,
+                    itemId = ProjectsMock.CORRECT_PROJECT.projectId,
+                    itemName = ProjectsMock.CORRECT_PROJECT.projectName,
+                    userId = ProjectsMock.CORRECT_PROJECT.adminId,
                     editorName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,
-                    newValue = project.projectName
+                    newValue = ProjectsMock.CORRECT_PROJECT.projectName
                 )
             )
 
-            val result = projectRepository.createProject(project)
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isSuccess)
 
@@ -68,9 +71,11 @@ class ProjectRepositoryImplTest {
     @Test
     fun `createProject should return failure when projectDataSource fails`() {
         try {
-            every { projectDataSource.createProject(any()) } returns Result.failure(Exception("Project creation failed"))
+            every {
+                projectDataSource.createProject(any())
+            } returns Result.failure(Exception("Project creation failed"))
 
-            val result = projectRepository.createProject(project)
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
@@ -85,10 +90,14 @@ class ProjectRepositoryImplTest {
     @Test
     fun `createProject should return failure when auditDataSource fails`() {
         try {
-            every { projectDataSource.createProject(any()) } returns Result.success(project)
-            every { auditDataSource.createAuditLog(any()) } returns Result.failure(Exception("Audit log error"))
+            every {
+                projectDataSource.createProject(any())
+            } returns Result.success(ProjectsMock.CORRECT_PROJECT)
+            every {
+                auditDataSource.createAuditLog(any())
+            } returns Result.failure(Exception("Audit log error"))
 
-            val result = projectRepository.createProject(project)
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
 
@@ -99,6 +108,7 @@ class ProjectRepositoryImplTest {
         }
 
     }
+    //endregion
 
     @Test
     fun `updateProject should return the updated project`() {
@@ -123,18 +133,18 @@ class ProjectRepositoryImplTest {
             // Given
             val auditLog = AuditLog(
                 auditId = UUID.randomUUID(),
-                itemId = project.projectId,
-                itemName = project.projectName,
-                userId = project.adminId,
+                itemId = ProjectsMock.CORRECT_PROJECT.projectId,
+                itemName = ProjectsMock.CORRECT_PROJECT.projectName,
+                userId = ProjectsMock.CORRECT_PROJECT.adminId,
                 editorName = "Admin",
                 actionType = AuditAction.DELETE,
                 auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                 changedField = null,
                 oldValue = null,
-                newValue = project.projectName
+                newValue = ProjectsMock.CORRECT_PROJECT.projectName
             )
             val projectId = UUID.randomUUID()
-            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.success(auditLog)
 
             // When
@@ -176,7 +186,7 @@ class ProjectRepositoryImplTest {
         try {
             // Given
             val projectId = UUID.randomUUID()
-            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.failure(
                 EiffelFlowException.UnableToCreateAuditLogException()
             )
@@ -190,85 +200,72 @@ class ProjectRepositoryImplTest {
         }catch (e: NotImplementedError){
             assertThat(e.message).contains("Not yet implemented")
         }
-
     }
 
 
+    //region getProjects
+    @Throws(EiffelFlowException.ElementNotFoundException::class)
     @Test
-    fun `should return Result of empty list of Projects when there is no project in data source`() {
+    fun `should return Result of failure when data source fail to load projects`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(emptyList())
+        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        every {
+            projectDataSource.getProjects()
+        } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjects()
+
+        // Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 
     @Test
     fun `should return Result of Projects when at least one project exists in data source`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
+        every {
+            projectDataSource.getProjects()
+        } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjects()
+
+        // Then
+        assertThat(result.getOrNull())
+            .containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
+    //endregion
 
-    @Test
-    fun `should return Result of ElementNotFoundException when project doesn't exists in data source`() {
-        //Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
-        every { projectDataSource.getProjects() } returns Result.failure(exception)
-
-        // When / Then
-        try {
-            val result = projectRepository.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-    }
-
+    //region getProjectById
     @Test
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
-        every { projectDataSource.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId) } returns Result.success(
-            ProjectsMock.CORRECT_PROJECT
-        )
+        every {
+            projectDataSource.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
+        } returns Result.success(ProjectsMock.CORRECT_PROJECT)
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
+
+
+        // Then
+        assertThat(result.getOrNull())
+            .isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
+    @Throws(EiffelFlowException.ElementNotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when searching for project doesn't exists in data source`() {
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
-        every { projectDataSource.getProjectById(UUID.randomUUID()) } returns Result.failure(exception)
+        every {
+            projectDataSource.getProjectById(any())
+        } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjectById(UUID.randomUUID())
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-    }
+        // When
+        val result = projectRepository.getProjectById(UUID.randomUUID())
 
-    companion object {
-        val project = Project(
-            projectName = "Test Project",
-            projectDescription = "A test project",
-            createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-            adminId = UUID.randomUUID(),
-            states = emptyList()
-        )
+        //Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
+    //endregion
 }

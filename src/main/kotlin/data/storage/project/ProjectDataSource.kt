@@ -9,7 +9,7 @@ interface ProjectDataSource {
 
     fun getProjects(): Result<List<Project>>
 
-    fun getProjectById(projectID: UUID): Result<Project>
+    fun getProjectById(projectId: UUID): Result<Project>
 
     fun deleteProject(projectID: UUID): Result<Project>
 

@@ -11,27 +11,14 @@ import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 import java.util.UUID
 
-class ProjectPresenterTest {
+class GetProjectPresenterTest {
 
-    private val getProjectUseCase: GetProjectUseCase = mockk()
+    private val getProjectUseCase: GetProjectUseCase = mockk(relaxed = true)
     private lateinit var getProjectPresenter: GetProjectPresenter
 
     @BeforeEach
     fun setup() {
         getProjectPresenter = GetProjectPresenter(getProjectUseCase)
-    }
-
-    @Test
-    fun `should return Result of empty list of Projects when no projects founded`() {
-        // Given
-        every { getProjectUseCase.getProjects() } returns Result.success(emptyList())
-
-        // When / Then
-        try {
-            val result = getProjectPresenter.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
     }
 
     @Test
@@ -41,13 +28,14 @@ class ProjectPresenterTest {
             getProjectUseCase.getProjects()
         } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
-        // When / Then
-        try {
-            val result = getProjectPresenter.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectPresenter.getProjects()
+
+        // Then
+        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
+
+    @Throws(EiffelFlowException.ElementNotFoundException::class)
 
     @Test
     fun `should return Result of ElementNotFoundException when projects cannot be retrieved`() {
@@ -55,12 +43,11 @@ class ProjectPresenterTest {
         val exception = EiffelFlowException.ElementNotFoundException("Projects not found")
         every { getProjectUseCase.getProjects() } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = getProjectPresenter.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectPresenter.getProjects()
+
+        // Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 
     @Test
@@ -71,27 +58,27 @@ class ProjectPresenterTest {
             getProjectUseCase.getProjectById(projectId)
         } returns Result.success(ProjectsMock.CORRECT_PROJECT)
 
-        // When / Then
-        try {
-            val result = getProjectPresenter.getProjectById(projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectPresenter.getProjectById(projectId)
+
+        // Then
+        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
+
+    @Throws(EiffelFlowException.ElementNotFoundException::class)
 
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
         every {
-            getProjectUseCase.getProjectById(UUID.randomUUID())
+            getProjectUseCase.getProjectById(any())
         } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = getProjectPresenter.getProjectById(UUID.randomUUID())
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectPresenter.getProjectById(UUID.randomUUID())
+
+        // Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 }

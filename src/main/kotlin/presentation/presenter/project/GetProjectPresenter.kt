@@ -9,10 +9,10 @@ class GetProjectPresenter(
 ) {
 
     fun getProjectById(projectId: UUID): Result<Project> {
-        TODO("Not yet implemented")
+        return getProjectUseCase.getProjectById(projectId)
     }
 
     fun getProjects(): Result<List<Project>> {
-        TODO("Not yet implemented")
+        return getProjectUseCase.getProjects()
     }
 }
