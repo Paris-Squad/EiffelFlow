@@ -1,15 +1,13 @@
 package org.example.data.storage.audit
 
-import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.CsvStorageManager
-import org.example.data.storage.Mapper
-import org.example.domain.model.entities.AuditAction
+import org.example.data.storage.mapper.AuditCsvMapper
 import org.example.domain.model.entities.AuditLog
 import org.example.domain.model.exception.EiffelFlowException
 import java.util.UUID
 
 class AuditDataSourceImpl(
-    private val auditMapper: Mapper<String, AuditLog>,
+    private val auditMapper: AuditCsvMapper,
     private val csvManager: CsvStorageManager
 ) : AuditDataSource {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
@@ -53,25 +51,15 @@ class AuditDataSourceImpl(
             val lines = csvManager.readLinesFromFile()
             if (lines.isEmpty())  return Result.success(emptyList())
 
-            val logs = lines.mapNotNull { line ->
-                val parts = line.split(",")
-                    if (parts.size >= 10) {
-                        AuditLog(
-                            auditId = UUID.fromString(parts[0]),
-                            itemId = UUID.fromString(parts[1]),
-                            itemName = parts[2],
-                            userId = UUID.fromString(parts[3]),
-                            editorName = parts[4],
-                            actionType = AuditAction.valueOf(parts[5]),
-                            auditTime = LocalDateTime.parse(parts[6]),
-                            changedField = parts[7],
-                            oldValue = parts[8],
-                            newValue = parts[9]
-                        )
-                    } else null
+        val logs = lines.mapNotNull { line ->
+            try {
+                auditMapper.mapFrom(line)
+            } catch (e: Exception) {
+                null
             }
+        }
 
-            return if (logs.isEmpty()) {
+        return if (logs.isEmpty()) {
                 Result.failure(EiffelFlowException.ElementNotFoundException("Audit logs not found"))
             } else {
                 Result.success(logs)
