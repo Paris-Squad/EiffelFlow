@@ -1,49 +1,64 @@
 package data.storage.mapper
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.mapper.ProjectCsvMapper
-import org.example.domain.model.entities.Project
-import java.util.*
+import org.example.data.storage.mapper.StateCsvMapper
+import utils.ProjectsMock
 import kotlin.test.Test
 
 class ProjectCsvMapperTest {
 
-    private val projectCsvMapper = ProjectCsvMapper()
+    private val stateCsvMapper = StateCsvMapper()
+    private val projectCsvMapper = ProjectCsvMapper(stateCsvMapper)
 
     @Test
     fun `should map CSV line to Project entity correctly`() {
 
         //Given / When
-        val result = projectCsvMapper.mapFrom(CSV_STRING_LINE)
+        val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
 
         // Then
-        assertThat(result).isEqualTo(PROJECT)
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
 
+    }
+
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part not start with opening bracket not found`() {
+
+        //Given / When
+        val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE.replace('[', '{'))
+
+        // Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
+    }
+
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part not start with closing bracket not found`() {
+
+        //Given / When
+        val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE.replace(']', '{'))
+
+        // Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
     }
 
     @Test
     fun `should map Project entity to CSV line correctly`() {
 
         //Given / When
-        val result = projectCsvMapper.mapTo(PROJECT)
+        val result = projectCsvMapper.mapTo(ProjectsMock.CORRECT_PROJECT)
 
         // Then
-        assertThat(result).isEqualTo(CSV_STRING_LINE)
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_CSV_STRING_LINE)
     }
 
-    companion object {
-        private val PROJECT = Project(
-            projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
-            projectName = "Project1",
-            projectDescription = "Description1",
-            createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
-            adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
-            states = emptyList()
-        )
+    @Test
+    fun `should map Project entity to CSV line with empty states when state part is blank`() {
 
-        private const val CSV_STRING_LINE =
-            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,Project1,Description1,1999-08-07T22:22:22,02ad4499-5d4c-4450-8fd1-8294f1bb5741"
+        //Given / When
+        val result = projectCsvMapper.mapTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
 
+        // Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_CSV_STRING_LINE_WITH_EMPTY_STATES)
     }
 }

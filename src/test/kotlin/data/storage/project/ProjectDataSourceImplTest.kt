@@ -1,8 +1,7 @@
 package data.storage.project
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.ProjectCsvMapper
@@ -13,12 +12,9 @@ import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.model.entities.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 import java.util.UUID
 import org.junit.jupiter.api.Assertions
-import io.mockk.Runs
-import io.mockk.just
-import io.mockk.verify
 
 class ProjectDataSourceImplTest {
 
@@ -84,11 +80,46 @@ class ProjectDataSourceImplTest {
 
     @Test
     fun `deleteProject should return the deleted project`() {
-        val projectId = UUID.randomUUID()
-
         try {
-            projectDataSource.deleteProject(projectId)
-        } catch (e: NotImplementedError) {
+            //  Given
+            val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
+            every { csvStorageManager.readLinesFromFile() } returns
+                    correctLine.split("\n")
+            every { projectMapper.mapFrom(correctLine) } returns correctProject
+            every { csvStorageManager.writeLinesToFile(any()) } returns Unit
+
+            // When
+            val result = projectDataSource.deleteProject(projectId)
+
+            // Then
+            assertThat(result.isSuccess).isTrue()
+            assertThat(result.getOrNull()).isEqualTo(correctProject)
+            verify { csvStorageManager.readLinesFromFile() }
+            verify { csvStorageManager.writeLinesToFile(any()) }
+        }catch (e: NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+
+    @Test
+    fun `deleteProject should return failure when project not found`(){
+        try {
+            // Given
+            val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
+            every { csvStorageManager.readLinesFromFile() } returns
+                    correctLine.split("\n")
+            every { projectMapper.mapFrom(correctLine) } returns correctProject
+
+            // When
+            val result = projectDataSource.deleteProject(differentProjectId)
+
+            // Then
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.UnableToFindTheCorrectProject::class.java
+            )
+        }catch (e: NotImplementedError){
             assertThat(e.message).contains("Not yet implemented")
         }
     }
@@ -108,7 +139,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in CSV file`() {
         //Given
-        every { csvStorageManager.readLinesFromFile() } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -133,7 +164,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in CSV file`() {
         //Given
-        every { csvStorageManager.readLinesFromFile() } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -157,7 +188,7 @@ class ProjectDataSourceImplTest {
     }
 
     companion object{
-        private val correctProject = MockProjects.CORRECT_PROJECT
-        private val correctLine = MockProjects.CORRECT_CSV_STRING_LINE
+        private val correctProject = ProjectsMock.CORRECT_PROJECT
+        private val correctLine = ProjectsMock.CORRECT_CSV_STRING_LINE
     }
 }

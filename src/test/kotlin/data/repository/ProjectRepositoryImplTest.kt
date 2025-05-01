@@ -19,7 +19,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.Assertions
-import utils.MockProjects
+import utils.ProjectsMock
 
 //todo change all of the test
 class ProjectRepositoryImplTest {
@@ -44,7 +44,7 @@ class ProjectRepositoryImplTest {
                     itemId = project.projectId,
                     itemName = project.projectName,
                     userId = project.adminId,
-                    userName = "Admin",
+                    editorName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
@@ -119,14 +119,80 @@ class ProjectRepositoryImplTest {
 
     @Test
     fun `deleteProject should return the deleted project`() {
-        val projectId = UUID.randomUUID()
-
         try {
+            // Given
+            val auditLog = AuditLog(
+                auditId = UUID.randomUUID(),
+                itemId = project.projectId,
+                itemName = project.projectName,
+                userId = project.adminId,
+                editorName = "Admin",
+                actionType = AuditAction.DELETE,
+                auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                changedField = null,
+                oldValue = null,
+                newValue = project.projectName
+            )
+            val projectId = UUID.randomUUID()
+            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { auditDataSource.createAuditLog(any()) } returns Result.success(auditLog)
+
+            // When
             projectRepository.deleteProject(projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+
+            // Then
+            verify(exactly = 1) { projectDataSource.deleteProject(any()) }
+            verify(exactly = 1) { auditDataSource.createAuditLog(any()) }
+        }catch (exception : NotImplementedError){
+            assertThat(exception.message).contains("Not yet implemented")
         }
     }
+
+    @Test
+    fun `deleteProject should throw UnableToDeleteProjectException when deleteProject returns failure`(){
+        try {
+            // Given
+            val projectId = UUID.randomUUID()
+            every { projectDataSource.deleteProject(any()) } returns Result.failure(EiffelFlowException.UnableToDeleteProjectException())
+
+            // When
+            val result = projectRepository.deleteProject(projectId)
+
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.UnableToDeleteProjectException::class.java
+            )
+        }catch (e : NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+
+
+
+    }
+
+    @Test
+    fun `deleteProject should throw UnableToCreateAuditLogException when createAuditLog returns failure`(){
+        try {
+            // Given
+            val projectId = UUID.randomUUID()
+            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { auditDataSource.createAuditLog(any()) } returns Result.failure(
+                EiffelFlowException.UnableToCreateAuditLogException()
+            )
+            // When
+            val result = projectRepository.deleteProject(projectId)
+
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.UnableToCreateAuditLogException::class.java
+            )
+        }catch (e: NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+
 
     @Test
     fun `should return Result of empty list of Projects when there is no project in data source`() {
@@ -144,7 +210,7 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in data source`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
+        every { projectDataSource.getProjects() } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
         // When / Then
         try {
@@ -171,13 +237,13 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
-        every { projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId) } returns Result.success(
-            MockProjects.CORRECT_PROJECT
+        every { projectDataSource.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId) } returns Result.success(
+            ProjectsMock.CORRECT_PROJECT
         )
 
         // When / Then
         try {
-            val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+            val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

@@ -1,6 +1,6 @@
 package org.example.domain.model.exception
 
-import org.example.common.ValidationMessages
+import org.example.common.Constants
 
 abstract class EiffelFlowException(message: String?) : Exception(message) {
 
@@ -9,13 +9,16 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
     class UserStorageException(message: String? = null) :
         EiffelFlowException(message ?: "User storage operation failed")
 
-    class PasswordValidationException(errors: Set<ValidationMessages.ValidationRule>) :
+    class PasswordValidationException(errors: Set<Constants.ValidationRule>) :
         EiffelFlowException("Password validation failed: ${errors.joinToString(", ") { it.message }}")
 
-    class UserNameValidationException(errors: Set<ValidationMessages.ValidationRule>) :
+    class UserNameValidationException(errors: Set<Constants.ValidationRule>) :
         EiffelFlowException("Username validation failed: ${errors.joinToString(", ") { it.message }}")
 
     class UsernameAlreadyExistsException : EiffelFlowException("Username already exists")
+    class UnableToDeleteProjectException : EiffelFlowException("unable to delete project")
+    class UnableToCreateAuditLogException : EiffelFlowException("unable to create AuditLog")
+    class UnableToFindTheCorrectProject : EiffelFlowException("unable to find project")
 
     class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
 
