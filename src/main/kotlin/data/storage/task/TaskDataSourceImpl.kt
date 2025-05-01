@@ -33,7 +33,7 @@ class TaskDataSourceImpl(
                 val updatedTasks = tasks.filterNot { it.taskId == taskId }
 
                 val updatedLines = updatedTasks.map { taskMapper.mapTo(it) }.joinToString("\n")
-
+                csvManager.clearFile()
                 csvManager.writeLinesToFile(updatedLines)
 
                 Result.success(taskToDelete)
