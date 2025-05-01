@@ -5,7 +5,7 @@ import org.example.domain.model.entities.Project
 import org.example.domain.model.entities.State
 import java.util.UUID
 
-object ProjectsMock {
+object MockProjects {
     val CORRECT_PROJECT = Project(
         projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
         projectName = "Project1",

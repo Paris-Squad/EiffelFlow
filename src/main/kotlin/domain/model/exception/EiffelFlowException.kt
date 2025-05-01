@@ -28,5 +28,6 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
 
     class NoChangesException(message: String? = null) :
         EiffelFlowException(message ?: "No changes detected")
+    class ElementNotFoundException(message: String) : RuntimeException(message)
 }
 
