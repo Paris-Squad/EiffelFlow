@@ -6,7 +6,5 @@ import java.util.*
 
 class DeleteTaskUseCase(private val taskRepository: TaskRepository) {
 
-    fun deleteTask(taskId: UUID): Result<Task> {
-        TODO("Not yet implemented")
-    }
+    fun deleteTask(taskId: UUID): Result<Task> = taskRepository.deleteTask(taskId)
 }

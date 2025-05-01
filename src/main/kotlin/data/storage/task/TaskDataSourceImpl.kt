@@ -42,10 +42,9 @@ class TaskDataSourceImpl(
 
             Result.success(task)
         } catch (e: Exception) {
-            Result.failure(EiffelFlowException.TaskDeletionException("Failed to delete task $e"))
+            Result.failure(EiffelFlowException.TaskDeletionException())
         }
     }
-
 
     override fun getTaskById(taskId: UUID): Result<Task> {
         val lines = csvManager.readLinesFromFile()

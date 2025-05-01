@@ -52,7 +52,7 @@ class TaskRepositoryImpl(
     }
 
     override fun deleteTask(taskId: UUID): Result<Task> {
-        TODO("Not yet implemented")
+        return taskDataSource.deleteTask(taskId)
     }
 
     override fun getTaskById(taskId: UUID): Result<Task> {
