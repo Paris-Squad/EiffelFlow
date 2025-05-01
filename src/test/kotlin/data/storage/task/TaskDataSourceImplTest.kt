@@ -20,8 +20,8 @@ import java.util.*
 
 class TaskDataSourceImplTest {
     private lateinit var taskDataSource: TaskDataSource
-    private val csvStorageManager: CsvStorageManager = mockk()
-    private val taskMapper: TaskCsvMapper = mockk()
+    private val csvStorageManager: CsvStorageManager = mockk(relaxed = true)
+    private val taskMapper: TaskCsvMapper = mockk(relaxed = true)
 
     @BeforeEach
     fun setUp() {
@@ -106,7 +106,7 @@ class TaskDataSourceImplTest {
 
         every { csvStorageManager.readLinesFromFile() } returns listOf(ValidTaskCSV)
         every { taskMapper.mapFrom(ValidTaskCSV) } returns validTask
-        every { csvStorageManager.deleteLineFromFile(ValidTaskCSV) } throws exception
+        every { csvStorageManager.deleteLineFromFile(any()) } throws exception
 
         val result = taskDataSource.deleteTask(taskId)
 

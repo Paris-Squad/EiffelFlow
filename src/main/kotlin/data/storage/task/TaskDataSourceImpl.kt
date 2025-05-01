@@ -32,26 +32,18 @@ class TaskDataSourceImpl(
     }
 
     override fun deleteTask(taskId: UUID): Result<Task> {
-            return try {
-                val lines = csvManager.readLinesFromFile()
-                    .filter { it.isNotBlank() }
+        return try {
+            val lines = csvManager.readLinesFromFile()
+            val taskLine = lines.find { taskMapper.mapFrom(it).taskId == taskId }
+                ?: return Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
 
-                val tasks = lines.map { line -> taskMapper.mapFrom(line) }
+            val task = taskMapper.mapFrom(taskLine)
+            csvManager.deleteLineFromFile(taskLine)
 
-                val taskToDelete = tasks.find { it.taskId == taskId }
-                    ?: return Result.failure(EiffelFlowException.TaskNotFoundException())
-
-                val updatedTasks = tasks.filterNot { it.taskId == taskId }
-
-                val updatedLines = updatedTasks.map { taskMapper.mapTo(it) }.joinToString("\n")
-                csvManager.clearFile()
-                csvManager.writeLinesToFile(updatedLines)
-
-                Result.success(taskToDelete)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-
+            Result.success(task)
+        } catch (e: Exception) {
+            Result.failure(EiffelFlowException.TaskDeletionException())
+        }
     }
 
     override fun getTaskById(taskId: UUID): Result<Task> {

@@ -31,10 +31,6 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
         EiffelFlowException(message ?: "No changes detected")
     class TaskDeletionException : EiffelFlowException("An error occurred while deleting the task")
 
-
-    class TaskDeletionException(message: String? = null) :
-        EiffelFlowException(message ?: "Failed to delete task")
-
     class TaskCreationException(message: String? = null) :
         EiffelFlowException(message ?: "Failed to create task")
 }
