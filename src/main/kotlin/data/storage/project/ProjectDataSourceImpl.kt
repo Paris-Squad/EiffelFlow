@@ -11,19 +11,27 @@ class ProjectDataSourceImpl(
     private val csvManager: CsvStorageManager
 ) : ProjectDataSource {
 
-    override fun getProjects(): Result<List<Project>> = runCatching {
-        csvManager.readLinesFromFile()
-            .map(projectMapper::mapFrom)
-            .ifEmpty {
-                throw EiffelFlowException.ElementNotFoundException("No projects found")
-            }
+    override fun getProjects(): Result<List<Project>> {
+        return runCatching {
+            csvManager.readLinesFromFile()
+                .map(projectMapper::mapFrom)
+                .ifEmpty {
+                    throw EiffelFlowException.ElementNotFoundException("No projects found")
+                }
+        }.recoverCatching {
+            throw EiffelFlowException.ElementNotFoundException("No projects found")
+        }
     }
 
-    override fun getProjectById(projectId: UUID): Result<Project> = runCatching {
-        csvManager.readLinesFromFile()
-            .map(projectMapper::mapFrom)
-            .firstOrNull { it.projectId == projectId }
-            ?: throw EiffelFlowException.ElementNotFoundException("Project not found")
+    override fun getProjectById(projectId: UUID): Result<Project> {
+        return runCatching {
+            csvManager.readLinesFromFile()
+                .map(projectMapper::mapFrom)
+                .firstOrNull { it.projectId == projectId }
+                ?: throw EiffelFlowException.ElementNotFoundException("Project not found")
+        }.recoverCatching {
+            throw EiffelFlowException.ElementNotFoundException("Project not found")
+        }
     }
 
     override fun createProject(project: Project): Result<Project> {

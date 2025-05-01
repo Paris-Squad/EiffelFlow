@@ -18,13 +18,14 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.Assertions
 import utils.MockProjects
 
 //todo change all of the test
 class ProjectRepositoryImplTest {
 
-    private lateinit var projectRepository: ProjectRepositoryImpl
+    private lateinit var projectRepository: ProjectRepository
     private val projectDataSource: ProjectDataSource = mockk()
     private val auditDataSource: AuditDataSource = mockk()
 
@@ -139,17 +140,20 @@ class ProjectRepositoryImplTest {
     }
 
     //region getProjects
+    @Throws(EiffelFlowException.ElementNotFoundException::class)
     @Test
-    fun `should return Result of empty list of Projects when there is no project in data source`() {
+    fun `should return Result of failure when data source fail to load projects`() {
         //Given
-        every { projectDataSource.getProjects() } returns Result.success(emptyList())
+        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        every {
+            projectDataSource.getProjects()
+        } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjects()
+
+        // Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 
     @Test
@@ -164,49 +168,38 @@ class ProjectRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
-
-    @Test
-    fun `should return Result of ElementNotFoundException when project doesn't exists in data source`() {
-        //Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
-        every { projectDataSource.getProjects() } returns Result.failure(exception)
-
-        // When / Then
-        try {
-            val result = projectRepository.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-    }
     //endregion
 
     //region getProjectById
     @Test
     fun `should return Result of Project when the given Id match project record exists in data source`() {
         //Given
-        every { projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId) } returns Result.success(
-            MockProjects.CORRECT_PROJECT
-        )
+        every {
+            projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+        } returns Result.success(MockProjects.CORRECT_PROJECT)
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+
+
+        // Then
+        assertThat(result.getOrNull())
+            .isEqualTo(MockProjects.CORRECT_PROJECT)
     }
 
+    @Throws(EiffelFlowException.ElementNotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when searching for project doesn't exists in data source`() {
         val exception = EiffelFlowException.ElementNotFoundException("Project not found")
-        every { projectDataSource.getProjectById(UUID.randomUUID()) } returns Result.failure(exception)
+        every {
+            projectDataSource.getProjectById(any())
+        } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjectById(UUID.randomUUID())
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjectById(UUID.randomUUID())
+
+        //Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
     //endregion
 }

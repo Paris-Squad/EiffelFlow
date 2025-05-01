@@ -12,24 +12,7 @@ object MockProjects {
         projectDescription = "Description1",
         createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
         adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
-        states = listOf(
-            State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
-            ),
-            State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
-            ),
-            State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
-            ),
-            State(
-                stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
-                name = "In Progress"
-            )
-        )
+        states = emptyList()
     )
 
     const val CORRECT_CSV_STRING_LINE =
