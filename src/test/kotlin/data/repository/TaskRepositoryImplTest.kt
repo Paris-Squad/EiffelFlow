@@ -5,7 +5,6 @@ import utils.TaskMock.validTask
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
-import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.task.TaskDataSource
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +14,8 @@ import utils.TaskMock.inProgressTask
 import utils.UserMock.validUser
 import java.io.IOException
 import java.util.*
+import org.example.data.repository.TaskRepositoryImpl
+import utils.TaskMock.validAuditLog
 
 class TaskRepositoryImplTest {
 
@@ -31,11 +32,19 @@ class TaskRepositoryImplTest {
 
     @Test
     fun `createTask should return the created task`() {
-        try {
-            taskRepository.createTask(validTask)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // Given
+        val task = validTask
+        val fakeAuditLog = validAuditLog
+
+        every { taskDataSource.createTask(task) } returns Result.success(task)
+        every { auditDataSource.createAuditLog(any()) } returns Result.success(fakeAuditLog)
+
+        // When
+        val result = taskRepository.createTask(task)
+
+        // Then
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(task)
     }
 
     @Test

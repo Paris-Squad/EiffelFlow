@@ -42,6 +42,16 @@ class CsvStorageManager(
         }
     }
 
+    fun deleteLineFromFile(lineToDelete: String){
+        val lines = readLinesFromFile().toMutableList()
+        val result = lines.remove(lineToDelete)
+
+        if (result)
+            file.writeText(lines.joinToString("\n"))
+        else
+            throw IOException("Line not found in file.")
+    }
+
     @Throws(FileNotFoundException::class)
     fun clearFile() {
         if (file.exists().not()) throw FileNotFoundException("File ${file.path} not found.")

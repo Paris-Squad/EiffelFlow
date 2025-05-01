@@ -11,23 +11,41 @@ class TaskDataSourceImpl(
     private val csvManager: CsvStorageManager
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
-        TODO("Not yet implemented")
+        return try {
+            val csvLine = taskMapper.mapTo(task)
+            csvManager.writeLinesToFile(csvLine)
+            Result.success(task)
+        } catch (exception: Exception) {
+            Result.failure( EiffelFlowException.TaskCreationException(exception.message))
+        }
     }
 
     override fun updateTask(task: Task, oldTask: Task): Result<Task> {
         return try {
             val taskCsv = taskMapper.mapTo(task)
-            val oldTask = taskMapper.mapTo(oldTask)
-            csvManager.updateLinesToFile(taskCsv, oldTask)
+            val oldTaskCsv = taskMapper.mapTo(oldTask)
+            csvManager.updateLinesToFile(taskCsv, oldTaskCsv)
             Result.success(task)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(EiffelFlowException.TaskCreationException("Failed to update task: $e"))
         }
     }
 
     override fun deleteTask(taskId: UUID): Result<Task> {
-        TODO("Not yet implemented")
+        return try {
+            val lines = csvManager.readLinesFromFile()
+            val taskLine = lines.find { taskMapper.mapFrom(it).taskId == taskId }
+                ?: return Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+
+            val task = taskMapper.mapFrom(taskLine)
+            csvManager.deleteLineFromFile(taskLine)
+
+            Result.success(task)
+        } catch (e: Exception) {
+            Result.failure(EiffelFlowException.TaskDeletionException("Failed to delete task $e"))
+        }
     }
+
 
     override fun getTaskById(taskId: UUID): Result<Task> {
         val lines = csvManager.readLinesFromFile()

@@ -24,11 +24,15 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
 
     class ElementNotFoundException(message: String) : EiffelFlowException(message)
     class ProjectCreationException(message: String) : EiffelFlowException(message)
-     class TaskNotFoundException(message: String? = null) :
+    class TaskNotFoundException(message: String? = null) :
         EiffelFlowException(message ?: "Task not found")
 
     class NoChangesException(message: String? = null) :
         EiffelFlowException(message ?: "No changes detected")
 
-}
+    class TaskDeletionException(message: String? = null) :
+        EiffelFlowException(message ?: "Failed to delete task")
 
+    class TaskCreationException(message: String? = null) :
+        EiffelFlowException(message ?: "Failed to create task")
+}
