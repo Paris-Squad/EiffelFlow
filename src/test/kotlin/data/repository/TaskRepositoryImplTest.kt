@@ -32,6 +32,31 @@ class TaskRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+    @Test
+    fun `createTask should return failure when task creation fails`() {
+        val exception = IOException("Task creation failed")
+
+        every { taskDataSource.createTask(validTask) } returns Result.failure(exception)
+
+        val result = taskRepository.createTask(validTask)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+    }
+
+    @Test
+    fun `createTask should return failure when audit creation fails`() {
+        val exception = IOException("Audit failed")
+
+        every { taskDataSource.createTask(validTask) } returns Result.success(validTask)
+        every { auditDataSource.createAuditLog(any()) } returns Result.failure(exception)
+
+        val result = taskRepository.createTask(validTask)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+    }
+
 
     @Test
     fun `updateTask should return success if the task is updated`() {
