@@ -4,7 +4,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
-class CsvStorageManager(
+class FileStorageManager(
     private val file: File
 ) {
 

@@ -1,6 +1,6 @@
 package org.example.data.storage.project
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.Mapper
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.domain.model.entities.Project
@@ -9,7 +9,7 @@ import java.util.UUID
 class ProjectDataSourceImpl(
     private val projectMapper: Mapper<String, Project>,
     private val stateCsvMapper: StateCsvMapper,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileStorageManager
 ) : ProjectDataSource {
 
     override fun getProjects(): Result<List<Project>> {

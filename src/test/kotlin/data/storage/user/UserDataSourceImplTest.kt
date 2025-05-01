@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.mapper.UserCsvMapper
 import org.example.data.storage.user.UserDataSource
 import org.example.data.storage.user.UserDataSourceImpl
@@ -21,7 +21,7 @@ import java.util.*
 class UserDataSourceImplTest {
     private lateinit var userDataSource: UserDataSource
     private val userMapper: UserCsvMapper = mockk()
-    private val csvManager: CsvStorageManager = mockk()
+    private val csvManager: FileStorageManager = mockk()
 
     @BeforeEach
     fun setUp() {

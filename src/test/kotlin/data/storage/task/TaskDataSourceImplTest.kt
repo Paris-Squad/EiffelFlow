@@ -8,7 +8,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.datetime.LocalDateTime
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.data.storage.task.TaskDataSource
@@ -23,13 +23,13 @@ import java.util.*
 
 class TaskDataSourceImplTest {
     private lateinit var taskDataSource: TaskDataSource
-    private val csvStorageManager: CsvStorageManager = mockk()
+    private val fileStorageManager: FileStorageManager = mockk()
     private val stateCsvMapper: StateCsvMapper = mockk()
     private val taskMapper: TaskCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        taskDataSource = TaskDataSourceImpl(taskMapper, stateCsvMapper, csvStorageManager)
+        taskDataSource = TaskDataSourceImpl(taskMapper, stateCsvMapper, fileStorageManager)
     }
 
     @Test
@@ -57,7 +57,7 @@ class TaskDataSourceImplTest {
     @Test
     fun `updateTask should return success when task is valid`() {
         every { taskMapper.mapTo(validTask) } returns ValidTaskCSV
-        every { csvStorageManager.updateLinesToFile(ValidTaskCSV, any()) } just runs
+        every { fileStorageManager.updateLinesToFile(ValidTaskCSV, any()) } just runs
 
 
         try {
@@ -71,7 +71,7 @@ class TaskDataSourceImplTest {
     @Test
     fun `updateTask should return failure when exception is thrown from the csvStorageManager`() {
         val exception = IOException("Error")
-        every { csvStorageManager.updateLinesToFile(ValidTaskCSV, ValidTaskCSV) } throws exception
+        every { fileStorageManager.updateLinesToFile(ValidTaskCSV, ValidTaskCSV) } throws exception
 
         try {
             val result = taskDataSource.createTask(validTask)

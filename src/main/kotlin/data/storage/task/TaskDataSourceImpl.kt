@@ -1,6 +1,6 @@
 package org.example.data.storage.task
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.Mapper
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.domain.model.entities.Task
@@ -9,7 +9,7 @@ import java.util.UUID
 class TaskDataSourceImpl(
     private val taskMapper: Mapper<String, Task>,
     private val stateCsvMapper: StateCsvMapper,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileStorageManager
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
         TODO("Not yet implemented")

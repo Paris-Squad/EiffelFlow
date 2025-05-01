@@ -1,7 +1,7 @@
 package data.storage
 
 import com.google.common.truth.Truth.assertThat
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
@@ -19,11 +19,11 @@ class CsvStorageManagerTest {
     fun `should throw FileNotFoundException when file does not exist`() {
         // Given
         val nonExistentFile = File(tempDir, "notExistFile.csv")
-        val csvStorageManager = CsvStorageManager(nonExistentFile)
+        val fileStorageManager = FileStorageManager(nonExistentFile)
 
         // When
         val exception = assertThrows<FileNotFoundException> {
-            csvStorageManager.readLinesFromFile()
+            fileStorageManager.readLinesFromFile()
         }
 
         // Then
@@ -35,11 +35,11 @@ class CsvStorageManagerTest {
     fun `should throw FileNotFoundException when path is a directory`() {
         // Given
         val directory = tempDir.resolve("directory").apply { mkdir() }
-        val csvStorageManager = CsvStorageManager(directory)
+        val fileStorageManager = FileStorageManager(directory)
 
         // When / Then
         val exception = assertThrows<FileNotFoundException> {
-            csvStorageManager.readLinesFromFile()
+            fileStorageManager.readLinesFromFile()
         }
         assertThat("${directory.path} Is a directory").isEqualTo(exception.message)
     }
@@ -50,10 +50,10 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "multiple_lines.csv").apply {
             writeText(DUMMY_FILE_CONTENT)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val fileStorageManager = FileStorageManager(testFile)
 
         // When
-        val result = csvStorageManager.readLinesFromFile()
+        val result = fileStorageManager.readLinesFromFile()
 
         // Then
         assertThat(DUMMY_FILE_CONTENT.split("\n")).containsExactlyElementsIn(result)
@@ -66,10 +66,10 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "single_line.csv").apply {
             writeText(fileContent)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val fileStorageManager = FileStorageManager(testFile)
 
         // When
-        val result = csvStorageManager.readLinesFromFile()
+        val result = fileStorageManager.readLinesFromFile()
 
         // Then
         assertThat(listOf(fileContent)).containsExactlyElementsIn(result)
@@ -80,11 +80,11 @@ class CsvStorageManagerTest {
     fun `writeLinesToFile should append text to file`() {
         //Given
         val testFile = File(tempDir, "write_file.csv")
-        val csvStorageManager = CsvStorageManager(testFile)
+        val fileStorageManager = FileStorageManager(testFile)
 
         //Then
-        csvStorageManager.writeLinesToFile(DUMMY_FILE_CONTENT)
-        val result = csvStorageManager.readLinesFromFile()
+        fileStorageManager.writeLinesToFile(DUMMY_FILE_CONTENT)
+        val result = fileStorageManager.readLinesFromFile()
 
         //When
         assertThat(DUMMY_FILE_CONTENT.split("\n")).containsExactlyElementsIn(result)
@@ -96,16 +96,16 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "update_file.csv").apply {
             writeText(initialContent)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val fileStorageManager = FileStorageManager(testFile)
         val oldLine = "line2"
         val newLine = "updated line"
 
         // When
-        csvStorageManager.updateLinesToFile(newLine, oldLine)
+        fileStorageManager.updateLinesToFile(newLine, oldLine)
 
         // Then
         val expectedContent = "line1\nupdated line\nline3"
-        val result = csvStorageManager.readLinesFromFile()
+        val result = fileStorageManager.readLinesFromFile()
         assertThat(expectedContent.split("\n")).containsExactlyElementsIn(result)
     }
 
@@ -117,13 +117,13 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "no_change_file.csv").apply {
             writeText(initialContent)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val fileStorageManager = FileStorageManager(testFile)
         val nonExistentLine = "line4"
         val newLine = "updated line"
 
         //when and Then
         assertThrows<IOException> {
-            csvStorageManager.updateLinesToFile(newLine, nonExistentLine)
+            fileStorageManager.updateLinesToFile(newLine, nonExistentLine)
         }
     }
 

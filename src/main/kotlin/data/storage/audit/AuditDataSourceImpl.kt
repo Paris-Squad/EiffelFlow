@@ -1,13 +1,13 @@
 package org.example.data.storage.audit
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.Mapper
 import org.example.domain.model.entities.AuditLog
 import java.util.UUID
 
 class AuditDataSourceImpl(
     private val auditMapper: Mapper<String, AuditLog>,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileStorageManager
 ) : AuditDataSource {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
         TODO("Not yet implemented")

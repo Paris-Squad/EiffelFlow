@@ -3,7 +3,7 @@ package data.storage.audit
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.audit.AuditDataSourceImpl
 import org.example.data.storage.mapper.AuditCsvMapper
@@ -16,12 +16,12 @@ import java.util.UUID
 class AuditDataSourceImplTest {
 
     private lateinit var auditDataSource: AuditDataSource
-    private val csvStorageManager: CsvStorageManager = mockk()
+    private val fileStorageManager: FileStorageManager = mockk()
     private val auditCsvMapper: AuditCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        auditDataSource = AuditDataSourceImpl(auditCsvMapper, csvStorageManager)
+        auditDataSource = AuditDataSourceImpl(auditCsvMapper, fileStorageManager)
     }
 
     @Test
@@ -37,7 +37,7 @@ class AuditDataSourceImplTest {
     @Test
     fun `getAuditLogs should return Result with empty list of AuditLog when CSV file is empty`() {
         // Given
-        every { csvStorageManager.readLinesFromFile() } returns emptyList()
+        every { fileStorageManager.readLinesFromFile() } returns emptyList()
 
         // When / Then
         try {
@@ -52,7 +52,7 @@ class AuditDataSourceImplTest {
     fun `getAuditLogs should return Result with list of AuditLogs when CSV contains valid lines`() {
         // Given
         every {
-            csvStorageManager.readLinesFromFile()
+            fileStorageManager.readLinesFromFile()
         } returns MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
 
         // When / Then
@@ -85,7 +85,7 @@ class AuditDataSourceImplTest {
     @Test
     fun `getAuditLogById should return Result with empty list of AuditLog when CSV file is empty`() {
         // Given
-        every { csvStorageManager.readLinesFromFile() } returns emptyList()
+        every { fileStorageManager.readLinesFromFile() } returns emptyList()
 
         // When / Then
         try {
@@ -101,7 +101,7 @@ class AuditDataSourceImplTest {
         // Given
         val auditLogId = MockAuditLog.AUDIT_LOG.auditId
         every {
-            csvStorageManager.readLinesFromFile()
+            fileStorageManager.readLinesFromFile()
         } returns MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
 
         // When / Then

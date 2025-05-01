@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.datetime.LocalDateTime
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.mapper.ProjectCsvMapper
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.data.storage.project.ProjectDataSource
@@ -23,13 +23,13 @@ import io.mockk.verify
 class ProjectDataSourceImplTest {
 
     private lateinit var projectDataSource: ProjectDataSource
-    private val csvStorageManager: CsvStorageManager = mockk()
+    private val fileStorageManager: FileStorageManager = mockk()
     private val stateCsvMapper: StateCsvMapper = mockk()
     private val projectMapper: ProjectCsvMapper = mockk()
 
     @BeforeEach
     fun setUp() {
-        projectDataSource = ProjectDataSourceImpl(projectMapper, stateCsvMapper, csvStorageManager)
+        projectDataSource = ProjectDataSourceImpl(projectMapper, stateCsvMapper, fileStorageManager)
     }
 
     @Test
@@ -37,12 +37,12 @@ class ProjectDataSourceImplTest {
         try {
             every { projectMapper.mapTo(correctProject) } returns correctLine
 
-            every { csvStorageManager.writeLinesToFile(correctLine + "\n") } just Runs
+            every { fileStorageManager.writeLinesToFile(correctLine + "\n") } just Runs
 
             val result = projectDataSource.createProject(correctProject)
 
             Assertions.assertTrue(result.isSuccess)
-            verify(exactly = 1) { csvStorageManager.writeLinesToFile(correctLine + "\n") }
+            verify(exactly = 1) { fileStorageManager.writeLinesToFile(correctLine + "\n") }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -53,12 +53,12 @@ class ProjectDataSourceImplTest {
     fun `createProject should return failure when writeLinesToFile throws exception`() {
         try {
             every { projectMapper.mapTo(correctProject) } returns correctLine
-            every { csvStorageManager.writeLinesToFile(correctLine + "\n") } throws Exception("Failed to write to file")
+            every { fileStorageManager.writeLinesToFile(correctLine + "\n") } throws Exception("Failed to write to file")
 
             val result = projectDataSource.createProject(correctProject)
 
             Assertions.assertTrue(result.isFailure)
-            verify(exactly = 1) { csvStorageManager.writeLinesToFile(correctLine + "\n") }
+            verify(exactly = 1) { fileStorageManager.writeLinesToFile(correctLine + "\n") }
 
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -95,7 +95,7 @@ class ProjectDataSourceImplTest {
 
     @Test
     fun `should return Result of empty list of Projects when the file is empty`() {
-        every { csvStorageManager.readLinesFromFile() } returns "".split("\n")
+        every { fileStorageManager.readLinesFromFile() } returns "".split("\n")
 
         // Then
         try {
@@ -108,7 +108,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Projects when at least one project exists in CSV file`() {
         //Given
-        every { csvStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
+        every { fileStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
@@ -133,7 +133,7 @@ class ProjectDataSourceImplTest {
     @Test
     fun `should return Result of Project when the given Id match project record exists in CSV file`() {
         //Given
-        every { csvStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
+        every { fileStorageManager.readLinesFromFile() } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When / Then
         try {
