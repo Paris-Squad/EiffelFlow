@@ -58,7 +58,7 @@ class ProjectRepositoryImpl(
 
                 val auditLog = AuditLog(
                     itemId = updatedProject.projectId,
-                    itemName = PROJECT,
+                    itemName = updatedProject.projectName,
                     userId = updatedProject.adminId,
                     userName = "Admin",
                     actionType = AuditAction.UPDATE,
