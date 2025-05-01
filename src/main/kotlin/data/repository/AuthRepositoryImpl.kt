@@ -1,18 +1,43 @@
 package org.example.data.repository
 
-import org.example.data.storage.auth.AuthDataSource
+import org.example.data.storage.CsvStorageManager
 import org.example.domain.repository.AuthRepository
+import java.io.FileNotFoundException
 import java.util.UUID
 
 class AuthRepositoryImpl(
-    private val authDataSource: AuthDataSource
+    private val storageManager: CsvStorageManager
 ) : AuthRepository {
-    override fun saveUserLogin(userID: UUID): Result<Boolean> =
-        authDataSource.saveUserLogin(userID)
+    override fun saveUserLogin(userID: UUID): Result<Boolean> {
+        return try {
+            storageManager.writeLinesToFile(userID.toString())
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
-    override fun getIsUserLoggedIn(): Result<Boolean> =
-        authDataSource.getIsUserLoggedIn()
+    override fun getIsUserLoggedIn(): Result<Boolean> {
+        return try {
+            val lines = storageManager.readLinesFromFile()
+            Result.success(lines.any { it.isNotBlank() })
+        } catch (_: FileNotFoundException) {
+            Result.success(false)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
-    override fun clearLogin(): Result<Boolean> =
-        authDataSource.clearLogin()
+    override fun clearLogin(): Result<Boolean> {
+        return try {
+            storageManager.clearFile()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    companion object {
+        const val FILE_NAME = "auth.txt"
+    }
 }

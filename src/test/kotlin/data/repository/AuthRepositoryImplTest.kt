@@ -2,90 +2,109 @@ package data.repository
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
 import org.example.data.repository.AuthRepositoryImpl
-import org.example.data.storage.auth.AuthDataSource
+import org.example.data.storage.CsvStorageManager
+import org.example.domain.repository.AuthRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.UUID
 
 class AuthRepositoryImplTest {
-    private val authDataSource: AuthDataSource = mockk(relaxed = true)
-    private lateinit var authRepository: AuthRepositoryImpl
+    private lateinit var authRepository: AuthRepository
+    private val fileManager: CsvStorageManager = mockk()
 
     @BeforeEach
     fun setUp() {
-        authRepository = AuthRepositoryImpl(authDataSource)
+        authRepository = AuthRepositoryImpl(fileManager)
     }
 
     @Test
-    fun `saveUserLogin should return success when data source succeeds`() {
+    fun `saveUserLogin should return success when user ID is saved successfully`() {
         val userId = UUID.randomUUID()
 
-        every { authDataSource.saveUserLogin(userId) } returns Result.success(true)
+        every { fileManager.writeLinesToFile(userId.toString()) } just runs
 
         val result = authRepository.saveUserLogin(userId)
 
-        assertThat(result.getOrNull()).isEqualTo(true)
-        verify(exactly = 1) { authDataSource.saveUserLogin(userId) }
+        assertThat(result.getOrNull()).isTrue()
     }
 
     @Test
-    fun `saveUserLogin should return failure when data source fails`() {
+    fun `saveUserLogin should return failure when an exception occurs`() {
         val userId = UUID.randomUUID()
-        val exception = IOException()
+        val exception = IOException("Failed to write file")
 
-        every { authDataSource.saveUserLogin(userId) } returns Result.failure(exception)
+        every { fileManager.writeLinesToFile(any()) } throws exception
 
         val result = authRepository.saveUserLogin(userId)
 
         assertThat(result.exceptionOrNull()).isEqualTo(exception)
-        verify(exactly = 1) { authDataSource.saveUserLogin(userId) }
     }
 
     @Test
-    fun `getIsUserLoggedIn should return logged in status when data source succeeds`() {
-        every { authDataSource.getIsUserLoggedIn() } returns Result.success(true)
+    fun `getIsUserLoggedIn should return true when file has content`() {
+        val lines = listOf(UUID.randomUUID().toString())
+
+        every { fileManager.readLinesFromFile() } returns lines
 
         val result = authRepository.getIsUserLoggedIn()
 
         assertThat(result.getOrNull()).isTrue()
-        verify(exactly = 1) { authDataSource.getIsUserLoggedIn() }
     }
 
     @Test
-    fun `getIsUserLoggedIn should return failure when data source fails`() {
-        val exception = IOException()
+    fun `getIsUserLoggedIn should return false when file has only blank lines`() {
+        val lines = listOf("", "  ", "\n")
 
-        every { authDataSource.getIsUserLoggedIn() } returns Result.failure(exception)
+        every { fileManager.readLinesFromFile() } returns lines
+
+        val result = authRepository.getIsUserLoggedIn()
+
+        assertThat(result.getOrNull()).isFalse()
+    }
+
+    @Test
+    fun `getIsUserLoggedIn should return false when file not found`() {
+        every { fileManager.readLinesFromFile() } throws FileNotFoundException()
+
+        val result = authRepository.getIsUserLoggedIn()
+
+        assertThat(result.getOrNull()).isFalse()
+    }
+
+    @Test
+    fun `getIsUserLoggedIn should return failure when other exception occurs`() {
+        val exception = IOException("Failed to read file")
+
+        every { fileManager.readLinesFromFile() } throws exception
 
         val result = authRepository.getIsUserLoggedIn()
 
         assertThat(result.exceptionOrNull()).isEqualTo(exception)
-        verify(exactly = 1) { authDataSource.getIsUserLoggedIn() }
     }
 
     @Test
-    fun `clearLogin should return success when data source succeeds`() {
-        every { authDataSource.clearLogin() } returns Result.success(true)
+    fun `clearLogin should return success when file is cleared successfully`() {
+        every { fileManager.clearFile() } just runs
 
         val result = authRepository.clearLogin()
 
         assertThat(result.getOrNull()).isTrue()
-        verify(exactly = 1) { authDataSource.clearLogin() }
     }
 
     @Test
-    fun `clearLogin should return failure when data source fails`() {
-        val exception = IOException()
-
-        every { authDataSource.clearLogin() } returns Result.failure(exception)
+    fun `clearLogin should return failure when an exception occurs`() {
+        val exception = FileNotFoundException()
+        every { fileManager.clearFile() } throws exception
 
         val result = authRepository.clearLogin()
 
         assertThat(result.exceptionOrNull()).isEqualTo(exception)
-        verify(exactly = 1) { authDataSource.clearLogin() }
     }
 }
