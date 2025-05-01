@@ -8,7 +8,7 @@ data class AuditLog(
     val itemId: UUID,
     val itemName: String,
     val userId: UUID,
-    val userName: String,
+    val editorName: String,
     val actionType: AuditAction,
     val auditTime: LocalDateTime,
     val changedField: String?,
