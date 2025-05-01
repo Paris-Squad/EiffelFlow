@@ -11,8 +11,8 @@ import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.task.TaskDataSource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockUser.validUser
 import utils.TaskMock.inProgressTask
+import utils.UserMock.validUser
 import java.io.IOException
 import java.util.UUID
 
