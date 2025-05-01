@@ -7,7 +7,7 @@ interface TaskDataSource {
 
     fun createTask(task: Task): Result<Task>
 
-    fun updateTask(task: Task): Result<Task>
+    fun updateTask(task: Task , oldTask: Task): Result<Task>
 
     fun deleteTask(taskId: UUID): Result<Task>
 

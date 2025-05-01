@@ -39,7 +39,7 @@ class UserDataSourceImplTest {
         val userCsv = "test,test,ADMIN,${user.userId}"
 
         every { userMapper.mapTo(user) } returns userCsv
-        every { csvManager.writeLinesToFile(userCsv + "\n") } just runs
+        every { csvManager.writeLinesToFile(userCsv) } just runs
 
         val result = userDataSource.createUser(user)
 

@@ -1,9 +1,10 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import utils.TaskMock.validTask
+import domain.usecase.task.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.example.domain.model.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.DeleteTaskUseCase
@@ -17,7 +18,6 @@ class DeleteTaskUseCaseTest {
     private lateinit var deleteTaskUseCase: DeleteTaskUseCase
     private lateinit var taskIdToDelete: UUID
 
-
     @BeforeEach
     fun setUp() {
         taskRepository = mockk()
@@ -27,12 +27,9 @@ class DeleteTaskUseCaseTest {
 
     @Test
     fun `deleteTask should return success when task exists`() {
-
         every { taskRepository.deleteTask(taskIdToDelete) } returns Result.success(validTask)
 
-
         val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
-
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(validTask)
@@ -58,11 +55,7 @@ class DeleteTaskUseCaseTest {
 
         val result = deleteTaskUseCase.deleteTask(taskIdWithError)
 
-
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(Exception::class.java)
     }
-
-
-
 }

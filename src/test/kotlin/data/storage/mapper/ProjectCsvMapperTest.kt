@@ -43,6 +43,16 @@ class ProjectCsvMapperTest {
     }
 
     @Test
+    fun `should map CSV line to Project entity line with empty states when state part is blank`() {
+
+        //Given / When
+        val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE_WITH_EMPTY_STATES)
+
+        // Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
+    }
+
+    @Test
     fun `should map Project entity to CSV line correctly`() {
 
         //Given / When

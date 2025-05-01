@@ -1,23 +1,34 @@
 package org.example.data.storage.task
 
 import org.example.data.storage.CsvStorageManager
-import org.example.data.storage.Mapper
-import org.example.data.storage.mapper.StateCsvMapper
+import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.domain.model.entities.Task
 import org.example.domain.model.exception.EiffelFlowException
 import java.util.UUID
 
 class TaskDataSourceImpl(
-    private val taskMapper: Mapper<String, Task>,
-    private val stateCsvMapper: StateCsvMapper,
+    private val taskMapper: TaskCsvMapper,
     private val csvManager: CsvStorageManager
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
-        TODO("Not yet implemented")
+        return try {
+            val csvLine = taskMapper.mapTo(task)
+            csvManager.writeLinesToFile(csvLine)
+            Result.success(task)
+        } catch (exception: Exception) {
+            Result.failure( EiffelFlowException.TaskCreationException(exception.message))
+        }
     }
 
-    override fun updateTask(task: Task): Result<Task> {
-        TODO("Not yet implemented")
+    override fun updateTask(task: Task, oldTask: Task): Result<Task> {
+        return try {
+            val taskCsv = taskMapper.mapTo(task)
+            val oldTaskCsv = taskMapper.mapTo(oldTask)
+            csvManager.updateLinesToFile(taskCsv, oldTaskCsv)
+            Result.success(task)
+        } catch (e: Exception) {
+            Result.failure(EiffelFlowException.TaskCreationException("Failed to update task: $e"))
+        }
     }
 
     override fun deleteTask(taskId: UUID): Result<Task> {
@@ -44,11 +55,22 @@ class TaskDataSourceImpl(
     }
 
     override fun getTaskById(taskId: UUID): Result<Task> {
-        TODO("Not yet implemented")
+        val lines = csvManager.readLinesFromFile()
+        val task = lines.find { taskMapper.mapFrom(it).taskId == taskId }
+        return if (task != null) {
+            Result.success(taskMapper.mapFrom(task))
+        } else {
+            Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+        }
     }
 
     override fun getTasks(): Result<List<Task>> {
-        TODO("Not yet implemented")
+        val lines = csvManager.readLinesFromFile().map { taskMapper.mapFrom(it) }
+        return if (lines.isNotEmpty()) {
+            Result.success(lines)
+        } else {
+            Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+        }
     }
 
     companion object {

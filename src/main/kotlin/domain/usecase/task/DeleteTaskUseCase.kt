@@ -4,10 +4,7 @@ import org.example.domain.model.entities.Task
 import org.example.domain.repository.TaskRepository
 import java.util.*
 
-
 class DeleteTaskUseCase(private val taskRepository: TaskRepository) {
 
-    fun deleteTask(taskId: UUID): Result<Task> {
-       return taskRepository.deleteTask(taskId)
-    }
+    fun deleteTask(taskId: UUID): Result<Task> = taskRepository.deleteTask(taskId)
 }
