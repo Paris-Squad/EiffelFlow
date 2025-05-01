@@ -34,7 +34,7 @@ class GetProjectsUseCaseTest {
         val result = getProjectsUseCase.getProjects()
 
         // Then
-        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockProjects.CORRECT_PROJECT))
+        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)
@@ -63,7 +63,7 @@ class GetProjectsUseCaseTest {
         val result = getProjectsUseCase.getProjectById(projectId)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(MockProjects.CORRECT_PROJECT)
+        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)

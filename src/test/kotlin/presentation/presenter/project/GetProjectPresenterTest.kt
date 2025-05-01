@@ -32,7 +32,7 @@ class GetProjectPresenterTest {
         val result = getProjectPresenter.getProjects()
 
         // Then
-        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockProjects.CORRECT_PROJECT))
+        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)
@@ -62,7 +62,7 @@ class GetProjectPresenterTest {
         val result = getProjectPresenter.getProjectById(projectId)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(MockProjects.CORRECT_PROJECT)
+        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)

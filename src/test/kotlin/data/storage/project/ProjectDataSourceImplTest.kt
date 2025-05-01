@@ -37,18 +37,18 @@ class ProjectDataSourceImplTest {
     fun `createProject should return success when project is written to CSV`() {
         try {
             every {
-                projectMapper.mapTo(MockProjects.CORRECT_PROJECT)
-            } returns MockProjects.CORRECT_CSV_STRING_LINE
+                projectMapper.mapTo(ProjectsMock.CORRECT_PROJECT)
+            } returns ProjectsMock.CORRECT_CSV_STRING_LINE
 
             every {
-                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+                csvStorageManager.writeLinesToFile(ProjectsMock.CORRECT_CSV_STRING_LINE + "\n")
             } just Runs
 
-            val result = projectDataSource.createProject(MockProjects.CORRECT_PROJECT)
+            val result = projectDataSource.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isSuccess)
             verify(exactly = 1) {
-                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+                csvStorageManager.writeLinesToFile(ProjectsMock.CORRECT_CSV_STRING_LINE + "\n")
             }
 
         } catch (e: NotImplementedError) {
@@ -59,16 +59,16 @@ class ProjectDataSourceImplTest {
     @Test
     fun `createProject should return failure when writeLinesToFile throws exception`() {
         try {
-            every { projectMapper.mapTo(MockProjects.CORRECT_PROJECT) } returns MockProjects.CORRECT_CSV_STRING_LINE
+            every { projectMapper.mapTo(ProjectsMock.CORRECT_PROJECT) } returns ProjectsMock.CORRECT_CSV_STRING_LINE
             every {
-                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+                csvStorageManager.writeLinesToFile(ProjectsMock.CORRECT_CSV_STRING_LINE + "\n")
             } throws Exception("Failed to write to file")
 
-            val result = projectDataSource.createProject(MockProjects.CORRECT_PROJECT)
+            val result = projectDataSource.createProject(ProjectsMock.CORRECT_PROJECT)
 
             Assertions.assertTrue(result.isFailure)
             verify(exactly = 1) {
-                csvStorageManager.writeLinesToFile(MockProjects.CORRECT_CSV_STRING_LINE + "\n")
+                csvStorageManager.writeLinesToFile(ProjectsMock.CORRECT_CSV_STRING_LINE + "\n")
             }
 
         } catch (e: NotImplementedError) {
@@ -128,14 +128,14 @@ class ProjectDataSourceImplTest {
 
         every {
             csvStorageManager.readLinesFromFile()
-        } returns MockProjects.CORRECT_CSV_STRING_LINE.split("\n")
+        } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When
         val result = projectDataSource.getProjects()
 
         // Then
         assertThat(result.getOrNull())
-            .containsExactlyElementsIn(listOf(MockProjects.CORRECT_PROJECT))
+            .containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)
@@ -160,17 +160,17 @@ class ProjectDataSourceImplTest {
     fun `should return Result of Project when the given Id match project record exists in CSV file`() {
         //Given
         every {
-            projectMapper.mapFrom(MockProjects.CORRECT_CSV_STRING_LINE)
+            projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
         } returns ProjectsMock.CORRECT_PROJECT
         every {
             csvStorageManager.readLinesFromFile()
         } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
         // When
-        val result = projectDataSource.getProjectById(MockProjects.CORRECT_PROJECT.projectId)
+        val result = projectDataSource.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
 
         //Then
-        assertThat(result.getOrNull()).isEqualTo(MockProjects.CORRECT_PROJECT)
+        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
     @Throws(EiffelFlowException.ElementNotFoundException::class)
