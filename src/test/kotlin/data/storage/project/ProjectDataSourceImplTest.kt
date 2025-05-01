@@ -125,7 +125,7 @@ class ProjectDataSourceImplTest {
             val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
             every { csvStorageManager.readLinesFromFile() } returns
                     ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
-            every { projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns correctProject
+            every { projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns ProjectsMock.CORRECT_PROJECT
 
             // When
             val result = projectDataSource.deleteProject(differentProjectId)

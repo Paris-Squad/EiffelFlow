@@ -144,7 +144,7 @@ class ProjectRepositoryImplTest {
                 newValue = ProjectsMock.CORRECT_PROJECT.projectName
             )
             val projectId = UUID.randomUUID()
-            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.success(auditLog)
 
             // When
@@ -186,7 +186,7 @@ class ProjectRepositoryImplTest {
         try {
             // Given
             val projectId = UUID.randomUUID()
-            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.failure(
                 EiffelFlowException.UnableToCreateAuditLogException()
             )
@@ -227,12 +227,12 @@ class ProjectRepositoryImplTest {
             projectDataSource.getProjects()
         } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
-        // When / Then
-        try {
-            val result = projectRepository.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = projectRepository.getProjects()
+
+        // Then
+        assertThat(result.getOrNull())
+            .containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
     //endregion
 
