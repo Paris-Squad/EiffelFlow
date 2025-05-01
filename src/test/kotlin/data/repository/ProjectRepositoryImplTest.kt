@@ -119,14 +119,80 @@ class ProjectRepositoryImplTest {
 
     @Test
     fun `deleteProject should return the deleted project`() {
-        val projectId = UUID.randomUUID()
-
         try {
+            // Given
+            val auditLog = AuditLog(
+                auditId = UUID.randomUUID(),
+                itemId = project.projectId,
+                itemName = project.projectName,
+                userId = project.adminId,
+                editorName = "Admin",
+                actionType = AuditAction.DELETE,
+                auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+                changedField = null,
+                oldValue = null,
+                newValue = project.projectName
+            )
+            val projectId = UUID.randomUUID()
+            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { auditDataSource.createAuditLog(any()) } returns Result.success(auditLog)
+
+            // When
             projectRepository.deleteProject(projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+
+            // Then
+            verify(exactly = 1) { projectDataSource.deleteProject(any()) }
+            verify(exactly = 1) { auditDataSource.createAuditLog(any()) }
+        }catch (exception : NotImplementedError){
+            assertThat(exception.message).contains("Not yet implemented")
         }
     }
+
+    @Test
+    fun `deleteProject should throw UnableToDeleteProjectException when deleteProject returns failure`(){
+        try {
+            // Given
+            val projectId = UUID.randomUUID()
+            every { projectDataSource.deleteProject(any()) } returns Result.failure(EiffelFlowException.UnableToDeleteProjectException())
+
+            // When
+            val result = projectRepository.deleteProject(projectId)
+
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.UnableToDeleteProjectException::class.java
+            )
+        }catch (e : NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+
+
+
+    }
+
+    @Test
+    fun `deleteProject should throw UnableToCreateAuditLogException when createAuditLog returns failure`(){
+        try {
+            // Given
+            val projectId = UUID.randomUUID()
+            every { projectDataSource.deleteProject(any()) } returns Result.success(project)
+            every { auditDataSource.createAuditLog(any()) } returns Result.failure(
+                EiffelFlowException.UnableToCreateAuditLogException()
+            )
+            // When
+            val result = projectRepository.deleteProject(projectId)
+
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.UnableToCreateAuditLogException::class.java
+            )
+        }catch (e: NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+
 
     @Test
     fun `should return Result of empty list of Projects when there is no project in data source`() {
