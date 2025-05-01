@@ -4,7 +4,7 @@ import org.example.domain.model.entities.Task
 import org.example.domain.repository.TaskRepository
 
 class CreateTaskUseCase(
-    val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository
 ) {
     fun createTask(task: Task): Result<Task> {
         return taskRepository.createTask(task)

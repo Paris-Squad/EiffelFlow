@@ -4,12 +4,12 @@ import io.mockk.mockk
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.usecase.project.CreateProjectUseCase
 import org.junit.jupiter.api.BeforeEach
-import utils.MockProjects
 import io.mockk.verify
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.Test
+import utils.ProjectsMock
 
 
 class CreateProjectUseCaseTest {
@@ -57,6 +57,6 @@ class CreateProjectUseCaseTest {
 
 
     companion object{
-        private val correctProject = MockProjects.CORRECT_PROJECT
+        private val correctProject = ProjectsMock.CORRECT_PROJECT
     }
 }

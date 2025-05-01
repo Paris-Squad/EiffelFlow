@@ -1,4 +1,4 @@
-package common
+package utils
 
 import kotlinx.datetime.LocalDateTime
 import org.example.domain.model.entities.AuditAction

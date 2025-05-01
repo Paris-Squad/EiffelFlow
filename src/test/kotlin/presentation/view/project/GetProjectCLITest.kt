@@ -8,7 +8,7 @@ import org.example.presentation.presenter.project.GetProjectPresenter
 import org.example.presentation.view.project.GetProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockProjects
+import utils.ProjectsMock
 import java.util.UUID
 
 class ProjectViewTest {
@@ -40,7 +40,7 @@ class ProjectViewTest {
         // Given
         every {
             getProjectPresenter.getProjects()
-        } returns Result.success(listOf(MockProjects.CORRECT_PROJECT))
+        } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
         // When / Then
         try {
@@ -68,10 +68,10 @@ class ProjectViewTest {
     @Test
     fun `should print single Project when project with given id founded`() {
         // Given
-        val projectId = MockProjects.CORRECT_PROJECT.projectId
+        val projectId = ProjectsMock.CORRECT_PROJECT.projectId
         every {
             getProjectPresenter.getProjectById(projectId)
-        } returns Result.success(MockProjects.CORRECT_PROJECT)
+        } returns Result.success(ProjectsMock.CORRECT_PROJECT)
 
         // When / Then
         try {
