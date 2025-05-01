@@ -1,8 +1,8 @@
 package data.storage.task
 
 import com.google.common.truth.Truth.assertThat
-import common.TaskMock.ValidTaskCSV
-import common.TaskMock.validTask
+import utils.TaskMock.ValidTaskCSV
+import utils.TaskMock.validTask
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk

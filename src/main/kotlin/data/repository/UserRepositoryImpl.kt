@@ -7,7 +7,6 @@ import org.example.domain.repository.UserRepository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.common.Constants.USER
 import org.example.domain.model.entities.AuditAction
 import org.example.domain.model.entities.AuditLog
 import java.util.UUID
@@ -16,14 +15,14 @@ class UserRepositoryImpl(
     private val userDataSource: UserDataSource,
     private val auditDataSource: AuditDataSource,
 ) : UserRepository {
-    override fun createUser(user: User): Result<User> {
+    override fun createUser(user: User, createdBy: User): Result<User> {
         return userDataSource.createUser(user).also { result ->
             result.onSuccess { createdUser ->
                 val auditLog = AuditLog(
                     itemId = createdUser.userId,
-                    itemName = USER,
+                    itemName = createdUser.username,
                     userId = createdUser.userId,
-                    userName = createdUser.username,
+                    editorName = createdBy.username,
                     actionType = AuditAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
