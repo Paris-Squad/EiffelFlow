@@ -13,7 +13,7 @@ class AuditDataSourceImpl(
         TODO("Not yet implemented")
     }
 
-    override fun getAuditLogById(auditLogID: UUID): Result<AuditLog> {
+    override fun getItemAuditLogById(itemId: UUID): Result<List<AuditLog>> {
         TODO("Not yet implemented")
     }
 
