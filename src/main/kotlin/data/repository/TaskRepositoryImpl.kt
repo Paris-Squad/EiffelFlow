@@ -25,7 +25,7 @@ class TaskRepositoryImpl(
                     itemId = task.taskId,
                     itemName = task.title,
                     userId = task.creatorId,
-                    userName = "Admin",
+                    editorName = "Admin",
                     actionType = AuditAction.CREATE,
                     auditTime = task.createdAt,
                     changedField = null,

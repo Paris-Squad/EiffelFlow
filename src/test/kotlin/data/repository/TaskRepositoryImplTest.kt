@@ -15,6 +15,7 @@ import utils.UserMock.validUser
 import java.io.IOException
 import java.util.*
 import org.example.data.repository.TaskRepositoryImpl
+import utils.TaskMock.validAuditLog
 
 class TaskRepositoryImplTest {
 

@@ -1,7 +1,6 @@
 package org.example.data.storage.task
 
 import org.example.data.storage.CsvStorageManager
-import org.example.data.storage.mapper.StateCsvMapper
 import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.domain.model.entities.Task
 import org.example.domain.model.exception.EiffelFlowException
@@ -9,17 +8,15 @@ import java.util.UUID
 
 class TaskDataSourceImpl(
     private val taskMapper: TaskCsvMapper,
-    private val stateCsvMapper: StateCsvMapper,
     private val csvManager: CsvStorageManager
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
         return try {
-            val stateAsString = stateCsvMapper.mapTo(task.state)
-            val csvLine = taskMapper.mapTo(task)+ "$stateAsString\n"
+            val csvLine = taskMapper.mapTo(task)
             csvManager.writeLinesToFile(csvLine)
             Result.success(task)
         } catch (exception: Exception) {
-            Result.failure(exception)
+            Result.failure( EiffelFlowException.TaskCreationException(exception.message))
         }
     }
 

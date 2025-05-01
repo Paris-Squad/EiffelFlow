@@ -46,7 +46,7 @@ object TaskMock {
         itemId = validTask.taskId,
         itemName = validTask.title,
         userId = validTask.creatorId,
-        userName = "Admin",
+        editorName = "Admin",
         actionType = AuditAction.CREATE,
         auditTime = validTask.createdAt,
         changedField = null,
