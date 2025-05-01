@@ -100,7 +100,7 @@ class TaskDataSourceImplTest {
         every { csvStorageManager.updateLinesToFile(ValidTaskCSV, ValidTaskCSV) } throws exception
 
         try {
-            val result = taskDataSource.createTask(validTask)
+            val result = taskDataSource.updateTask(validTask)
             assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
