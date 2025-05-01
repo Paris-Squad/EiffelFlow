@@ -19,15 +19,7 @@ class ProjectCsvMapper : Mapper<String, Project> {
             projectDescription = parts[ProjectCsvColumnIndex.PROJECT_DESCRIPTION],
             createdAt = LocalDateTime.parse(parts[ProjectCsvColumnIndex.CREATED_AT]),
             adminId = UUID.fromString(parts[ProjectCsvColumnIndex.ADMIN_ID]),
-            states = statesPart.split(";").mapNotNull { stateStr ->
-                stateStr.trim().takeIf { it.isNotEmpty() }?.let {
-                    val stateParts = it.split(",")
-                    State(
-                        stateId = UUID.fromString(stateParts[0]),
-                        name = stateParts[1].trim()
-                    )
-                }
-            })
+            states = mappingStateList(statesPart))
     }
 
     override fun mapTo(output: Project): String {
@@ -42,5 +34,17 @@ class ProjectCsvMapper : Mapper<String, Project> {
             "[$statesString]"
         ).joinToString(",")
     }
+
+    private fun mappingStateList(statesPart: String)=
+        statesPart.split(";").mapNotNull { stateStr ->
+            stateStr.trim().takeIf { it.isNotEmpty() }?.let {
+                val stateParts = it.split(",")
+                State(
+                    stateId = UUID.fromString(stateParts[0]),
+                    name = stateParts[1].trim()
+                )
+            }
+        }
+
 }
 
