@@ -125,7 +125,7 @@ class ProjectRepositoryImplTest {
             itemId = project.projectId,
             itemName = project.projectName,
             userId = project.adminId,
-            userName = "Admin",
+            editorName = "Admin",
             actionType = AuditAction.DELETE,
             auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
             changedField = null,
