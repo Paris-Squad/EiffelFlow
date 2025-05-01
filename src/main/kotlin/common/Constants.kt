@@ -1,5 +1,0 @@
-package org.example.common
-
-object Constants {
-    const val USER = "user"
-}

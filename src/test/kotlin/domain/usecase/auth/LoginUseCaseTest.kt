@@ -13,7 +13,7 @@ import org.example.domain.usecase.auth.ValidateUserNameUseCase
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.MockUser
+import utils.UserMock
 
 
 
@@ -31,12 +31,12 @@ class LoginUseCaseTest {
     @Test
     fun `login should return success when credentials are correct`() {
         // Given
-        every { validateUsernameUseCase.validateUserName(MockUser.validUser.username) } returns Result.success(Unit)
-        every { validatePasswordUseCase.validatePassword(MockUser.validUser.password) } returns Result.success(Unit)
-        every { userRepository.getUsers() } returns Result.success(MockUser.userList)
+        every { validateUsernameUseCase.validateUserName(UserMock.validUser.username) } returns Result.success(Unit)
+        every { validatePasswordUseCase.validatePassword(UserMock.validUser.password) } returns Result.success(Unit)
+        every { userRepository.getUsers() } returns Result.success(UserMock.userList)
 
         // When
-        val result = loginUseCase.login(MockUser.validUser.username, MockUser.validUser.password)
+        val result = loginUseCase.login(UserMock.validUser.username, UserMock.validUser.password)
 
         // Then
         assertTrue(result.isSuccess)
@@ -45,9 +45,9 @@ class LoginUseCaseTest {
     @Test
     fun `login should return failure when password are incorrect`(){
         //Given
-            every { userRepository.getUsers() } returns Result.success(listOf(MockUser.validUser))
+            every { userRepository.getUsers() } returns Result.success(listOf(UserMock.validUser))
         //When
-            val result = loginUseCase.login(MockUser.validUser.username, MockUser.invalidUser.password)
+            val result = loginUseCase.login(UserMock.validUser.username, UserMock.invalidUser.password)
         //Then
             assertTrue(result.isFailure)
             assertEquals("Password validation failed: Invalid password", result.exceptionOrNull()?.message)
@@ -55,9 +55,9 @@ class LoginUseCaseTest {
     @Test
     fun `login should return failure when userName are incorrect`(){
         //Given
-        every { userRepository.getUsers() } returns Result.success(listOf(MockUser.validUser))
+        every { userRepository.getUsers() } returns Result.success(listOf(UserMock.validUser))
         //When
-        val result = loginUseCase.login("wrong username", MockUser.validUser.password)
+        val result = loginUseCase.login("wrong username", UserMock.validUser.password)
         //Then
         assertTrue(result.isFailure)
         assertEquals("Username validation failed: Invalid userName", result.exceptionOrNull()?.message)
@@ -80,22 +80,22 @@ class LoginUseCaseTest {
         val validationException =
             EiffelFlowException.UserNameValidationException(setOf(ValidationMessages.ValidationRule.USERNAME_TOO_LONG))
 
-        every { validateUsernameUseCase.validateUserName(MockUser.invalidUser.username) } returns Result.failure(validationException)
+        every { validateUsernameUseCase.validateUserName(UserMock.invalidUser.username) } returns Result.failure(validationException)
 
-        val result = loginUseCase.login(MockUser.invalidUser.username, MockUser.validUser.password)
+        val result = loginUseCase.login(UserMock.invalidUser.username, UserMock.validUser.password)
 
         assertTrue(result.isFailure)
         assertEquals(validationException, result.exceptionOrNull())
 
-        verify { validateUsernameUseCase.validateUserName(MockUser.invalidUser.username) }
+        verify { validateUsernameUseCase.validateUserName(UserMock.invalidUser.username) }
     }
     @Test
     fun `register should fail when password validation fails`() {
         val validationException = EiffelFlowException.PasswordValidationException(setOf(ValidationMessages.ValidationRule.PASSWORD_TOO_SHORT))
 
-        every { validatePasswordUseCase.validatePassword(MockUser.invalidUser.password) } returns Result.failure(validationException)
+        every { validatePasswordUseCase.validatePassword(UserMock.invalidUser.password) } returns Result.failure(validationException)
 
-        val result = loginUseCase.login(MockUser.validUser.username, MockUser.invalidUser.password)
+        val result = loginUseCase.login(UserMock.validUser.username, UserMock.invalidUser.password)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(validationException::class.java)
     }
