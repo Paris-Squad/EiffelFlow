@@ -12,9 +12,7 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
     class UserNameValidationException(errors: Set<Constants.ValidationRule>) :
         EiffelFlowException("Username validation failed: ${errors.joinToString(", ") { it.message }}")
 
-    class UsernameAlreadyExistsException : EiffelFlowException("Username already exists")
-
-    class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
+    class AuthorizationException(message: String?) : EiffelFlowException(message)
 
     class NotFoundException(message: String?) : EiffelFlowException(message)
 

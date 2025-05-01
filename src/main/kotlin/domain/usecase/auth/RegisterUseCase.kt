@@ -14,7 +14,7 @@ class RegisterUseCase(
 ) {
     fun register(username: String, password: String, role: RoleType, creator: User): Result<User> {
         if (creator.role != RoleType.ADMIN) {
-            return Result.failure(EiffelFlowException.UnauthorizedRegistrationException())
+            return Result.failure(EiffelFlowException.AuthorizationException("Only admins can register users."))
         }
 
         val usernameValidation = validateUsername(username)
@@ -45,7 +45,7 @@ class RegisterUseCase(
 
     private fun onCheckUsernameAvailability(username: String, existingUsers: List<User>): Result<Unit> {
         return if (existingUsers.any { it.username.equals(username, ignoreCase = true) }) {
-            Result.failure(EiffelFlowException. UsernameAlreadyExistsException())
+            Result.failure(EiffelFlowException. AuthorizationException("Username '$username' is already taken. Please choose another username."))
         } else {
             Result.success(Unit)
         }

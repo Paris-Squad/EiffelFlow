@@ -55,7 +55,7 @@ class RegisterUseCaseTest {
     fun `register with non-admin caller role should fail with unauthorized exception`() {
         val result = registerUseCase.register(username, password, mateRole, validUser)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UnauthorizedRegistrationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
     }
 
     @Test
@@ -118,7 +118,7 @@ class RegisterUseCaseTest {
 
         val result = registerUseCase.register(username, password, mateRole, adminUser)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UsernameAlreadyExistsException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
     }
 
     @Test
