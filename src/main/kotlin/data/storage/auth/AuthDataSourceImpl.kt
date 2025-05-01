@@ -1,11 +1,11 @@
 package org.example.data.storage.auth
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import java.io.FileNotFoundException
 import java.util.UUID
 
 class AuthDataSourceImpl(
-    private val storageManager: CsvStorageManager
+    private val storageManager: FileStorageManager
 ) : AuthDataSource {
     override fun saveUserLogin(userID: UUID): Result<Boolean> {
         return try {

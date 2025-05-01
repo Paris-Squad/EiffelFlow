@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileStorageManager
 import org.example.data.storage.auth.AuthDataSource
 import org.example.data.storage.auth.AuthDataSourceImpl
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +16,7 @@ import java.util.*
 
 class AuthDataSourceImplTest {
     private lateinit var authDataSource: AuthDataSource
-    private val fileManager: CsvStorageManager = mockk()
+    private val fileManager: FileStorageManager = mockk()
 
     @BeforeEach
     fun setUp() {

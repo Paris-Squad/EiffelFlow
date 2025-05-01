@@ -64,7 +64,7 @@ val appModule = module {
     }
 
     single<AuthDataSource> {
-        AuthDataSourceImpl(CsvStorageManager(File(AuthDataSourceImpl.FILE_NAME)))
+        AuthDataSourceImpl(FileStorageManager(File(AuthDataSourceImpl.FILE_NAME)))
     }
 
     //repose

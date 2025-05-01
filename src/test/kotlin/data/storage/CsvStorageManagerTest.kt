@@ -131,7 +131,7 @@ class CsvStorageManagerTest {
     fun `should throw FileNotFoundException when file does not exist for clearFile`() {
         // Given
         val nonExistentFile = File(tempDir, "notExistFile.csv")
-        val csvStorageManager = CsvStorageManager(nonExistentFile)
+        val csvStorageManager = FileStorageManager(nonExistentFile)
 
         // When/Then
         assertThrows<FileNotFoundException> {
@@ -145,7 +145,7 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "file_to_clear.csv").apply {
             writeText(DUMMY_FILE_CONTENT)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileStorageManager(testFile)
 
         // When
         csvStorageManager.clearFile()
