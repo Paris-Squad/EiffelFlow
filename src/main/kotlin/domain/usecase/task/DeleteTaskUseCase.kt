@@ -1,6 +1,6 @@
 package org.example.domain.usecase.task
 
-import org.example.domain.model.entities.Task
+import org.example.domain.model.Task
 import org.example.domain.repository.TaskRepository
 import java.util.*
 

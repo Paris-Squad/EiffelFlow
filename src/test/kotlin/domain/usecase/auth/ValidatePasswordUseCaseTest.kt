@@ -2,7 +2,7 @@ package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
 import org.example.common.Constants
-import org.example.domain.model.exception.EiffelFlowException.PasswordValidationException
+import org.example.domain.exception.EiffelFlowException.PasswordValidationException
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

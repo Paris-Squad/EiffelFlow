@@ -2,7 +2,7 @@ package data.storage.mapper
 
 import com.google.common.truth.Truth.assertThat
 import org.example.data.storage.mapper.StateCsvMapper
-import org.example.domain.model.entities.State
+import org.example.domain.model.TaskState
 import java.util.*
 import kotlin.test.Test
 
@@ -32,7 +32,7 @@ class StateCsvMapperTest {
     }
 
     companion object {
-        private val STATE = State(
+        private val STATE = TaskState(
             stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748"),
             name = "In Progress"
         )

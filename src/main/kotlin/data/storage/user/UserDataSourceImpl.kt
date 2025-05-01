@@ -2,8 +2,8 @@ package org.example.data.storage.user
 
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.Mapper
-import org.example.domain.model.exception.EiffelFlowException
-import org.example.domain.model.entities.User
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.User
 import java.io.FileNotFoundException
 import java.util.UUID
 

@@ -3,7 +3,7 @@ package domain.usecase.project
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.junit.jupiter.api.BeforeEach

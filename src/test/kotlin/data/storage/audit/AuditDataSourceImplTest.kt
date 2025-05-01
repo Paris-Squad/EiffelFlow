@@ -10,7 +10,7 @@ import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.audit.AuditDataSourceImpl
 import org.example.data.storage.mapper.AuditCsvMapper
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog

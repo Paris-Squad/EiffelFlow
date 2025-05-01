@@ -1,8 +1,8 @@
 package org.example.domain.usecase.auth
 
-import org.example.domain.model.exception.EiffelFlowException
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
 import kotlin.Result
 

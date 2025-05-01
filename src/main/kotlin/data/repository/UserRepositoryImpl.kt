@@ -2,13 +2,13 @@ package org.example.data.repository
 
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.user.UserDataSource
-import org.example.domain.model.entities.User
+import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
 import java.util.UUID
 
 class UserRepositoryImpl(
@@ -23,7 +23,7 @@ class UserRepositoryImpl(
                     itemName = createdUser.username,
                     userId = createdUser.userId,
                     editorName = createdBy.username,
-                    actionType = AuditAction.CREATE,
+                    actionType = AuditLogAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,

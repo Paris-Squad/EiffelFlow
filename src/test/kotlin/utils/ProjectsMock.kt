@@ -1,8 +1,8 @@
 package utils
 
 import kotlinx.datetime.LocalDateTime
-import org.example.domain.model.entities.Project
-import org.example.domain.model.entities.State
+import org.example.domain.model.Project
+import org.example.domain.model.TaskState
 import java.util.UUID
 
 object ProjectsMock {
@@ -12,12 +12,12 @@ object ProjectsMock {
         projectDescription = "Description1",
         createdAt = LocalDateTime.parse("1999-08-07T22:22:22"),
         adminId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5741"),
-        states = listOf(
-            State(
+        taskStates = listOf(
+            TaskState(
                 stateId = UUID.fromString("8d4f05a4-5717-4562-b3fc-2c963f66afa7"),
                 name = "Backlog"
             ),
-            State(
+            TaskState(
                 stateId = UUID.fromString("9e4f05a4-5717-4562-b3fc-2c963f66afa8"),
                 name = "In Progress"
             )

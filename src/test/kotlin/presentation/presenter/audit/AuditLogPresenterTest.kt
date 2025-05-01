@@ -3,7 +3,7 @@ package presentation.presenter.audit
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.example.presentation.presenter.audit.GetProjectAuditLogsPresenter
 import org.junit.jupiter.api.BeforeEach

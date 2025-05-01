@@ -4,8 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import domain.usecase.task.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.junit.jupiter.api.BeforeEach

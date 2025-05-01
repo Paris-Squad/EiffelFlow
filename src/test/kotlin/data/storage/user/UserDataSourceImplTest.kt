@@ -9,9 +9,9 @@ import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.UserCsvMapper
 import org.example.data.storage.user.UserDataSource
 import org.example.data.storage.user.UserDataSourceImpl
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException

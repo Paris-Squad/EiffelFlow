@@ -2,8 +2,8 @@ package org.example.data.storage.project
 
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.Mapper
-import org.example.domain.model.entities.Project
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.Project
+import org.example.domain.exception.EiffelFlowException
 import java.util.UUID
 
 class ProjectDataSourceImpl(

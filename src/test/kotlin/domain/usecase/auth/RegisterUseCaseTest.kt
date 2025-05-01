@@ -5,9 +5,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.example.common.Constants
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.auth.RegisterUseCase

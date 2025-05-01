@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.example.common.Constants
 import org.example.data.repository.AuthRepositoryImpl
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.LoginUseCase
 import org.example.domain.usecase.auth.ValidatePasswordUseCase

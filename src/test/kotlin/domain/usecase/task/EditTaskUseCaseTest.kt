@@ -5,9 +5,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.example.common.Constants
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.State
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.TaskState
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.EditTaskUseCase
 import org.junit.jupiter.api.BeforeEach
@@ -187,7 +187,7 @@ class EditTaskUseCaseTest {
     @Test
     fun `editTask should identify state changes`() {
         val originalTask = validTask
-        val updatedTask = originalTask.copy(state = State(name = "in progress"))
+        val updatedTask = originalTask.copy(state = TaskState(name = "in progress"))
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
         every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(

@@ -2,8 +2,8 @@ package org.example.data.storage.audit
 
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.AuditCsvMapper
-import org.example.domain.model.entities.AuditLog
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.AuditLog
+import org.example.domain.exception.EiffelFlowException
 import java.util.UUID
 
 class AuditDataSourceImpl(

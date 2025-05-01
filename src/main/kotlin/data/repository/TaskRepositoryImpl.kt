@@ -5,10 +5,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.task.TaskDataSource
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
-import org.example.domain.model.entities.Task
-import org.example.domain.model.entities.User
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
+import org.example.domain.model.Task
+import org.example.domain.model.User
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
@@ -26,7 +26,7 @@ class TaskRepositoryImpl(
                     itemName = task.title,
                     userId = task.creatorId,
                     editorName = "Admin",
-                    actionType = AuditAction.CREATE,
+                    actionType = AuditLogAction.CREATE,
                     auditTime = task.createdAt,
                     changedField = null,
                     oldValue = null,
@@ -69,7 +69,7 @@ class TaskRepositoryImpl(
             itemName = task.title,
             userId = editor.userId,
             editorName = editor.username,
-            actionType = AuditAction.UPDATE,
+            actionType = AuditLogAction.UPDATE,
             auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
             changedField = changedField,
             oldValue = oldTask.toString(),

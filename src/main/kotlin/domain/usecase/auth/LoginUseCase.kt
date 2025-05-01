@@ -3,8 +3,8 @@ package org.example.domain.usecase.auth
 
 import org.example.common.Constants
 import org.example.data.repository.AuthRepositoryImpl
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 
 

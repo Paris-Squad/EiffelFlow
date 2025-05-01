@@ -8,8 +8,8 @@ import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.ProjectCsvMapper
 import org.example.data.storage.project.ProjectDataSource
 import org.example.data.storage.project.ProjectDataSourceImpl
-import org.example.domain.model.exception.EiffelFlowException
-import org.example.domain.model.entities.Project
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
@@ -84,7 +84,7 @@ class ProjectDataSourceImplTest {
             projectDescription = "Updated Description",
             createdAt = LocalDateTime(2023, 1, 1, 12, 0),
             adminId = UUID.randomUUID(),
-            states = emptyList()
+            taskStates = emptyList()
         )
 
         try {

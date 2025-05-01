@@ -1,6 +1,6 @@
 package org.example.domain.usecase.auth
 
-import org.example.domain.model.exception.EiffelFlowException.PasswordValidationException
+import org.example.domain.exception.EiffelFlowException.PasswordValidationException
 import org.example.common.Constants
 
 class ValidatePasswordUseCase {

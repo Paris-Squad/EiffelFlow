@@ -1,6 +1,6 @@
 package org.example.domain.repository
 
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLog
 import java.util.UUID
 
 interface AuditRepository {

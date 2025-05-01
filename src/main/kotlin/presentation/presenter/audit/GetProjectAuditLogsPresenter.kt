@@ -1,6 +1,6 @@
 package org.example.presentation.presenter.audit
 
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import java.util.UUID
 

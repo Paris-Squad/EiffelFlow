@@ -1,7 +1,7 @@
 package org.example.data.repository
 
 import org.example.data.storage.audit.AuditDataSource
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import java.util.UUID
 

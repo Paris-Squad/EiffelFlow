@@ -6,18 +6,18 @@ import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.ProjectRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.project.ProjectDataSource
-import org.example.domain.model.entities.Project
+import org.example.domain.model.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
 import io.mockk.verify
 import io.mockk.every
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.Assertions
 import utils.ProjectsMock
@@ -48,7 +48,7 @@ class ProjectRepositoryImplTest {
                     itemName = ProjectsMock.CORRECT_PROJECT.projectName,
                     userId = ProjectsMock.CORRECT_PROJECT.adminId,
                     editorName = "Admin",
-                    actionType = AuditAction.CREATE,
+                    actionType = AuditLogAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,
@@ -117,7 +117,7 @@ class ProjectRepositoryImplTest {
             projectDescription = "Updated Description",
             createdAt = LocalDateTime(2023, 1, 1, 12, 0),
             adminId = UUID.randomUUID(),
-            states = emptyList()
+            taskStates = emptyList()
         )
 
         try {
@@ -137,7 +137,7 @@ class ProjectRepositoryImplTest {
                 itemName = ProjectsMock.CORRECT_PROJECT.projectName,
                 userId = ProjectsMock.CORRECT_PROJECT.adminId,
                 editorName = "Admin",
-                actionType = AuditAction.DELETE,
+                actionType = AuditLogAction.DELETE,
                 auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                 changedField = null,
                 oldValue = null,

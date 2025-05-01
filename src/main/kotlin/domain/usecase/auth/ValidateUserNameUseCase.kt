@@ -1,7 +1,7 @@
 package org.example.domain.usecase.auth
 
 import org.example.common.Constants
-import org.example.domain.model.exception.EiffelFlowException.UserNameValidationException
+import org.example.domain.exception.EiffelFlowException.UserNameValidationException
 
 class ValidateUserNameUseCase {
     fun validateUserName(userName: String): Result<Unit> {

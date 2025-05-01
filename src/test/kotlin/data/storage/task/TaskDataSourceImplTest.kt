@@ -9,7 +9,7 @@ import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.data.storage.task.TaskDataSource
 import org.example.data.storage.task.TaskDataSourceImpl
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.TaskMock.ValidTaskCSV

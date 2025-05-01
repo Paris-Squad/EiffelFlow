@@ -1,4 +1,4 @@
-package org.example.domain.model.exception
+package org.example.domain.exception
 
 import org.example.common.Constants
 

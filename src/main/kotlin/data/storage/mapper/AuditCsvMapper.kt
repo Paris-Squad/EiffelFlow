@@ -3,8 +3,8 @@ package org.example.data.storage.mapper
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.Mapper
 import org.example.data.utils.AuditCsvColumnIndex
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
 import java.util.UUID
 
 class AuditCsvMapper : Mapper<String, AuditLog> {
@@ -17,7 +17,7 @@ class AuditCsvMapper : Mapper<String, AuditLog> {
             itemName = parts[AuditCsvColumnIndex.ITEM_NAME],
             userId = UUID.fromString(parts[AuditCsvColumnIndex.USER_ID]),
             editorName = parts[AuditCsvColumnIndex.USER_NAME],
-            actionType = AuditAction.valueOf(parts[AuditCsvColumnIndex.ACTION_TYPE]),
+            actionType = AuditLogAction.valueOf(parts[AuditCsvColumnIndex.ACTION_TYPE]),
             auditTime = LocalDateTime.parse(parts[AuditCsvColumnIndex.AUDIT_TIME]),
             changedField = parts[AuditCsvColumnIndex.CHANGED_FIELD].takeIf { it.isNotBlank() },
             oldValue = parts[AuditCsvColumnIndex.OLD_VALUE].takeIf { it.isNotBlank() },

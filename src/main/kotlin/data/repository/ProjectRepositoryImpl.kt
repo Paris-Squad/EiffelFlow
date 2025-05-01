@@ -5,9 +5,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.project.ProjectDataSource
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
-import org.example.domain.model.entities.Project
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
+import org.example.domain.model.Project
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
@@ -29,7 +29,7 @@ class ProjectRepositoryImpl(
                     itemName = createdProject.projectName,
                     userId = createdProject.adminId,
                     editorName = "Admin",
-                    actionType = AuditAction.CREATE,
+                    actionType = AuditLogAction.CREATE,
                     auditTime = currentTime,
                     changedField = null,
                     oldValue = null,
@@ -62,7 +62,7 @@ class ProjectRepositoryImpl(
                     itemName = project.projectName,
                     userId = project.adminId,
                     editorName = "Admin",
-                    actionType = AuditAction.DELETE,
+                    actionType = AuditLogAction.DELETE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,
