@@ -55,6 +55,32 @@ class TaskDataSourceImplTest {
     }
 
     @Test
+    fun `createTask should return failure when title is blank`() {
+        val invalidTask = Task(
+            title = "",
+            description = "Test",
+            createdAt = LocalDateTime(2023, 1, 1, 12, 0),
+            creatorId = UUID.randomUUID(),
+            projectId = UUID.randomUUID(),
+            assignedId = UUID.randomUUID(),
+            role = RoleType.MATE,
+            state = State(name = "test")
+        )
+
+        try {
+            val result = taskDataSource.createTask(invalidTask)
+
+            assertThat(result.isFailure).isTrue()
+            result.exceptionOrNull()?.let {
+                assertThat(it.message).contains("Title must not be blank")
+            }
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+
+    @Test
     fun `updateTask should return success when task is valid`() {
         every { taskMapper.mapTo(validTask) } returns ValidTaskCSV
         every { taskMapper.mapTo(inProgressTask) } returns ValidTaskCSV
