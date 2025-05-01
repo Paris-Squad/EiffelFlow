@@ -24,7 +24,7 @@ import java.io.File
 val appModule = module {
 
     single<AuditCsvMapper> { AuditCsvMapper() }
-    single<ProjectCsvMapper> { ProjectCsvMapper() }
+    single<ProjectCsvMapper> { ProjectCsvMapper(get()) }
     single<TaskCsvMapper> { TaskCsvMapper(get()) }
     single<StateCsvMapper> { StateCsvMapper() }
     single<UserCsvMapper> { UserCsvMapper() }
