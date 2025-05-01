@@ -45,9 +45,9 @@ tasks.named<JacocoReport>("jacocoTestReport") {
             fileTree(it) {
                 exclude("org/example/domain/model/**")
                 exclude("org/example/domain/exception/**")
+                exclude("org/example/domain/utils/**")
                 exclude("org/example/di/**")
                 exclude("org/example/MainKt.class")
-                exclude("org/example/common/**")
             }
         })
     )

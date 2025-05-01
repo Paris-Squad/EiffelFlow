@@ -1,7 +1,7 @@
 package org.example.domain.usecase.auth
 
 
-import org.example.common.Constants
+import org.example.domain.utils.ValidationErrorMessage
 import org.example.data.repository.AuthRepositoryImpl
 import org.example.domain.model.User
 import org.example.domain.exception.EiffelFlowException
@@ -34,9 +34,9 @@ class LoginUseCase(
 
     private fun validateUser(users: List<User>, username: String, password: String): User{
         val user=users.find { it.username==username }
-            ?: throw EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.INVALID_USERNAME))
+            ?: throw EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.INVALID_USERNAME))
         if(user.password!=password){
-            throw EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.INVALID_PASSWORD))
+            throw EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.INVALID_PASSWORD))
         }
         return user
     }

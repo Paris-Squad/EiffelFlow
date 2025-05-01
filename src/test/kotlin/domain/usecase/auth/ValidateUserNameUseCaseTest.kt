@@ -1,7 +1,7 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
-import org.example.common.Constants
+import org.example.domain.utils.ValidationErrorMessage
 import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.usecase.auth.ValidateUserNameUseCase
 import org.junit.jupiter.api.Nested
@@ -75,7 +75,7 @@ class ValidateUserNameUseCaseTest {
 
             val errors = useCase.getUserNameValidationErrors(invalidUsername)
 
-            assertThat(errors).contains(Constants.ValidationRule.USERNAME_TOO_SHORT)
+            assertThat(errors).contains(ValidationErrorMessage.USERNAME_TOO_SHORT)
         }
 
         @Test
@@ -84,7 +84,7 @@ class ValidateUserNameUseCaseTest {
 
             val errors = useCase.getUserNameValidationErrors(invalidUsername)
 
-            assertThat(errors).contains(Constants.ValidationRule.USERNAME_TOO_LONG)
+            assertThat(errors).contains(ValidationErrorMessage.USERNAME_TOO_LONG)
         }
 
         @Test
@@ -93,7 +93,7 @@ class ValidateUserNameUseCaseTest {
 
             invalidUserNames.forEach { username ->
                 val errors = useCase.getUserNameValidationErrors(username)
-                assertThat(errors).contains(Constants.ValidationRule.USERNAME_INVALID_CHARACTERS)
+                assertThat(errors).contains(ValidationErrorMessage.USERNAME_INVALID_CHARACTERS)
             }
         }
 

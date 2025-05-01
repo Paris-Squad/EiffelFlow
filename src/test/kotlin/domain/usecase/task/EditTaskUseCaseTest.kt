@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.example.common.Constants
 import org.example.domain.model.RoleType
 import org.example.domain.model.TaskState
 import org.example.domain.exception.EiffelFlowException
@@ -41,7 +40,7 @@ class EditTaskUseCaseTest {
         assertThat(result.isSuccess).isTrue()
         verify {
             taskRepository.updateTask(
-                inProgressTask, validTask, validUser, match { it.contains(Constants.TaskField.STATE.displayName) })
+                inProgressTask, validTask, validUser, match { it.contains("STATE") })
         }
     }
 
@@ -84,7 +83,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.TITLE.displayName) }
+                match { it.contains("TITLE") }
             )
         }
     }
@@ -108,7 +107,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.DESCRIPTION.displayName) })
+                match { it.contains("DESCRIPTION") })
         }
     }
 
@@ -131,7 +130,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.ASSIGNEE.displayName) }
+                match { it.contains("ASSIGNEE") }
             )
         }
     }
@@ -155,7 +154,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.ROLE.displayName) }
+                match { it.contains("ROLE") }
             )
         }
     }
@@ -179,7 +178,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.PROJECT.displayName) }
+                match { it.contains("PROJECT") }
             )
         }
     }
@@ -203,7 +202,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.STATE.displayName) }
+                match { it.contains("STATE") }
             )
         }
     }
@@ -240,9 +239,9 @@ class EditTaskUseCaseTest {
         verify {
             taskRepository.updateTask(
                 updatedTask, originalTask, validUser, match {
-                    it.contains(Constants.TaskField.TITLE.displayName) &&
-                            it.contains(Constants.TaskField.DESCRIPTION.displayName) &&
-                            it.contains(Constants.TaskField.ASSIGNEE.displayName)
+                    it.contains("TITLE") &&
+                            it.contains("DESCRIPTION") &&
+                            it.contains("ASSIGNEE")
                 })
         }
     }

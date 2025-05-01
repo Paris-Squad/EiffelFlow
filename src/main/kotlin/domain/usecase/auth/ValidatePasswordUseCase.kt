@@ -1,7 +1,7 @@
 package org.example.domain.usecase.auth
 
 import org.example.domain.exception.EiffelFlowException.AuthenticationException
-import org.example.common.Constants
+import org.example.domain.utils.ValidationErrorMessage
 
 class ValidatePasswordUseCase {
     fun validatePassword(password: String): Result<Unit> {
@@ -12,23 +12,23 @@ class ValidatePasswordUseCase {
         } else Result.success(Unit)
     }
 
-    fun getPasswordValidationErrors(password: String): Set<Constants.ValidationRule> {
-        val errors = mutableSetOf<Constants.ValidationRule>()
+    fun getPasswordValidationErrors(password: String): Set<ValidationErrorMessage> {
+        val errors = mutableSetOf<ValidationErrorMessage>()
 
         if (password.length < MIN_PASSWORD_LENGTH)
-            errors.add(Constants.ValidationRule.PASSWORD_TOO_SHORT)
+            errors.add(ValidationErrorMessage.PASSWORD_TOO_SHORT)
 
         if (!password.any { it.isUpperCase() })
-            errors.add(Constants.ValidationRule.PASSWORD_NO_UPPERCASE)
+            errors.add(ValidationErrorMessage.PASSWORD_NO_UPPERCASE)
 
         if (!password.any { it.isLowerCase() })
-            errors.add(Constants.ValidationRule.PASSWORD_NO_LOWERCASE)
+            errors.add(ValidationErrorMessage.PASSWORD_NO_LOWERCASE)
 
         if (!password.any { it.isDigit() })
-            errors.add(Constants.ValidationRule.PASSWORD_NO_DIGIT)
+            errors.add(ValidationErrorMessage.PASSWORD_NO_DIGIT)
 
         if (!SPECIAL_CHAR_REGEX.matches(password))
-            errors.add(Constants.ValidationRule.PASSWORD_NO_SPECIAL_CHAR)
+            errors.add(ValidationErrorMessage.PASSWORD_NO_SPECIAL_CHAR)
 
         return errors
     }

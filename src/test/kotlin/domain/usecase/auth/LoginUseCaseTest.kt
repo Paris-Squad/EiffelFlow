@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.example.common.Constants
+import org.example.domain.utils.ValidationErrorMessage
 import org.example.data.repository.AuthRepositoryImpl
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
@@ -81,7 +81,7 @@ class LoginUseCaseTest {
     @Test
     fun `register should fail when username validation fails`(){
         val validationException =
-            EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.USERNAME_TOO_LONG))
+            EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.USERNAME_TOO_LONG))
 
         every { validateUsernameUseCase.validateUserName(UserMock.invalidUser.username) } returns Result.failure(validationException)
 
@@ -94,7 +94,7 @@ class LoginUseCaseTest {
     }
     @Test
     fun `register should fail when password validation fails`() {
-        val validationException = EiffelFlowException.AuthenticationException(setOf(Constants.ValidationRule.PASSWORD_TOO_SHORT))
+        val validationException = EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.PASSWORD_TOO_SHORT))
 
         every { validatePasswordUseCase.validatePassword(UserMock.invalidUser.password) } returns Result.failure(validationException)
 
