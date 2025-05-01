@@ -16,6 +16,5 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
     class UsernameAlreadyExistsException : EiffelFlowException("Username already exists")
 
     class UnauthorizedRegistrationException : EiffelFlowException("Only admins can register new users")
-    class TaskNotFoundException : EiffelFlowException("task not found")
 
 }
