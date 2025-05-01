@@ -1,4 +1,4 @@
-package domain.usecase.task
+package utils
 import kotlinx.datetime.LocalDateTime
 import org.example.domain.model.entities.RoleType
 import org.example.domain.model.entities.State

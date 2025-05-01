@@ -1,7 +1,9 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
@@ -11,6 +13,7 @@ import org.example.domain.model.entities.State
 import org.example.domain.model.entities.Task
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.TaskMock.validTask
 import java.util.UUID
 
 //todo change those testcases
@@ -73,11 +76,14 @@ class TaskRepositoryImplTest {
     fun `deleteTask should return the deleted task`() {
         val taskId = UUID.randomUUID()
 
-        try {
-            taskRepository.deleteTask(taskId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        every { taskDataSource.deleteTask(taskId) } returns Result.success(validTask)
+
+
+        val result = taskRepository.deleteTask(taskId)
+
+        verify(exactly = 1) { taskRepository.deleteTask(taskId) }
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(validTask)
     }
 
     @Test

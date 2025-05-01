@@ -1,7 +1,7 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import domain.usecase.task.TaskMock.validTask
+import utils.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
