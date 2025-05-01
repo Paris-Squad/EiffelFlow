@@ -133,7 +133,7 @@ class ProjectDataSourceImplTest {
             // Then
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.UnableToFindTheCorrectProject::class.java
+                EiffelFlowException.IOException::class.java
             )
         }catch (e: NotImplementedError){
             assertThat(e.message).contains("Not yet implemented")

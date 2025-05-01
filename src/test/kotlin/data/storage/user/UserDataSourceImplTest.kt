@@ -61,7 +61,7 @@ class UserDataSourceImplTest {
 
         val result = userDataSource.createUser(user)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UserCreationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
@@ -132,6 +132,6 @@ class UserDataSourceImplTest {
 
         val result = userDataSource.getUsers()
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UserStorageException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 }

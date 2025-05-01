@@ -46,8 +46,8 @@ class EditTaskUseCaseTest {
     }
 
     @Test
-    fun `editTask should fail with NoChangesException when no changes detected`() {
-        val exception = EiffelFlowException.NoChangesException()
+    fun `editTask should fail with IOException when no changes detected`() {
+        val exception = EiffelFlowException.IOException(null)
         every { taskRepository.getTaskById(validTask.taskId) } returns Result.success(validTask)
 
         val result = editTaskUseCase.editTask(validTask, validUser)
@@ -210,7 +210,7 @@ class EditTaskUseCaseTest {
 
     @Throws
     @Test
-    fun `editTask  should threw NoChangesException when no fields changed`() {
+    fun `editTask  should threw IOException when no fields changed`() {
         val originalTask = validTask
         val updatedTask = validTask.copy() // Same task, no changes
 
@@ -218,7 +218,7 @@ class EditTaskUseCaseTest {
 
         val result = editTaskUseCase.editTask(updatedTask, validUser)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NoChangesException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test

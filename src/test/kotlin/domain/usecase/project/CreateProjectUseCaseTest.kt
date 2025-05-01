@@ -43,7 +43,7 @@ class CreateProjectUseCaseTest {
     fun `should return Result of Failure when creating project fails`() {
         try {
 
-            every { projectRepository.createProject(correctProject) } returns Result.failure(EiffelFlowException.ProjectCreationException("Failed to create project"))
+            every { projectRepository.createProject(correctProject) } returns Result.failure(EiffelFlowException.IOException("Failed to create project"))
 
             val result = createProjectUseCase.createProject(correctProject)
 

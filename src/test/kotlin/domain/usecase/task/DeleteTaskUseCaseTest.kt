@@ -50,7 +50,9 @@ class DeleteTaskUseCaseTest {
     fun `deleteTask should return failure when there is an error during deletion`() {
         val taskIdWithError = UUID.randomUUID()
 
-        every { taskRepository.deleteTask(taskIdWithError) } returns Result.failure(EiffelFlowException.TaskDeletionException())
+        every {
+            taskRepository.deleteTask(taskIdWithError)
+        } returns Result.failure(EiffelFlowException.IOException(null))
 
         val result = deleteTaskUseCase.deleteTask(taskIdWithError)
 

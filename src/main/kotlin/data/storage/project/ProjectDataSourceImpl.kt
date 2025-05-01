@@ -50,7 +50,7 @@ class ProjectDataSourceImpl(
         val removedLine = lines.find { line->
             val project = projectMapper.mapFrom(line)
             project.projectId == projectID
-        } ?: return Result.failure(EiffelFlowException.UnableToFindTheCorrectProject())
+        } ?: return Result.failure(EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectID."))
 
         lines.remove(removedLine)
         csvManager.writeLinesToFile(lines.joinToString("\n"))

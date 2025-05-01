@@ -153,51 +153,51 @@ class ProjectRepositoryImplTest {
             // Then
             verify(exactly = 1) { projectDataSource.deleteProject(any()) }
             verify(exactly = 1) { auditDataSource.createAuditLog(any()) }
-        }catch (exception : NotImplementedError){
+        } catch (exception: NotImplementedError) {
             assertThat(exception.message).contains("Not yet implemented")
         }
     }
 
     @Test
-    fun `deleteProject should throw UnableToDeleteProjectException when deleteProject returns failure`(){
+    fun `deleteProject should throw IOException when deleteProject returns failure`() {
         try {
             // Given
             val projectId = UUID.randomUUID()
-            every { projectDataSource.deleteProject(any()) } returns Result.failure(EiffelFlowException.UnableToDeleteProjectException())
+            every {
+                projectDataSource.deleteProject(any())
+            } returns Result.failure(EiffelFlowException.IOException("Failed to delete project"))
 
             // When
             val result = projectRepository.deleteProject(projectId)
 
             // Then
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.UnableToDeleteProjectException::class.java
+                EiffelFlowException.IOException::class.java
             )
-        }catch (e : NotImplementedError){
+        } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
-
-
 
 
     }
 
     @Test
-    fun `deleteProject should throw UnableToCreateAuditLogException when createAuditLog returns failure`(){
+    fun `deleteProject should throw IOException when createAuditLog returns failure`() {
         try {
             // Given
             val projectId = UUID.randomUUID()
             every { projectDataSource.deleteProject(any()) } returns Result.success(ProjectsMock.CORRECT_PROJECT)
             every { auditDataSource.createAuditLog(any()) } returns Result.failure(
-                EiffelFlowException.UnableToCreateAuditLogException()
+                EiffelFlowException.IOException("Failed to create audit log")
             )
             // When
             val result = projectRepository.deleteProject(projectId)
 
             // Then
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.UnableToCreateAuditLogException::class.java
+                EiffelFlowException.IOException::class.java
             )
-        }catch (e: NotImplementedError){
+        } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }

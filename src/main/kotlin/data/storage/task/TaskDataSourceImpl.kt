@@ -16,7 +16,7 @@ class TaskDataSourceImpl(
             csvManager.writeLinesToFile(csvLine)
             Result.success(task)
         } catch (exception: Exception) {
-            Result.failure( EiffelFlowException.TaskCreationException(exception.message))
+            Result.failure( EiffelFlowException.IOException(exception.message))
         }
     }
 
@@ -27,7 +27,7 @@ class TaskDataSourceImpl(
             csvManager.updateLinesToFile(taskCsv, oldTaskCsv)
             Result.success(task)
         } catch (e: Exception) {
-            Result.failure(EiffelFlowException.TaskCreationException("Failed to update task: $e"))
+            Result.failure(EiffelFlowException.IOException("Failed to update task: $e"))
         }
     }
 
@@ -42,7 +42,7 @@ class TaskDataSourceImpl(
 
             Result.success(task)
         } catch (e: Exception) {
-            Result.failure(EiffelFlowException.TaskDeletionException())
+            Result.failure(EiffelFlowException.IOException(e.message))
         }
     }
 

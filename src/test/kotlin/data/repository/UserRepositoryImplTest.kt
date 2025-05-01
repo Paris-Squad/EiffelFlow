@@ -48,7 +48,7 @@ class UserRepositoryImplTest {
             password = "test",
             role = RoleType.ADMIN
         )
-        val exception = EiffelFlowException.UserCreationException("Database error")
+        val exception = EiffelFlowException.IOException("Database error")
 
         every { userDataSource.createUser(validUser) } returns Result.failure(exception)
 
@@ -121,7 +121,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `getUsers should return failure when data source throws exception`() {
-        val exception = EiffelFlowException.UserStorageException("Database error")
+        val exception = EiffelFlowException.IOException("Database error")
 
         every { userDataSource.getUsers() } returns Result.failure(exception)
 

@@ -45,7 +45,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.createTask(validTask)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskCreationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
 
@@ -69,7 +69,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.updateTask(validTask, inProgressTask)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskCreationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
@@ -110,7 +110,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.deleteTask(taskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskDeletionException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test

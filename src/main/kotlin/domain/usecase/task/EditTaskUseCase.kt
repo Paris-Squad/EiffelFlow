@@ -12,7 +12,7 @@ class EditTaskUseCase(private val taskRepository: TaskRepository) {
         if (taskResult.isFailure) return taskResult
 
         val originalTask = taskResult.getOrThrow()
-        if (originalTask == request) return Result.failure(EiffelFlowException.NoChangesException())
+        if (originalTask == request) return Result.failure(EiffelFlowException.IOException("No changes detected"))
 
         val changedField = detectChangedField(originalTask, request)
 

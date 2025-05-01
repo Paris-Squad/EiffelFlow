@@ -16,8 +16,8 @@ class UserDataSourceImpl(
             val userAsCsv = userMapper.mapTo(user)
             csvManager.writeLinesToFile(userAsCsv)
             Result.success(user)
-        } catch (e: Exception) {
-            Result.failure(EiffelFlowException.UserCreationException(e.message))
+        } catch (e: Throwable) {
+            Result.failure(EiffelFlowException.IOException(e.message))
         }
     }
 
@@ -43,8 +43,8 @@ class UserDataSourceImpl(
             Result.success(users)
         } catch (_: FileNotFoundException) {
             Result.success(emptyList())
-        } catch (e: Exception) {
-            Result.failure(EiffelFlowException.UserStorageException(e.message))
+        } catch (e: Throwable) {
+            Result.failure(EiffelFlowException.IOException(e.message))
         }
     }
 
