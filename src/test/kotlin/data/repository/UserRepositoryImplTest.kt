@@ -11,6 +11,7 @@ import org.example.domain.model.entities.User
 import org.example.domain.model.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.UserMock.validUser
 import java.util.*
 
 class UserRepositoryImplTest {
@@ -25,23 +26,23 @@ class UserRepositoryImplTest {
 
     @Test
     fun `createUser should return the created user on success`() {
-        val user = User(
+        val admin = User(
             userId = UUID.randomUUID(),
             username = "test",
             password = "test",
             role = RoleType.ADMIN
         )
 
-        every { userDataSource.createUser(user) } returns Result.success(user)
+        every { userDataSource.createUser(validUser) } returns Result.success(validUser)
 
-        val result = userRepository.createUser(user)
+        val result = userRepository.createUser(user = validUser, createdBy = admin)
 
-        assertThat(result.getOrNull()).isEqualTo(user)
+        assertThat(result.getOrNull()).isEqualTo(validUser)
     }
 
     @Test
     fun `createUser should return failure when data source fails`() {
-        val user = User(
+        val admin = User(
             userId = UUID.randomUUID(),
             username = "test",
             password = "test",
@@ -49,9 +50,9 @@ class UserRepositoryImplTest {
         )
         val exception = EiffelFlowException.UserCreationException("Database error")
 
-        every { userDataSource.createUser(user) } returns Result.failure(exception)
+        every { userDataSource.createUser(validUser) } returns Result.failure(exception)
 
-        val result = userRepository.createUser(user)
+        val result = userRepository.createUser(user = validUser, createdBy = admin)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
 

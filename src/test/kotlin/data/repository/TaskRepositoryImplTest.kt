@@ -1,27 +1,29 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
+import utils.TaskMock.validTask
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.task.TaskDataSource
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.State
-import org.example.domain.model.entities.Task
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.TaskMock.validTask
+import utils.MockUser.validUser
+import utils.TaskMock.inProgressTask
+import java.io.IOException
 import java.util.UUID
 
 //todo change those testcases
 class TaskRepositoryImplTest {
 
-    private lateinit var taskRepository: TaskRepositoryImpl
     private val taskDataSource: TaskDataSource = mockk()
     private val auditDataSource: AuditDataSource = mockk()
+    private lateinit var taskRepository: TaskRepositoryImpl
+
+    private val changedField = "title"
 
     @BeforeEach
     fun setUp() {
@@ -30,46 +32,31 @@ class TaskRepositoryImplTest {
 
     @Test
     fun `createTask should return the created task`() {
-        val task = Task(
-            title = "Test",
-            description = "Test",
-            createdAt = LocalDateTime(2023, 1, 1, 12, 0),
-            creatorId = UUID.randomUUID(),
-            projectId = UUID.randomUUID(),
-            assignedId = UUID.randomUUID(),
-            role = RoleType.MATE,
-            state = State(
-                name = "test"
-            )
-        )
-
         try {
-            taskRepository.createTask(task)
+            taskRepository.createTask(validTask)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
 
     @Test
-    fun `updateTask should return the updated task`() {
-        val task = Task(
-            title = "Updated Task",
-            description = "Updated Description",
-            createdAt = LocalDateTime(2023, 1, 1, 12, 0),
-            creatorId = UUID.randomUUID(),
-            projectId = UUID.randomUUID(),
-            assignedId = UUID.randomUUID(),
-            role = RoleType.MATE,
-            state = State(
-                name = "test"
-            )
-        )
+    fun `updateTask should return success if the task is updated`() {
+        every { taskDataSource.updateTask(inProgressTask) } returns Result.success(inProgressTask)
+        justRun { auditDataSource.createAuditLog(any()) }
 
-        try {
-            taskRepository.updateTask(task)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        val result = taskRepository.updateTask(inProgressTask,validTask,validUser, changedField)
+
+        assertThat(result.getOrNull()).isEqualTo(inProgressTask)
+    }
+
+    @Test
+    fun `updateTask should return failure if the data source throws an exception`() {
+        val exception = IOException("Error updating task")
+        every { taskDataSource.updateTask(validTask) } returns Result.failure(exception)
+
+        val result = taskRepository.updateTask(validTask, inProgressTask,validUser, changedField)
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
     }
 
     @Test

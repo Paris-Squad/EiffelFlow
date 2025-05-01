@@ -7,6 +7,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.IOException
 
 class CsvStorageManagerTest {
 
@@ -89,7 +90,72 @@ class CsvStorageManagerTest {
         assertThat(DUMMY_FILE_CONTENT.split("\n")).containsExactlyElementsIn(result)
     }
 
-    companion object{
-        private const val DUMMY_FILE_CONTENT = "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress\n02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"
+    @Test
+    fun `updateLinesToFile should replace line in file when line exists`() {
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "update_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+        val oldLine = "line2"
+        val newLine = "updated line"
+
+        // When
+        csvStorageManager.updateLinesToFile(newLine, oldLine)
+
+        // Then
+        val expectedContent = "line1\nupdated line\nline3"
+        val result = csvStorageManager.readLinesFromFile()
+        assertThat(expectedContent.split("\n")).containsExactlyElementsIn(result)
+    }
+
+    @Throws(IOException::class)
+    @Test
+    fun `updateLinesToFile should threw IOException when line does not exist`() {
+        // Given
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "no_change_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+        val nonExistentLine = "line4"
+        val newLine = "updated line"
+
+        //when and Then
+        assertThrows<IOException> {
+            csvStorageManager.updateLinesToFile(newLine, nonExistentLine)
+        }
+    }
+
+    @Test
+    fun `should throw FileNotFoundException when file does not exist for clearFile`() {
+        // Given
+        val nonExistentFile = File(tempDir, "notExistFile.csv")
+        val csvStorageManager = CsvStorageManager(nonExistentFile)
+
+        // When/Then
+        assertThrows<FileNotFoundException> {
+            csvStorageManager.clearFile()
+        }
+    }
+
+    @Test
+    fun `should clear content when file exists for clearFile`() {
+        // Given
+        val testFile = File(tempDir, "file_to_clear.csv").apply {
+            writeText(DUMMY_FILE_CONTENT)
+        }
+        val csvStorageManager = CsvStorageManager(testFile)
+
+        // When
+        csvStorageManager.clearFile()
+
+        // Then
+        assertThat(testFile.readText()).isEmpty()
+    }
+
+    companion object {
+        private const val DUMMY_FILE_CONTENT =
+            "02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress\n02ad4499-5d4c-4450-8fd1-8294f1bb5748,In Progress"
     }
 }
