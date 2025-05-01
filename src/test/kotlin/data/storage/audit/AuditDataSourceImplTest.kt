@@ -79,9 +79,8 @@ class AuditDataSourceImplTest {
     @Test
     fun `getAuditLogs should return Result with list of AuditLogs when CSV contains valid lines`() {
         // Given
-        every {
-            csvStorageManager.readLinesFromFile()
-        } returns MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns listOf(MockAuditLog.FULL_CSV_STRING_LINE)
+        every { auditCsvMapper.mapFrom(MockAuditLog.FULL_CSV_STRING_LINE) } returns MockAuditLog.AUDIT_LOG
 
         // When / Then
         try {
@@ -91,6 +90,7 @@ class AuditDataSourceImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+
 
     @Test
     fun `getAuditLogs should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
