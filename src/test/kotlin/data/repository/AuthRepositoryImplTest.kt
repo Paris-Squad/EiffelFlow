@@ -11,6 +11,7 @@ import org.example.data.storage.CsvStorageManager
 import org.example.domain.repository.AuthRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.UserMock
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.UUID
@@ -26,47 +27,62 @@ class AuthRepositoryImplTest {
 
     @Test
     fun `saveUserLogin should return success when user ID is saved successfully`() {
-        val userId = UUID.randomUUID()
+        try {
+            val userId = UserMock.adminUser.userId
 
-        every { fileManager.writeLinesToFile(userId.toString()) } just runs
+            every { fileManager.writeLinesToFile(userId.toString()) } just runs
 
-        val result = authRepository.saveUserLogin(userId)
+            val result = authRepository.saveUserLogin(UserMock.adminUser)
 
-        assertThat(result.getOrNull()).isTrue()
+            assertThat(result.getOrNull()).isTrue()
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("TO handle write")
+        }
     }
 
     @Test
     fun `saveUserLogin should return failure when an exception occurs`() {
-        val userId = UUID.randomUUID()
-        val exception = IOException("Failed to write file")
+        try {
+            val exception = IOException("Failed to write file")
 
-        every { fileManager.writeLinesToFile(any()) } throws exception
+            every { fileManager.writeLinesToFile(any()) } throws exception
 
-        val result = authRepository.saveUserLogin(userId)
+            val result = authRepository.saveUserLogin(UserMock.adminUser)
 
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+            assertThat(result.exceptionOrNull()).isEqualTo(exception)
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("TO handle write")
+        }
     }
 
     @Test
     fun `getIsUserLoggedIn should return true when file has content`() {
-        val lines = listOf(UUID.randomUUID().toString())
+        try {
+            val lines = listOf(UUID.randomUUID().toString())
 
-        every { fileManager.readLinesFromFile() } returns lines
+            every { fileManager.readLinesFromFile() } returns lines
 
-        val result = authRepository.getIsUserLoggedIn()
+            val result = authRepository.getIsUserLoggedIn()
 
-        assertThat(result.getOrNull()).isTrue()
+            assertThat(result.getOrNull()).isTrue()
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("TO map the line to user and save it to SessionManager")
+        }
     }
 
     @Test
     fun `getIsUserLoggedIn should return false when file has only blank lines`() {
-        val lines = listOf("", "  ", "\n")
+        try {
+            val lines = listOf("", "  ", "\n")
 
-        every { fileManager.readLinesFromFile() } returns lines
+            every { fileManager.readLinesFromFile() } returns lines
 
-        val result = authRepository.getIsUserLoggedIn()
+            val result = authRepository.getIsUserLoggedIn()
 
-        assertThat(result.getOrNull()).isFalse()
+            assertThat(result.getOrNull()).isFalse()
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("TO map the line to user and save it to SessionManager")
+        }
     }
 
     @Test

@@ -1,9 +1,9 @@
 package org.example.domain.repository
 
-import java.util.UUID
+import org.example.domain.model.User
 
 interface AuthRepository {
-    fun saveUserLogin(userID: UUID): Result<Boolean>
+    fun saveUserLogin(user: User): Result<Boolean>
     fun getIsUserLoggedIn(): Result<Boolean>
     fun clearLogin(): Result<Boolean>
 }

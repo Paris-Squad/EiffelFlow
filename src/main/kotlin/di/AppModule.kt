@@ -3,8 +3,6 @@ package org.example.di
 import org.example.data.repository.*
 import org.example.data.storage.CsvStorageManager
 import org.example.data.storage.mapper.*
-import org.example.data.storage.project.ProjectDataSource
-import org.example.data.storage.project.ProjectDataSourceImpl
 import org.example.data.storage.task.TaskDataSource
 import org.example.data.storage.task.TaskDataSourceImpl
 import org.example.data.storage.user.UserDataSource
@@ -22,12 +20,6 @@ val appModule = module {
     single<UserCsvMapper> { UserCsvMapper() }
 
     //DataSource
-    single<ProjectDataSource> {
-        ProjectDataSourceImpl(
-            projectMapper = get<ProjectCsvMapper>(),
-            csvManager = CsvStorageManager(File(ProjectDataSourceImpl.FILE_NAME))
-        )
-    }
     single<TaskDataSource> {
         TaskDataSourceImpl(
             taskMapper = get<TaskCsvMapper>(),
@@ -43,11 +35,19 @@ val appModule = module {
     }
 
     //repose
-    single<AuditRepository> { AuditRepositoryImpl(
-        auditMapper = get<AuditCsvMapper>(),
-        csvManager = CsvStorageManager(File(AuditRepositoryImpl.FILE_NAME))
-    ) }
-    single<ProjectRepository> { ProjectRepositoryImpl(get(), get()) }
+    single<AuditRepository> {
+        AuditRepositoryImpl(
+            auditMapper = get<AuditCsvMapper>(),
+            csvManager = CsvStorageManager(File(AuditRepositoryImpl.FILE_NAME))
+        )
+    }
+    single<ProjectRepository> {
+        ProjectRepositoryImpl(
+            projectMapper = get<ProjectCsvMapper>(),
+            csvManager = CsvStorageManager(File(ProjectRepositoryImpl.FILE_NAME)),
+            auditRepository = get()
+        )
+    }
     single<TaskRepository> { TaskRepositoryImpl(get(), get()) }
     single<UserRepository> { UserRepositoryImpl(get(), get()) }
     single<AuthRepository> {

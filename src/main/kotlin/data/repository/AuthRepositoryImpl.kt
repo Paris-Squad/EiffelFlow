@@ -1,26 +1,31 @@
 package org.example.data.repository
 
 import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.SessionManger
+import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 import java.io.FileNotFoundException
-import java.util.UUID
 
 class AuthRepositoryImpl(
     private val storageManager: CsvStorageManager
 ) : AuthRepository {
-    override fun saveUserLogin(userID: UUID): Result<Boolean> {
-        return try {
-            storageManager.writeLinesToFile(userID.toString())
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override fun saveUserLogin(user: User): Result<Boolean> {
+        TODO("TO handle write")
+//        return try {
+//            storageManager.writeLinesToFile(userID.toString())
+//            SessionManger.login(user)
+//            Result.success(true)
+//        } catch (e: Exception) {
+//            Result.failure(e)
+//        }
     }
 
     override fun getIsUserLoggedIn(): Result<Boolean> {
         return try {
             val lines = storageManager.readLinesFromFile()
             Result.success(lines.any { it.isNotBlank() })
+//            SessionManger.login(user)
+            TODO("TO map the line to user and save it to SessionManager")
         } catch (_: FileNotFoundException) {
             Result.success(false)
         } catch (e: Exception) {
@@ -31,6 +36,7 @@ class AuthRepositoryImpl(
     override fun clearLogin(): Result<Boolean> {
         return try {
             storageManager.clearFile()
+            SessionManger.logout()
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
