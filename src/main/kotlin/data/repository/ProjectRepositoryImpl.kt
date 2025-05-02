@@ -39,6 +39,9 @@ class ProjectRepositoryImpl(
     }
 
     override fun deleteProject(projectId: UUID): Result<Project> {
+        if(SessionManger.isAdmin().not())
+            return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
+
         return runCatching {
             val lines = fileDataSource.readLinesFromFile().toMutableList()
 
@@ -46,7 +49,11 @@ class ProjectRepositoryImpl(
                 val project = projectCsvParser.parseCsvLine(line)
                 project.projectId == projectId
             }
-                ?: return Result.failure(EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId."))
+                ?: return Result.failure(
+                    EiffelFlowException.IOException(
+                        "Can't delete project. Project not found with ID: $projectId."
+                    )
+                )
 
             lines.remove(removedLine)
             fileDataSource.writeLinesToFile(lines.joinToString("\n"))
@@ -59,7 +66,9 @@ class ProjectRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
             deletedProject
         }.recoverCatching {
-            throw  EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId, ${it.message}")
+            throw  EiffelFlowException.IOException(
+                "Can't delete project. Project not found with ID: $projectId, ${it.message}"
+            )
         }
     }
 
