@@ -1,6 +1,7 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
+import domain.usecase.task.TaskMock.validTask
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -8,8 +9,10 @@ import io.mockk.mockk
 import org.example.data.repository.AuditRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.AuditCsvMapper
+import org.example.data.storage.task.TaskDataSource
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
+import org.example.domain.repository.TaskRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
@@ -20,10 +23,11 @@ class AuditRepositoryImplTest {
     private lateinit var auditRepository: AuditRepository
     private val csvStorageManager: FileDataSource = mockk()
     private val auditCsvMapper: AuditCsvMapper = mockk()
+    private val taskRepository: TaskDataSource= mockk()
 
     @BeforeEach
     fun setUp() {
-        auditRepository = AuditRepositoryImpl(auditCsvMapper, csvStorageManager)
+        auditRepository = AuditRepositoryImpl(auditCsvMapper, csvStorageManager,taskRepository)
     }
 
     @Test
@@ -180,6 +184,7 @@ class AuditRepositoryImplTest {
         val itemId = MockAuditLog.AUDIT_LOG.itemId
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
         every { csvStorageManager.readLinesFromFile() } returns csvLines
+        every { taskRepository.getTasks() } returns Result.success(listOf(validTask,validTask))
         every { auditCsvMapper.mapFrom(csvLines[0]) } returns MockAuditLog.AUDIT_LOG
 
         // When / Then
@@ -198,6 +203,7 @@ class AuditRepositoryImplTest {
         val auditLogWithNewId = MockAuditLog.AUDIT_LOG.copy(itemId = UUID.randomUUID())
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
         every { csvStorageManager.readLinesFromFile() } returns csvLines
+        every { taskRepository.getTasks() } returns Result.success(listOf(validTask,validTask,validTask))
         every { auditCsvMapper.mapFrom(csvLines[0]) } returns auditLogWithNewId
 
         // When / Then
@@ -209,5 +215,21 @@ class AuditRepositoryImplTest {
         }
 
     }
+
+    @Test
+    fun `getProjectAuditLogById should return failure when taskRepository fails`() {
+        // Given
+        val projectId = UUID.randomUUID()
+        val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns csvLines
+        every { taskRepository.getTasks() } returns Result.failure(EiffelFlowException.NotFoundException("NoTasksFound"))
+
+        // When
+        val result = auditRepository.getProjectAuditLogById(projectId)
+
+        // Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+    }
+
     //endregion
 }

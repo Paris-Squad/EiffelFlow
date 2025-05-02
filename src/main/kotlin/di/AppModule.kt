@@ -38,7 +38,8 @@ val appModule = module {
     single<AuditRepository> {
         AuditRepositoryImpl(
             auditMapper = get<AuditCsvMapper>(),
-            csvManager = FileDataSource(File(AuditRepositoryImpl.FILE_NAME))
+            csvManager = FileDataSource(File(AuditRepositoryImpl.FILE_NAME)),
+            taskRepository = get()
         )
     }
     single<ProjectRepository> {
