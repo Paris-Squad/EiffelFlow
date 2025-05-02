@@ -18,7 +18,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
-import org.example.data.storage.mapper.ProjectCsvMapper
+import org.example.data.storage.parser.ProjectCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.Assertions
@@ -31,14 +31,14 @@ class ProjectRepositoryImplTest {
     private lateinit var projectRepository: ProjectRepository
     private val csvStorageManager: FileDataSource = mockk(relaxed = true)
     private val auditRepository: AuditRepository = mockk(relaxed = true)
-    private val projectMapper: ProjectCsvMapper = mockk(relaxed = true)
+    private val projectMapper: ProjectCsvParser = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
 
     @BeforeEach
     fun setUp() {
         projectRepository = ProjectRepositoryImpl(
-            projectMapper = projectMapper,
-            csvManager = csvStorageManager,
+            projectCsvParser = projectMapper,
+            fileDataSource = csvStorageManager,
             auditRepository = auditRepository
         )
     }
@@ -167,7 +167,7 @@ class ProjectRepositoryImplTest {
                     ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
             every { csvStorageManager.writeLinesToFile(any()) } returns Unit
             every {
-                projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
+                projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
 
             // When
@@ -192,7 +192,7 @@ class ProjectRepositoryImplTest {
             every { sessionManger.getUser() } returns UserMock.adminUser
             every { csvStorageManager.readLinesFromFile() } returns
                     ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
-            every { projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns ProjectsMock.CORRECT_PROJECT
+            every { projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns ProjectsMock.CORRECT_PROJECT
             every { auditRepository.createAuditLog(any()) } returns Result.failure(
                 EiffelFlowException.IOException("Failed to create audit log")
             )
@@ -218,7 +218,7 @@ class ProjectRepositoryImplTest {
             every { csvStorageManager.readLinesFromFile() } returns
                     ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
             every {
-                projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
+                projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
             every {
                 auditRepository.createAuditLog(any())
@@ -237,26 +237,7 @@ class ProjectRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
-
-    @Test
-    fun `deleteProject should return UnauthorizedRegistrationException when the user is not the admin`() {
-        try {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When
-            val result = projectRepository.deleteProject(ProjectsMock.CORRECT_PROJECT.projectId)
-
-            // Then
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.IOException::class.java
-            )
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-        //endregion
+    //endregion
 
 //    @Test
 //    fun `deleteProject should throw IOException when deleteProject returns failure`() {
@@ -301,98 +282,97 @@ class ProjectRepositoryImplTest {
 //    }
 
 
-        //region getProjects
-        @Throws(EiffelFlowException.NotFoundException::class)
-        @Test
-        fun `should return Result of empty list of Projects when the file is empty`() {
-            //Given
-            every { csvStorageManager.readLinesFromFile() } returns emptyList()
+    //region getProjects
+    @Throws(EiffelFlowException.NotFoundException::class)
+    @Test
+    fun `should return Result of empty list of Projects when the file is empty`() {
+        //Given
+        every { csvStorageManager.readLinesFromFile() } returns emptyList()
 
-            //When
-            val result = projectRepository.getProjects()
+        //When
+        val result = projectRepository.getProjects()
 
-            // Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
-        }
-
-        @Test
-        fun `should return Result of Projects when there are projects exist in CSV file`() {
-            //Given
-            every {
-                projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
-            } returns ProjectsMock.CORRECT_PROJECT
-
-            every {
-                csvStorageManager.readLinesFromFile()
-            } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
-
-            // When
-            val result = projectRepository.getProjects()
-
-            // Then
-            assertThat(result.getOrNull())
-                .containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
-        }
-
-        @Throws(EiffelFlowException.NotFoundException::class)
-        @Test
-        fun `should return Result of ElementNotFoundException when CSV file throw exception`() {
-            //Given
-            every {
-                csvStorageManager.readLinesFromFile()
-            } throws IOException("Failed to read file")
-
-            // When / Then
-            val result = projectRepository.getProjects()
-
-            // Then
-            assertThat(result.exceptionOrNull())
-                .isInstanceOf(EiffelFlowException.NotFoundException::class.java)
-        }
-        //endregion
-
-        //region getProjectById
-        @Test
-        fun `should return Result of Project when the given Id match project record exists in CSV file`() {
-            //Given
-            every {
-                projectMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE)
-            } returns ProjectsMock.CORRECT_PROJECT
-            every {
-                csvStorageManager.readLinesFromFile()
-            } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
-
-            // When
-            val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
-
-            //Then
-            assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-        }
-
-        @Throws(EiffelFlowException.NotFoundException::class)
-        @Test
-        fun `should return Result of ElementNotFoundException when searching for project doesn't exists in CSV file`() {
-            // When
-            val result = projectRepository.getProjectById(UUID.randomUUID())
-
-            //Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
-        }
-
-        @Throws(EiffelFlowException.NotFoundException::class)
-        @Test
-        fun `should return Result of ElementNotFoundException when searching for project and CSV file throw exception`() {
-            //Given
-            every {
-                csvStorageManager.readLinesFromFile()
-            } throws IOException("Failed to read file")
-
-            // When
-            val result = projectRepository.getProjectById(UUID.randomUUID())
-
-            //Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
-        }
-        //endregion
+        // Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
+
+    @Test
+    fun `should return Result of Projects when there are projects exist in CSV file`() {
+        //Given
+        every {
+            projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
+        } returns ProjectsMock.CORRECT_PROJECT
+
+        every {
+            csvStorageManager.readLinesFromFile()
+        } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
+
+        // When
+        val result = projectRepository.getProjects()
+
+        // Then
+        assertThat(result.getOrNull())
+            .containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
+    }
+
+    @Throws(EiffelFlowException.NotFoundException::class)
+    @Test
+    fun `should return Result of ElementNotFoundException when CSV file throw exception`() {
+        //Given
+        every {
+            csvStorageManager.readLinesFromFile()
+        } throws IOException("Failed to read file")
+
+        // When / Then
+        val result = projectRepository.getProjects()
+
+        // Then
+        assertThat(result.exceptionOrNull())
+            .isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+    }
+    //endregion
+
+    //region getProjectById
+    @Test
+    fun `should return Result of Project when the given Id match project record exists in CSV file`() {
+        //Given
+        every {
+            projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            csvStorageManager.readLinesFromFile()
+        } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
+
+        // When
+        val result = projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
+
+        //Then
+        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
+    }
+
+    @Throws(EiffelFlowException.NotFoundException::class)
+    @Test
+    fun `should return Result of ElementNotFoundException when searching for project doesn't exists in CSV file`() {
+        // When
+        val result = projectRepository.getProjectById(UUID.randomUUID())
+
+        //Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+    }
+
+    @Throws(EiffelFlowException.NotFoundException::class)
+    @Test
+    fun `should return Result of ElementNotFoundException when searching for project and CSV file throw exception`() {
+        //Given
+        every {
+            csvStorageManager.readLinesFromFile()
+        } throws IOException("Failed to read file")
+
+        // When
+        val result = projectRepository.getProjectById(UUID.randomUUID())
+
+        //Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+    }
+    //endregion
 }

@@ -30,7 +30,7 @@ class EditTaskUseCaseTest {
     @Test
     fun `editTask should successfully update task when changes are detected`() {
         every { taskRepository.getTaskById(inProgressTask.taskId) } returns Result.success(validTask)
-        every { taskRepository.updateTask(inProgressTask, validTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(inProgressTask, validTask,  any()) } returns Result.success(
             inProgressTask
         )
 
@@ -40,7 +40,7 @@ class EditTaskUseCaseTest {
         assertThat(result.isSuccess).isTrue()
         verify {
             taskRepository.updateTask(
-                inProgressTask, validTask, validUser, match { it.contains("STATE") })
+                inProgressTask, validTask,  match { it.contains("STATE") })
         }
     }
 
@@ -70,7 +70,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(title = "Updated Title")
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -82,7 +82,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-                validUser,
+                
                 match { it.contains("TITLE") }
             )
         }
@@ -94,7 +94,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(description = "Updated description")
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -106,7 +106,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-                validUser,
+                
                 match { it.contains("DESCRIPTION") })
         }
     }
@@ -117,7 +117,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(assignedId = UUID.randomUUID())
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -129,7 +129,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-                validUser,
+                
                 match { it.contains("ASSIGNEE") }
             )
         }
@@ -141,7 +141,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(role = RoleType.ADMIN)
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -153,7 +153,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-                validUser,
+                
                 match { it.contains("ROLE") }
             )
         }
@@ -165,7 +165,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(projectId = UUID.randomUUID())
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -177,7 +177,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-                validUser,
+                
                 match { it.contains("PROJECT") }
             )
         }
@@ -189,7 +189,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(state = TaskState(name = "in progress"))
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -201,7 +201,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-                validUser,
+                
                 match { it.contains("STATE") }
             )
         }
@@ -228,7 +228,7 @@ class EditTaskUseCaseTest {
         )
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
-        every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns Result.success(
             updatedTask
         )
 
@@ -238,7 +238,7 @@ class EditTaskUseCaseTest {
 
         verify {
             taskRepository.updateTask(
-                updatedTask, originalTask, validUser, match {
+                updatedTask, originalTask,  match {
                     it.contains("TITLE") &&
                             it.contains("DESCRIPTION") &&
                             it.contains("ASSIGNEE")

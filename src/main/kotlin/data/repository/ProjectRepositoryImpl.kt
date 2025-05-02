@@ -3,7 +3,7 @@ package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
-import org.example.data.storage.mapper.ProjectCsvMapper
+import org.example.data.storage.parser.ProjectCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
@@ -13,17 +13,20 @@ import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
 class ProjectRepositoryImpl(
-    private val projectMapper: ProjectCsvMapper,
-    private val csvManager: FileDataSource,
+    private val projectCsvParser: ProjectCsvParser,
+    private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository
 ) : ProjectRepository {
 
     override fun createProject(project: Project): Result<Project> {
         if(SessionManger.isAdmin().not()) return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
        return runCatching{
-            val csvLine = projectMapper.mapTo(project)
-            csvManager.writeLinesToFile(csvLine + "\n")
-            val auditLog = project.toAuditLog(SessionManger.getUser(), actionType = AuditLogAction.CREATE)
+            val csvLine = projectCsvParser.serialize(project)
+            fileDataSource.writeLinesToFile(csvLine + "\n")
+            val auditLog = project.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.CREATE,
+                newValue = project.projectName)
             auditRepository.createAuditLog(auditLog)
            project
        }.recoverCatching {
@@ -37,39 +40,33 @@ class ProjectRepositoryImpl(
 
     override fun deleteProject(projectId: UUID): Result<Project> {
         return runCatching {
-            val lines = csvManager.readLinesFromFile().toMutableList()
+            val lines = fileDataSource.readLinesFromFile().toMutableList()
 
             val removedLine = lines.find { line ->
-                val project = projectMapper.mapFrom(line)
+                val project = projectCsvParser.parseCsvLine(line)
                 project.projectId == projectId
             }
-                ?: return Result.failure(
-                    EiffelFlowException.IOException(
-                        "Can't delete project. Project not found with ID: $projectId."
-                    )
-                )
+                ?: return Result.failure(EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId."))
 
             lines.remove(removedLine)
-            csvManager.writeLinesToFile(lines.joinToString("\n"))
-            val deletedProject = projectMapper.mapFrom(removedLine)
+            fileDataSource.writeLinesToFile(lines.joinToString("\n"))
+            val deletedProject = projectCsvParser.parseCsvLine(removedLine)
 
             val auditLog = deletedProject.toAuditLog(
-                SessionManger.getUser(),
-                actionType = AuditLogAction.CREATE
-            )
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.CREATE,
+                newValue = deletedProject.projectName)
             auditRepository.createAuditLog(auditLog)
             deletedProject
         }.recoverCatching {
-            throw  EiffelFlowException.IOException(
-                "Can't delete project. Project not found with ID: $projectId, ${it.message}"
-            )
+            throw  EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId, ${it.message}")
         }
     }
 
     override fun getProjects(): Result<List<Project>> {
         return runCatching {
-            csvManager.readLinesFromFile()
-                .map(projectMapper::mapFrom)
+            fileDataSource.readLinesFromFile()
+                .map(projectCsvParser::parseCsvLine)
                 .ifEmpty {
                     throw EiffelFlowException.NotFoundException("No projects found")
                 }
@@ -80,8 +77,8 @@ class ProjectRepositoryImpl(
 
     override fun getProjectById(projectId: UUID): Result<Project> {
         return runCatching {
-            csvManager.readLinesFromFile()
-                .map(projectMapper::mapFrom)
+            fileDataSource.readLinesFromFile()
+                .map(projectCsvParser::parseCsvLine)
                 .firstOrNull { it.projectId == projectId }
                 ?: throw EiffelFlowException.NotFoundException("Project not found")
         }.recoverCatching {

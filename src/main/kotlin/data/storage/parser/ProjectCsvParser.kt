@@ -1,18 +1,18 @@
-package org.example.data.storage.mapper
+package org.example.data.storage.parser
 
 import kotlinx.datetime.LocalDateTime
-import org.example.data.storage.Mapper
+import org.example.data.storage.CsvParser
 import org.example.data.utils.ProjectCsvColumnIndex
 import org.example.domain.model.Project
 import org.example.domain.model.TaskState
 import java.util.UUID
 
-class ProjectCsvMapper(
-    private val stateCsvMapper: StateCsvMapper
-) : Mapper<String, Project> {
+class ProjectCsvParser(
+    private val StateCsvParser: StateCsvParser
+) : CsvParser<Project> {
 
-    override fun mapFrom(input: String): Project {
-        val parts = input.split(",", limit = 6)
+    override fun parseCsvLine(csvLine: String): Project {
+        val parts = csvLine.split(",", limit = 6)
 
         return Project(
             projectId = UUID.fromString(parts[ProjectCsvColumnIndex.PROJECT_ID].trim()),
@@ -33,23 +33,23 @@ class ProjectCsvMapper(
             return emptyList()
         }
         val content = input.removeSurrounding("[", "]").split(";")
-        return content.map { stateCsvMapper.mapFrom(it) }
+        return content.map { StateCsvParser.parseCsvLine(it) }
     }
 
-    override fun mapTo(output: Project): String {
+    override fun serialize(item: Project): String {
         return listOf(
-            output.projectId.toString(),
-            output.projectName,
-            output.projectDescription,
-            output.createdAt.toString(),
-            output.adminId.toString(),
-            mapFromStates(output.taskStates)
+            item.projectId.toString(),
+            item.projectName,
+            item.projectDescription,
+            item.createdAt.toString(),
+            item.adminId.toString(),
+            mapFromStates(item.taskStates)
         ).joinToString(",")
     }
 
     private fun mapFromStates(states: List<TaskState>): String {
         val statesString = states
-            .joinToString(";") { stateCsvMapper.mapTo(it) }
+            .joinToString(";") { StateCsvParser.serialize(it) }
         return if (statesString.isNotBlank()) {
             "[$statesString]"
         } else {

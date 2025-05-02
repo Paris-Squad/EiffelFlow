@@ -1,18 +1,18 @@
-package data.storage.mapper
+package data.storage.parser
 
 import com.google.common.truth.Truth.assertThat
-import org.example.data.storage.mapper.AuditCsvMapper
+import org.example.data.storage.parser.AuditCsvParser
 import utils.MockAuditLog
 import kotlin.test.Test
 
-class AuditCsvMapperTest {
+class AuditCsvParserTest {
 
-    private val auditCsvMapper = AuditCsvMapper()
+    private val AuditCsvParser = AuditCsvParser()
 
     @Test
     fun `should map full CSV line to full AuditLog entity correctly`() {
         //Given / When
-        val result = auditCsvMapper.mapFrom(MockAuditLog.FULL_CSV_STRING_LINE)
+        val result = AuditCsvParser.parseCsvLine(MockAuditLog.FULL_CSV_STRING_LINE)
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.AUDIT_LOG)
@@ -21,7 +21,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full AuditLog entity to CSV line correctly`() {
         //Given / When
-        val result = auditCsvMapper.mapTo(MockAuditLog.AUDIT_LOG)
+        val result = AuditCsvParser.serialize(MockAuditLog.AUDIT_LOG)
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.FULL_CSV_STRING_LINE)
@@ -30,7 +30,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full CSV line to full AuditLog entity correctly with newValue = null`() {
         //Given / When
-        val result = auditCsvMapper.mapFrom(MockAuditLog.CSV_STRING_LINE_WITH_NEW_VALUE_NULL)
+        val result = AuditCsvParser.parseCsvLine(MockAuditLog.CSV_STRING_LINE_WITH_NEW_VALUE_NULL)
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.AUDIT_LOG.copy(newValue = null))
@@ -39,7 +39,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full AuditLog entity to CSV line correctly with newValue = null`() {
         //Given / When
-        val result = auditCsvMapper.mapTo(MockAuditLog.AUDIT_LOG.copy(newValue = null))
+        val result = AuditCsvParser.serialize(MockAuditLog.AUDIT_LOG.copy(newValue = null))
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.CSV_STRING_LINE_WITH_NEW_VALUE_NULL)
@@ -48,7 +48,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full CSV line to full AuditLog entity correctly with oldValue = null`() {
         //Given / When
-        val result = auditCsvMapper.mapFrom(MockAuditLog.CSV_STRING_LINE_WITH_OLD_VALUE_NULL)
+        val result = AuditCsvParser.parseCsvLine(MockAuditLog.CSV_STRING_LINE_WITH_OLD_VALUE_NULL)
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.AUDIT_LOG.copy(oldValue = null))
@@ -57,7 +57,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full AuditLog entity to CSV line correctly with oldValue = null`() {
         //Given / When
-        val result = auditCsvMapper.mapTo(MockAuditLog.AUDIT_LOG.copy(oldValue = null))
+        val result = AuditCsvParser.serialize(MockAuditLog.AUDIT_LOG.copy(oldValue = null))
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.CSV_STRING_LINE_WITH_OLD_VALUE_NULL)
@@ -66,7 +66,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full CSV line to full AuditLog entity correctly with changedField = null`() {
         //Given / When
-        val result = auditCsvMapper.mapFrom(MockAuditLog.CSV_STRING_LINE_WITH_CHANGED_FIELD_NULL)
+        val result = AuditCsvParser.parseCsvLine(MockAuditLog.CSV_STRING_LINE_WITH_CHANGED_FIELD_NULL)
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.AUDIT_LOG.copy(changedField = null))
@@ -75,7 +75,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full AuditLog entity to CSV line correctly with changedField = null`() {
         //Given / When
-        val result = auditCsvMapper.mapTo(MockAuditLog.AUDIT_LOG.copy(changedField = null))
+        val result = AuditCsvParser.serialize(MockAuditLog.AUDIT_LOG.copy(changedField = null))
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.CSV_STRING_LINE_WITH_CHANGED_FIELD_NULL)
@@ -84,7 +84,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full CSV line to full AuditLog entity correctly with changedField & oldValue & newValue = null`() {
         //Given / When
-        val result = auditCsvMapper.mapFrom(MockAuditLog.CSV_STRING_LINE_MISSING_CHANGED_FIELD_AND_OLD_VALUE_AND_NEW_VALUE)
+        val result = AuditCsvParser.parseCsvLine(MockAuditLog.CSV_STRING_LINE_MISSING_CHANGED_FIELD_AND_OLD_VALUE_AND_NEW_VALUE)
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.AUDIT_LOG.copy(changedField = null, oldValue = null, newValue = null))
@@ -93,7 +93,7 @@ class AuditCsvMapperTest {
     @Test
     fun `should map full AuditLog entity to CSV line correctly with changedField & oldValue & newValue = null`() {
         //Given / When
-        val result = auditCsvMapper.mapTo(MockAuditLog.AUDIT_LOG.copy(changedField = null, oldValue = null, newValue = null))
+        val result = AuditCsvParser.serialize(MockAuditLog.AUDIT_LOG.copy(changedField = null, oldValue = null, newValue = null))
 
         //Then
         assertThat(result).isEqualTo(MockAuditLog.CSV_STRING_LINE_MISSING_CHANGED_FIELD_AND_OLD_VALUE_AND_NEW_VALUE)

@@ -1,15 +1,15 @@
-package org.example.data.storage.mapper
+package org.example.data.storage.parser
 
-import org.example.data.storage.Mapper
+import org.example.data.storage.CsvParser
 import org.example.domain.model.User
 import org.example.data.utils.UserCsvColumnIndex
 import org.example.domain.model.RoleType
 import java.util.UUID
 
-class UserCsvMapper : Mapper<String, User> {
+class UserCsvParser : CsvParser<User> {
 
-    override fun mapFrom(input: String): User {
-        val parts = input.split(",")
+    override fun parseCsvLine(csvLine: String): User {
+        val parts = csvLine.split(",")
         return User(
             userId = UUID.fromString(parts[UserCsvColumnIndex.USER_ID]),
             username = parts[UserCsvColumnIndex.USERNAME],
@@ -18,12 +18,12 @@ class UserCsvMapper : Mapper<String, User> {
         )
     }
 
-    override fun mapTo(output: User): String {
+    override fun serialize(item: User): String {
         return listOf(
-            output.userId.toString(),
-            output.username,
-            output.password,
-            output.role.name
+            item.userId.toString(),
+            item.username,
+            item.password,
+            item.role.name
         ).joinToString(",")
     }
 }
