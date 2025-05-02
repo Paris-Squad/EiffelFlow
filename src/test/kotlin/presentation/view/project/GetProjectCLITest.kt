@@ -3,7 +3,7 @@ package presentation.view.project
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.presentation.presenter.project.GetProjectPresenter
 import org.example.presentation.view.project.GetProjectCLI
 import org.junit.jupiter.api.BeforeEach
@@ -53,7 +53,7 @@ class ProjectViewTest {
     @Test
     fun `should print error message when no projects founded`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Projects not found")
+        val exception = EiffelFlowException.NotFoundException("Projects not found")
         every { getProjectPresenter.getProjects() } returns Result.failure(exception)
 
         // When / Then
@@ -84,7 +84,7 @@ class ProjectViewTest {
     @Test
     fun `should print error message when project with given id does not founded`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             getProjectPresenter.getProjectById(UUID.randomUUID())
         } returns Result.failure(exception)

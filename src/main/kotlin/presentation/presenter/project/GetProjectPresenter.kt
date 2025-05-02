@@ -1,6 +1,6 @@
 package org.example.presentation.presenter.project
 
-import org.example.domain.model.entities.Project
+import org.example.domain.model.Project
 import org.example.domain.usecase.project.GetProjectUseCase
 import java.util.UUID
 
@@ -9,10 +9,10 @@ class GetProjectPresenter(
 ) {
 
     fun getProjectById(projectId: UUID): Result<Project> {
-        TODO("Not yet implemented")
+        return getProjectUseCase.getProjectById(projectId)
     }
 
     fun getProjects(): Result<List<Project>> {
-        TODO("Not yet implemented")
+        return getProjectUseCase.getProjects()
     }
 }

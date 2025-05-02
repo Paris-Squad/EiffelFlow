@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.DeleteProjectUseCase
 import org.example.presentation.presenter.project.DeleteProjectPresenter
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +46,10 @@ class DeleteProjectPresenterTest {
         try {
             // Given
             val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
-            every { deleteProjectUseCase.deleteProject(any()) } returns Result.success(project)
+            every { deleteProjectUseCase.deleteProject(any()) } returns
+                    Result.failure(
+                        EiffelFlowException.IOException("unable to find correct project")
+                    )
 
             // When
             val result = deleteProjectPresenter.deleteProject(differentProjectId)
@@ -54,7 +57,7 @@ class DeleteProjectPresenterTest {
             // Then
             assertThat(result.isSuccess).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.UnableToFindTheCorrectProject::class.java
+                EiffelFlowException::class.java
             )
 
         } catch (e: NotImplementedError) {

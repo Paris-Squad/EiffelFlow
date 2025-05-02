@@ -1,24 +1,23 @@
 package org.example.data.storage.user
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.Mapper
-import org.example.domain.model.exception.EiffelFlowException
-import org.example.domain.model.entities.User
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.User
 import java.io.FileNotFoundException
 import java.util.UUID
 
 class UserDataSourceImpl(
     private val userMapper: Mapper<String, User>,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileDataSource
 ) : UserDataSource {
     override fun createUser(user: User): Result<User> {
         return try {
             val userAsCsv = userMapper.mapTo(user)
-            val line = userAsCsv + "\n"
-            csvManager.writeLinesToFile(line)
+            csvManager.writeLinesToFile(userAsCsv)
             Result.success(user)
-        } catch (e: Exception) {
-            Result.failure(EiffelFlowException.UserCreationException(e.message))
+        } catch (e: Throwable) {
+            Result.failure(EiffelFlowException.IOException(e.message))
         }
     }
 
@@ -44,8 +43,8 @@ class UserDataSourceImpl(
             Result.success(users)
         } catch (_: FileNotFoundException) {
             Result.success(emptyList())
-        } catch (e: Exception) {
-            Result.failure(EiffelFlowException.UserStorageException(e.message))
+        } catch (e: Throwable) {
+            Result.failure(EiffelFlowException.IOException(e.message))
         }
     }
 

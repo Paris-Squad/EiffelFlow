@@ -1,19 +1,19 @@
 package org.example.data.repository
 
-import org.example.data.storage.audit.AuditDataSource
 import org.example.data.storage.user.UserDataSource
-import org.example.domain.model.entities.User
+import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
+import org.example.domain.repository.AuditRepository
 import java.util.UUID
 
 class UserRepositoryImpl(
     private val userDataSource: UserDataSource,
-    private val auditDataSource: AuditDataSource,
+    private val auditRepository: AuditRepository,
 ) : UserRepository {
     override fun createUser(user: User, createdBy: User): Result<User> {
         return userDataSource.createUser(user).also { result ->
@@ -23,13 +23,13 @@ class UserRepositoryImpl(
                     itemName = createdUser.username,
                     userId = createdUser.userId,
                     editorName = createdBy.username,
-                    actionType = AuditAction.CREATE,
+                    actionType = AuditLogAction.CREATE,
                     auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
                     changedField = null,
                     oldValue = null,
                     newValue = createdUser.toString()
                 )
-                auditDataSource.createAuditLog(auditLog)
+                auditRepository.createAuditLog(auditLog)
             }
         }
     }

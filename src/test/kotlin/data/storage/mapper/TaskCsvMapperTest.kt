@@ -4,9 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.mapper.StateCsvMapper
 import org.example.data.storage.mapper.TaskCsvMapper
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.State
-import org.example.domain.model.entities.Task
+import org.example.domain.model.RoleType
+import org.example.domain.model.TaskState
+import org.example.domain.model.Task
 import java.util.*
 import kotlin.test.Test
 
@@ -34,7 +34,7 @@ class TaskCsvMapperTest {
     }
 
     companion object {
-        private val STATE = State(
+        private val STATE = TaskState(
             stateId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749"),
             name = "In Progress"
         )

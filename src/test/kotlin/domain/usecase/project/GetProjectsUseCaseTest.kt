@@ -3,13 +3,14 @@ package domain.usecase.project
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 import java.util.UUID
+import kotlin.jvm.Throws
 
 
 class GetProjectsUseCaseTest {
@@ -23,45 +24,31 @@ class GetProjectsUseCaseTest {
     }
 
     @Test
-    fun `should return Result of empty list of Projects when there are no projects`() {
-        // Given
-        every { projectRepository.getProjects() } returns Result.success(emptyList())
-
-        // When / Then
-        try {
-            val result = getProjectsUseCase.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-    }
-
-    @Test
-    fun `should return Result of Projects when at least one project exists`() {
+    fun `should return Result of Projects when there are project exist `() {
         // Given
         every {
             projectRepository.getProjects()
         } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
 
-        // When / Then
-        try {
-            val result = getProjectsUseCase.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectsUseCase.getProjects()
+
+        // Then
+        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when projects cannot be retrieved`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Projects not found")
+        val exception = EiffelFlowException.NotFoundException("Projects not found")
         every { projectRepository.getProjects() } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = getProjectsUseCase.getProjects()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectsUseCase.getProjects()
+
+        // Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 
     @Test
@@ -72,28 +59,27 @@ class GetProjectsUseCaseTest {
             projectRepository.getProjectById(projectId)
         } returns Result.success(ProjectsMock.CORRECT_PROJECT)
 
-        // When / Then
-        try {
-            val result = getProjectsUseCase.getProjectById(projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectsUseCase.getProjectById(projectId)
+
+        // Then
+        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
+    @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
-            projectRepository.getProjectById(UUID.randomUUID())
+            projectRepository.getProjectById(any())
         } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = getProjectsUseCase.getProjectById(UUID.randomUUID())
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectsUseCase.getProjectById(UUID.randomUUID())
+
+        // Then
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 }
 

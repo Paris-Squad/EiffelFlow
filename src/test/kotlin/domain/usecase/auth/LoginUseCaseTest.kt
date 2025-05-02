@@ -4,9 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.example.common.Constants
+import org.example.domain.utils.ValidationErrorMessage
 import org.example.data.repository.AuthRepositoryImpl
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.LoginUseCase
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
@@ -58,11 +58,12 @@ class LoginUseCaseTest {
     fun `login should return failure when userName are incorrect`(){
         //Given
         every { userRepository.getUsers() } returns Result.success(listOf(UserMock.validUser))
+
         //When
         val result = loginUseCase.login("wrong username", UserMock.validUser.password)
+
         //Then
-        assertTrue(result.isFailure)
-        assertEquals("Username validation failed: Invalid userName", result.exceptionOrNull()?.message)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthenticationException::class.java)
     }
     @Test
     fun `login should return failure when userRepository returns failure`() {
@@ -80,7 +81,7 @@ class LoginUseCaseTest {
     @Test
     fun `register should fail when username validation fails`(){
         val validationException =
-            EiffelFlowException.UserNameValidationException(setOf(Constants.ValidationRule.USERNAME_TOO_LONG))
+            EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.USERNAME_TOO_LONG))
 
         every { validateUsernameUseCase.validateUserName(UserMock.invalidUser.username) } returns Result.failure(validationException)
 
@@ -93,7 +94,7 @@ class LoginUseCaseTest {
     }
     @Test
     fun `register should fail when password validation fails`() {
-        val validationException = EiffelFlowException.PasswordValidationException(setOf(Constants.ValidationRule.PASSWORD_TOO_SHORT))
+        val validationException = EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.PASSWORD_TOO_SHORT))
 
         every { validatePasswordUseCase.validatePassword(UserMock.invalidUser.password) } returns Result.failure(validationException)
 

@@ -29,7 +29,7 @@ class ProjectCsvMapperTest {
         val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE.replace('[', '{'))
 
         // Then
-        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(taskStates = emptyList()))
     }
 
     @Test
@@ -39,7 +39,17 @@ class ProjectCsvMapperTest {
         val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE.replace(']', '{'))
 
         // Then
-        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(taskStates = emptyList()))
+    }
+
+    @Test
+    fun `should map CSV line to Project entity line with empty states when state part is blank`() {
+
+        //Given / When
+        val result = projectCsvMapper.mapFrom(ProjectsMock.CORRECT_CSV_STRING_LINE_WITH_EMPTY_STATES)
+
+        // Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT.copy(taskStates = emptyList()))
     }
 
     @Test
@@ -56,7 +66,7 @@ class ProjectCsvMapperTest {
     fun `should map Project entity to CSV line with empty states when state part is blank`() {
 
         //Given / When
-        val result = projectCsvMapper.mapTo(ProjectsMock.CORRECT_PROJECT.copy(states = emptyList()))
+        val result = projectCsvMapper.mapTo(ProjectsMock.CORRECT_PROJECT.copy(taskStates = emptyList()))
 
         // Then
         assertThat(result).isEqualTo(ProjectsMock.CORRECT_CSV_STRING_LINE_WITH_EMPTY_STATES)

@@ -2,8 +2,8 @@ package data.storage.mapper
 
 import com.google.common.truth.Truth.assertThat
 import org.example.data.storage.mapper.UserCsvMapper
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
 import java.util.*
 import kotlin.test.Test
 

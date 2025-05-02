@@ -1,10 +1,10 @@
 package org.example.data.storage.mapper
 
 import org.example.data.storage.Mapper
-import org.example.domain.model.entities.Task
+import org.example.domain.model.Task
 import kotlinx.datetime.LocalDateTime
 import org.example.data.utils.TaskCsvColumnIndex
-import org.example.domain.model.entities.RoleType
+import org.example.domain.model.RoleType
 
 import java.util.UUID
 

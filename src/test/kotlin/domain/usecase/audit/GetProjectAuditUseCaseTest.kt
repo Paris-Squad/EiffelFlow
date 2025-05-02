@@ -3,7 +3,7 @@ package domain.usecase.audit
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +25,7 @@ class GetProjectAuditUseCaseTest {
     fun `should return Result of list with AuditLogs when project with given id exists`() {
         // Given
         every {
-            auditRepository.getItemAuditLogById(any())
+            auditRepository.getProjectAuditLogById(any())
         } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
 
         // When / Then
@@ -39,9 +39,9 @@ class GetProjectAuditUseCaseTest {
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
-            auditRepository.getItemAuditLogById(any())
+            auditRepository.getProjectAuditLogById(any())
         } returns Result.failure(exception)
 
         // When / Then

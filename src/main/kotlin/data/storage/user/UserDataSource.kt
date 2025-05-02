@@ -1,6 +1,6 @@
 package org.example.data.storage.user
 
-import org.example.domain.model.entities.User
+import org.example.domain.model.User
 import java.util.UUID
 
 interface UserDataSource {

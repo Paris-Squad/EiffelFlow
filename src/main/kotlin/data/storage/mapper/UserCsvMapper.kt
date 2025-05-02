@@ -1,9 +1,9 @@
 package org.example.data.storage.mapper
 
 import org.example.data.storage.Mapper
-import org.example.domain.model.entities.User
+import org.example.domain.model.User
 import org.example.data.utils.UserCsvColumnIndex
-import org.example.domain.model.entities.RoleType
+import org.example.domain.model.RoleType
 import java.util.UUID
 
 class UserCsvMapper : Mapper<String, User> {

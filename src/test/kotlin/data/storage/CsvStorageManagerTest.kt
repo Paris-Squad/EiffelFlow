@@ -1,7 +1,7 @@
 package data.storage
 
 import com.google.common.truth.Truth.assertThat
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.io.TempDir
@@ -19,7 +19,7 @@ class CsvStorageManagerTest {
     fun `should throw FileNotFoundException when file does not exist`() {
         // Given
         val nonExistentFile = File(tempDir, "notExistFile.csv")
-        val csvStorageManager = CsvStorageManager(nonExistentFile)
+        val csvStorageManager = FileDataSource(nonExistentFile)
 
         // When
         val exception = assertThrows<FileNotFoundException> {
@@ -35,7 +35,7 @@ class CsvStorageManagerTest {
     fun `should throw FileNotFoundException when path is a directory`() {
         // Given
         val directory = tempDir.resolve("directory").apply { mkdir() }
-        val csvStorageManager = CsvStorageManager(directory)
+        val csvStorageManager = FileDataSource(directory)
 
         // When / Then
         val exception = assertThrows<FileNotFoundException> {
@@ -50,7 +50,7 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "multiple_lines.csv").apply {
             writeText(DUMMY_FILE_CONTENT)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileDataSource(testFile)
 
         // When
         val result = csvStorageManager.readLinesFromFile()
@@ -66,7 +66,7 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "single_line.csv").apply {
             writeText(fileContent)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileDataSource(testFile)
 
         // When
         val result = csvStorageManager.readLinesFromFile()
@@ -80,7 +80,7 @@ class CsvStorageManagerTest {
     fun `writeLinesToFile should append text to file`() {
         //Given
         val testFile = File(tempDir, "write_file.csv")
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileDataSource(testFile)
 
         //Then
         csvStorageManager.writeLinesToFile(DUMMY_FILE_CONTENT)
@@ -96,7 +96,7 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "update_file.csv").apply {
             writeText(initialContent)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileDataSource(testFile)
         val oldLine = "line2"
         val newLine = "updated line"
 
@@ -117,7 +117,7 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "no_change_file.csv").apply {
             writeText(initialContent)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileDataSource(testFile)
         val nonExistentLine = "line4"
         val newLine = "updated line"
 
@@ -131,7 +131,7 @@ class CsvStorageManagerTest {
     fun `should throw FileNotFoundException when file does not exist for clearFile`() {
         // Given
         val nonExistentFile = File(tempDir, "notExistFile.csv")
-        val csvStorageManager = CsvStorageManager(nonExistentFile)
+        val csvStorageManager = FileDataSource(nonExistentFile)
 
         // When/Then
         assertThrows<FileNotFoundException> {
@@ -145,13 +145,53 @@ class CsvStorageManagerTest {
         val testFile = File(tempDir, "file_to_clear.csv").apply {
             writeText(DUMMY_FILE_CONTENT)
         }
-        val csvStorageManager = CsvStorageManager(testFile)
+        val csvStorageManager = FileDataSource(testFile)
 
         // When
         csvStorageManager.clearFile()
 
         // Then
         assertThat(testFile.readText()).isEmpty()
+    }
+
+    @Test
+    fun `deleteLineFromFile should remove line from file when line exists`() {
+        // Given
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "delete_line_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = FileDataSource(testFile)
+        val lineToDelete = "line2"
+
+        // When
+        csvStorageManager.deleteLineFromFile(lineToDelete)
+
+        // Then
+        val expectedContent = "line1\nline3"
+        val result = csvStorageManager.readLinesFromFile()
+        assertThat(expectedContent.split("\n")).containsExactlyElementsIn(result)
+    }
+
+    @Test
+    fun `deleteLineFromFile should throw IOException when line does not exist`() {
+        // Given
+        val initialContent = "line1\nline2\nline3"
+        val testFile = File(tempDir, "nonexistent_line_file.csv").apply {
+            writeText(initialContent)
+        }
+        val csvStorageManager = FileDataSource(testFile)
+        val nonExistentLine = "line4"
+
+        // When/Then
+        val exception = assertThrows<IOException> {
+            csvStorageManager.deleteLineFromFile(nonExistentLine)
+        }
+        assertThat(exception.message).isEqualTo("Line not found in file.")
+
+        // Verify file content was not modified
+        val result = csvStorageManager.readLinesFromFile()
+        assertThat(initialContent.split("\n")).containsExactlyElementsIn(result)
     }
 
     companion object {

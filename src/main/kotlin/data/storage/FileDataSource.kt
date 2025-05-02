@@ -4,7 +4,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
-class CsvStorageManager(
+class FileDataSource(
     private val file: File
 ) {
 
@@ -40,6 +40,16 @@ class CsvStorageManager(
         } else {
             throw IOException()
         }
+    }
+
+    fun deleteLineFromFile(lineToDelete: String){
+        val lines = readLinesFromFile().toMutableList()
+        val result = lines.remove(lineToDelete)
+
+        if (result)
+            file.writeText(lines.joinToString("\n"))
+        else
+            throw IOException("Line not found in file.")
     }
 
     @Throws(FileNotFoundException::class)

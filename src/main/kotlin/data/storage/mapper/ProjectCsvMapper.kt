@@ -3,8 +3,8 @@ package org.example.data.storage.mapper
 import kotlinx.datetime.LocalDateTime
 import org.example.data.storage.Mapper
 import org.example.data.utils.ProjectCsvColumnIndex
-import org.example.domain.model.entities.Project
-import org.example.domain.model.entities.State
+import org.example.domain.model.Project
+import org.example.domain.model.TaskState
 import java.util.UUID
 
 class ProjectCsvMapper(
@@ -20,11 +20,11 @@ class ProjectCsvMapper(
             projectDescription = parts[ProjectCsvColumnIndex.PROJECT_DESCRIPTION],
             createdAt = LocalDateTime.parse(parts[ProjectCsvColumnIndex.CREATED_AT].trim()),
             adminId = UUID.fromString(parts[ProjectCsvColumnIndex.ADMIN_ID].trim()),
-            states = mapToStates(parts[ProjectCsvColumnIndex.STATE])
+            taskStates = mapToStates(parts[ProjectCsvColumnIndex.STATE])
         )
     }
 
-    private fun mapToStates(input: String): List<State> {
+    private fun mapToStates(input: String): List<TaskState> {
         if (
             input.isBlank() ||
             input.startsWith("[").not() ||
@@ -43,11 +43,11 @@ class ProjectCsvMapper(
             output.projectDescription,
             output.createdAt.toString(),
             output.adminId.toString(),
-            mapFromStates(output.states)
+            mapFromStates(output.taskStates)
         ).joinToString(",")
     }
 
-    private fun mapFromStates(states: List<State>): String {
+    private fun mapFromStates(states: List<TaskState>): String {
         val statesString = states
             .joinToString(";") { stateCsvMapper.mapTo(it) }
         return if (statesString.isNotBlank()) {

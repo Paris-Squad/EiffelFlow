@@ -1,28 +1,28 @@
 package org.example.domain.usecase.auth
 
-import org.example.common.Constants
-import org.example.domain.model.exception.EiffelFlowException.UserNameValidationException
+import org.example.domain.utils.ValidationErrorMessage
+import org.example.domain.exception.EiffelFlowException.AuthenticationException
 
 class ValidateUserNameUseCase {
     fun validateUserName(userName: String): Result<Unit> {
         val validationResult = getUserNameValidationErrors(userName)
 
         return if (validationResult.isNotEmpty()) {
-            Result.failure(UserNameValidationException(validationResult))
+            Result.failure(AuthenticationException(validationResult))
         } else Result.success(Unit)
     }
 
-    fun getUserNameValidationErrors(userName: String): Set<Constants.ValidationRule> {
-        val errors = mutableSetOf<Constants.ValidationRule>()
+    fun getUserNameValidationErrors(userName: String): Set<ValidationErrorMessage> {
+        val errors = mutableSetOf<ValidationErrorMessage>()
 
         if (userName.length < MIN_USERNAME_LENGTH)
-            errors.add(Constants.ValidationRule.USERNAME_TOO_SHORT)
+            errors.add(ValidationErrorMessage.USERNAME_TOO_SHORT)
 
         if (userName.length > MAX_USERNAME_LENGTH)
-            errors.add(Constants.ValidationRule.USERNAME_TOO_LONG)
+            errors.add(ValidationErrorMessage.USERNAME_TOO_LONG)
 
         if (!USERNAME_REGEX.matches(userName))
-            errors.add(Constants.ValidationRule.USERNAME_INVALID_CHARACTERS)
+            errors.add(ValidationErrorMessage.USERNAME_INVALID_CHARACTERS)
 
         return errors
     }
