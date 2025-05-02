@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
-import org.example.domain.usecase.task.ViewTaskHistory
+import org.example.domain.usecase.task.ViewTaskHistoryUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.TaskMock.validAuditLog
@@ -14,14 +14,14 @@ import java.util.*
 class ViewTaskHistoryTest {
 
     private lateinit var auditRepository: AuditRepository
-    private lateinit var viewTaskHistoryUseCase: ViewTaskHistory
+    private lateinit var viewTaskHistoryUseCase: ViewTaskHistoryUseCase
     private lateinit var taskId: UUID
 
 
     @BeforeEach
     fun setUp() {
         auditRepository = mockk()
-        viewTaskHistoryUseCase = ViewTaskHistory(auditRepository)
+        viewTaskHistoryUseCase = ViewTaskHistoryUseCase(auditRepository)
         taskId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
     }
 
