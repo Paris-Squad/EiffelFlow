@@ -17,14 +17,6 @@ val appModule = module {
     single<StateCsvParser> { StateCsvParser() }
     single<UserCsvParser> { UserCsvParser() }
 
-    //DataSource
-    single<UserDataSource> {
-        UserDataSourceImpl(
-            userCsvParser = get<UserCsvParser>(),
-            fileDataSource = FileDataSource(File(UserDataSourceImpl.FILE_NAME))
-        )
-    }
-
     //repose
     single<AuditRepository> {
         AuditRepositoryImpl(
@@ -45,8 +37,14 @@ val appModule = module {
             fileDataSource = FileDataSource(File(TaskRepositoryImpl.FILE_NAME)),
             auditRepository = get())
     }
-    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    single<UserRepository> {
+        UserRepositoryImpl(
+            userMapper = get<UserCsvParser>(),
+            csvManager = FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
+            auditRepository = get()
+        )
+    }
     single<AuthRepository> {
-        AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)))
+        AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)) , get())
     }
 }

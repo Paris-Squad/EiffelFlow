@@ -2,48 +2,80 @@ package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
+import org.example.data.storage.parser.UserCsvParser
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
+import org.example.domain.utils.ValidationErrorMessage
 import java.io.FileNotFoundException
 
 class AuthRepositoryImpl(
-    private val fileDataSource: FileDataSource
+    private val fileDataSource: FileDataSource,
+    private val userCsvParser: UserCsvParser
 ) : AuthRepository {
-    override fun saveUserLogin(user: User): Result<Boolean> {
-        TODO("TO handle write")
-//        return try {
-//            storageManager.writeLinesToFile(userID.toString())
-//            SessionManger.login(user)
-//            Result.success(true)
-//        } catch (e: Exception) {
-//            Result.failure(e)
-//        }
+    override fun loginUser(username: String, password: String): Result<String> {
+        return runCatching {
+            val lines = fileDataSource.readLinesFromFile()
+            val users = lines
+                .filter { it.isNotBlank() }
+                .map { userCsvParser.parseCsvLine(it) }
+
+            val user = users.find { it.username == username }
+                ?: throw EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.INVALID_USERNAME))
+
+            if (user.password != password) {
+                throw EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.INVALID_PASSWORD))
+            }
+
+            saveUserLogin(user)
+            "Login successfully"
+        }.recoverCatching {
+            when (it) {
+                is EiffelFlowException -> throw it
+                else -> throw EiffelFlowException.IOException(it.message)
+            }
+        }
     }
 
-    override fun getIsUserLoggedIn(): Result<Boolean> {
-        return try {
+    override fun saveUserLogin(user: User): Result<User> {
+        return runCatching {
+            val userCsv = userCsvParser.serialize(user)
+            fileDataSource.writeLinesToFile(userCsv)
+            SessionManger.login(user)
+            user
+        }.recoverCatching {
+            throw EiffelFlowException.IOException(it.message)
+        }
+    }
+
+    override fun isUserLoggedIn(): Result<Boolean> {
+        return runCatching {
             val lines = fileDataSource.readLinesFromFile()
-            Result.success(lines.any { it.isNotBlank() })
-//            SessionManger.login(user)
-            TODO("TO map the line to user and save it to SessionManager")
-        } catch (_: FileNotFoundException) {
-            Result.success(false)
-        } catch (e: Exception) {
-            Result.failure(e)
+            if (lines.any { it.isNotBlank() }) {
+                val userCsv = lines.first { it.isNotBlank() }
+                val user = userCsvParser.parseCsvLine(userCsv)
+                SessionManger.login(user)
+                true
+            } else {
+                false
+            }
+        }.recoverCatching { e ->
+            when (e) {
+                is FileNotFoundException -> false
+                else -> throw e
+            }
         }
     }
 
     override fun clearLogin(): Result<Boolean> {
-        return try {
+        return runCatching {
             fileDataSource.clearFile()
             SessionManger.logout()
-            Result.success(true)
-        } catch (e: Exception) {
-            Result.failure(e)
+            true
         }
     }
 
     companion object {
-        const val FILE_NAME = "auth.txt"
+        const val FILE_NAME = "auth.csv"
     }
 }
