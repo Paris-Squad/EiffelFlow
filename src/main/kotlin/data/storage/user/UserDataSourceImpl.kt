@@ -1,6 +1,6 @@
 package org.example.data.storage.user
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.Mapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
@@ -9,7 +9,7 @@ import java.util.UUID
 
 class UserDataSourceImpl(
     private val userMapper: Mapper<String, User>,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileDataSource
 ) : UserDataSource {
     override fun createUser(user: User): Result<User> {
         return try {

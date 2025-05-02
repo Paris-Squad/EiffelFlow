@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.data.storage.task.TaskDataSource
 import org.example.data.storage.task.TaskDataSourceImpl
@@ -20,7 +20,7 @@ import java.util.*
 
 class TaskDataSourceImplTest {
     private lateinit var taskDataSource: TaskDataSource
-    private val csvStorageManager: CsvStorageManager = mockk(relaxed = true)
+    private val csvStorageManager: FileDataSource = mockk(relaxed = true)
     private val taskMapper: TaskCsvMapper = mockk(relaxed = true)
 
     @BeforeEach

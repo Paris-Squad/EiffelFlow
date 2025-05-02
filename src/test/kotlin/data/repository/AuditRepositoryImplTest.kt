@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import org.example.data.repository.AuditRepositoryImpl
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.AuditCsvMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
@@ -18,7 +18,7 @@ import java.util.UUID
 class AuditRepositoryImplTest {
 
     private lateinit var auditRepository: AuditRepository
-    private val csvStorageManager: CsvStorageManager = mockk()
+    private val csvStorageManager: FileDataSource = mockk()
     private val auditCsvMapper: AuditCsvMapper = mockk()
 
     @BeforeEach

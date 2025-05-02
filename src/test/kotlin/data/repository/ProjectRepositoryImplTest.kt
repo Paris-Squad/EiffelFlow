@@ -16,13 +16,12 @@ import io.mockk.every
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
 import org.example.data.storage.mapper.ProjectCsvMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.Assertions
-import utils.MockAuditLog
 import utils.ProjectsMock
 import utils.UserMock
 import java.io.IOException
@@ -30,7 +29,7 @@ import java.io.IOException
 class ProjectRepositoryImplTest {
 
     private lateinit var projectRepository: ProjectRepository
-    private val csvStorageManager: CsvStorageManager = mockk(relaxed = true)
+    private val csvStorageManager: FileDataSource = mockk(relaxed = true)
     private val auditRepository: AuditRepository = mockk(relaxed = true)
     private val projectMapper: ProjectCsvMapper = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)

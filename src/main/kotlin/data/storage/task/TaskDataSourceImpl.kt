@@ -1,6 +1,6 @@
 package org.example.data.storage.task
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.domain.model.Task
 import org.example.domain.exception.EiffelFlowException
@@ -8,7 +8,7 @@ import java.util.UUID
 
 class TaskDataSourceImpl(
     private val taskMapper: TaskCsvMapper,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileDataSource
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
         return try {

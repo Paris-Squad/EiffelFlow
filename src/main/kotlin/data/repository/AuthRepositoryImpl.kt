@@ -1,13 +1,13 @@
 package org.example.data.repository
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
 import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 import java.io.FileNotFoundException
 
 class AuthRepositoryImpl(
-    private val storageManager: CsvStorageManager
+    private val storageManager: FileDataSource
 ) : AuthRepository {
     override fun saveUserLogin(user: User): Result<Boolean> {
         TODO("TO handle write")

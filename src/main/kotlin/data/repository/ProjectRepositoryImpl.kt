@@ -1,7 +1,7 @@
 package org.example.data.repository
 
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
 import org.example.data.storage.mapper.ProjectCsvMapper
 import org.example.domain.exception.EiffelFlowException
@@ -14,7 +14,7 @@ import java.util.UUID
 
 class ProjectRepositoryImpl(
     private val projectMapper: ProjectCsvMapper,
-    private val csvManager: CsvStorageManager,
+    private val csvManager: FileDataSource,
     private val auditRepository: AuditRepository
 ) : ProjectRepository {
 

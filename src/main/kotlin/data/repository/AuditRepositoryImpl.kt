@@ -1,6 +1,6 @@
 package org.example.data.repository
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.AuditCsvMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
@@ -9,7 +9,7 @@ import java.util.UUID
 
 class AuditRepositoryImpl(
     private val auditMapper: AuditCsvMapper,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileDataSource
 ) : AuditRepository {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
         return try {

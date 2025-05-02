@@ -5,9 +5,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import io.mockk.verify
 import org.example.data.repository.AuthRepositoryImpl
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.domain.repository.AuthRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +17,7 @@ import java.util.UUID
 
 class AuthRepositoryImplTest {
     private lateinit var authRepository: AuthRepository
-    private val fileManager: CsvStorageManager = mockk()
+    private val fileManager: FileDataSource = mockk()
 
     @BeforeEach
     fun setUp() {
