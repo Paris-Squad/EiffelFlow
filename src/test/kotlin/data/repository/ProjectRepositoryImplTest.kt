@@ -153,7 +153,8 @@ class ProjectRepositoryImplTest {
         try {
             // Given
             val projectId = UUID.randomUUID()
-            every { projectDataSource.deleteProject(any()) } returns Result.failure(EiffelFlowException.UnableToDeleteProjectException())
+            every { projectDataSource.deleteProject(any()) } returns
+                    Result.failure(EiffelFlowException.UnableToDeleteProjectException())
 
             // When
             val result = projectRepository.deleteProject(projectId)
@@ -165,10 +166,6 @@ class ProjectRepositoryImplTest {
         }catch (e : NotImplementedError){
             assertThat(e.message).contains("Not yet implemented")
         }
-
-
-
-
     }
 
     @Test
@@ -190,7 +187,15 @@ class ProjectRepositoryImplTest {
         }catch (e: NotImplementedError){
             assertThat(e.message).contains("Not yet implemented")
         }
+    }
 
+    @Test
+    fun `deleteProject should return UnauthorizedRegistrationException when the user is not the admin`(){
+        try {
+            every {  }
+        }catch (e: NotImplementedError){
+            assertThat(e.message).contains("Not yet implemented")
+        }
     }
 
 
