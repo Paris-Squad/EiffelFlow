@@ -107,15 +107,15 @@ class AuditRepositoryImplTest {
     }
     //endregion
 
-    //region getAuditLogById
+    //region getTaskAuditLogById
     @Test
-    fun `getAuditLogById should return Result with empty list of AuditLog when CSV file is empty`() {
+    fun `getTaskAuditLogById should return Result with empty list of AuditLog when CSV file is empty`() {
         // Given
         every { csvStorageManager.readLinesFromFile() } returns emptyList()
 
         // When / Then
         try {
-            val result = auditRepository.getItemAuditLogById(UUID.randomUUID())
+            val result = auditRepository.getTaskAuditLogById(UUID.randomUUID())
             assertThat(result.getOrNull()).isEmpty()
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -123,7 +123,7 @@ class AuditRepositoryImplTest {
     }
 
     @Test
-    fun `getAuditLogById should return Result with list of AuditLogs when CSV contains valid lines`() {
+    fun `getTaskAuditLogById should return Result with list of AuditLogs when CSV contains valid lines`() {
         // Given
         val itemId = MockAuditLog.AUDIT_LOG.itemId
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
@@ -132,7 +132,7 @@ class AuditRepositoryImplTest {
 
         // When / Then
         try {
-            val result = auditRepository.getItemAuditLogById(itemId)
+            val result = auditRepository.getTaskAuditLogById(itemId)
             assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockAuditLog.AUDIT_LOG))
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
@@ -141,7 +141,7 @@ class AuditRepositoryImplTest {
     }
 
     @Test
-    fun `getAuditLogById should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
+    fun `getTaskAuditLogById should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
         // Given
         val auditLogWithNewId = MockAuditLog.AUDIT_LOG.copy(itemId = UUID.randomUUID())
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
@@ -150,7 +150,59 @@ class AuditRepositoryImplTest {
 
         // When / Then
         try {
-            val result = auditRepository.getItemAuditLogById(UUID.randomUUID())
+            val result = auditRepository.getTaskAuditLogById(UUID.randomUUID())
+            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+    //endregion
+
+    //region getProjectAuditLogById
+    @Test
+    fun `getProjectAuditLogById should return Result with empty list of AuditLog when CSV file is empty`() {
+        // Given
+        every { csvStorageManager.readLinesFromFile() } returns emptyList()
+
+        // When / Then
+        try {
+            val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
+            assertThat(result.getOrNull()).isEmpty()
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
+
+    @Test
+    fun `getProjectAuditLogById should return Result with list of AuditLogs when CSV contains valid lines`() {
+        // Given
+        val itemId = MockAuditLog.AUDIT_LOG.itemId
+        val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns csvLines
+        every { auditCsvMapper.mapFrom(csvLines[0]) } returns MockAuditLog.AUDIT_LOG
+
+        // When / Then
+        try {
+            val result = auditRepository.getProjectAuditLogById(itemId)
+            assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(MockAuditLog.AUDIT_LOG))
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+
+    @Test
+    fun `getProjectAuditLogById should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
+        // Given
+        val auditLogWithNewId = MockAuditLog.AUDIT_LOG.copy(itemId = UUID.randomUUID())
+        val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
+        every { csvStorageManager.readLinesFromFile() } returns csvLines
+        every { auditCsvMapper.mapFrom(csvLines[0]) } returns auditLogWithNewId
+
+        // When / Then
+        try {
+            val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
             assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")

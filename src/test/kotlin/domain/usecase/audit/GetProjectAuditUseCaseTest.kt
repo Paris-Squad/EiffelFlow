@@ -25,7 +25,7 @@ class GetProjectAuditUseCaseTest {
     fun `should return Result of list with AuditLogs when project with given id exists`() {
         // Given
         every {
-            auditRepository.getItemAuditLogById(any())
+            auditRepository.getProjectAuditLogById(any())
         } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
 
         // When / Then
@@ -41,7 +41,7 @@ class GetProjectAuditUseCaseTest {
         // Given
         val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
-            auditRepository.getItemAuditLogById(any())
+            auditRepository.getProjectAuditLogById(any())
         } returns Result.failure(exception)
 
         // When / Then

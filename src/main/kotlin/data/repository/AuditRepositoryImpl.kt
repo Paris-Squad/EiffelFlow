@@ -33,16 +33,32 @@ class AuditRepositoryImpl(
         }
     }
 
-    override fun getItemAuditLogById(itemId: UUID): Result<List<AuditLog>> {
+    override fun getTaskAuditLogById(taskId: UUID): Result<List<AuditLog>> {
         val lines = csvManager.readLinesFromFile()
         if (lines.isEmpty())  return Result.success(emptyList())
 
         val auditLogs = lines.map { line ->
             auditMapper.mapFrom(line)
-        }.filter { it.itemId == itemId }
+        }.filter { it.itemId == taskId }
 
         return if (auditLogs.isEmpty()) {
-            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $itemId"))
+            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $taskId"))
+        } else {
+            Result.success(auditLogs)
+        }
+    }
+
+    override fun getProjectAuditLogById(projectId: UUID): Result<List<AuditLog>> {
+        //TODO retrieve the tasks related to the project and get it's own history
+        val lines = csvManager.readLinesFromFile()
+        if (lines.isEmpty())  return Result.success(emptyList())
+
+        val auditLogs = lines.map { line ->
+            auditMapper.mapFrom(line)
+        }.filter { it.itemId == projectId }
+
+        return if (auditLogs.isEmpty()) {
+            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $projectId"))
         } else {
             Result.success(auditLogs)
         }

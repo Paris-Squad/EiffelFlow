@@ -7,7 +7,9 @@ interface AuditRepository {
 
     fun createAuditLog(auditLog: AuditLog): Result<AuditLog>
 
-    fun getItemAuditLogById(itemId: UUID): Result<List<AuditLog>>
+    fun getTaskAuditLogById(taskId: UUID): Result<List<AuditLog>>
+
+    fun getProjectAuditLogById(projectId: UUID): Result<List<AuditLog>>
 
     fun getAuditLogs(): Result<List<AuditLog>>
 }
