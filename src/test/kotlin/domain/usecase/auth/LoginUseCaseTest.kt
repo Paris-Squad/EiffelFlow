@@ -3,103 +3,95 @@ package domain.usecase.auth
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import org.example.domain.utils.ValidationErrorMessage
 import org.example.data.repository.AuthRepositoryImpl
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.LoginUseCase
-import org.example.domain.usecase.auth.ValidatePasswordUseCase
-import org.example.domain.usecase.auth.ValidateUserNameUseCase
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.UserMock
 
-
-
 class LoginUseCaseTest {
-    private val userRepository: UserRepository = mockk(relaxed = true)
-    private val validatePasswordUseCase: ValidatePasswordUseCase = mockk(relaxed = true)
-    private val validateUsernameUseCase: ValidateUserNameUseCase = mockk(relaxed = true)
-    private val authRepositoryImpl: AuthRepositoryImpl=mockk(relaxed = true)
+    private val authRepositoryImpl: AuthRepositoryImpl = mockk(relaxed = true)
     private lateinit var loginUseCase: LoginUseCase
 
     @BeforeEach
-    fun setup(){
-        loginUseCase = LoginUseCase(userRepository, validatePasswordUseCase, validateUsernameUseCase,authRepositoryImpl)
+    fun setup() {
+        loginUseCase = LoginUseCase(authRepositoryImpl)
     }
 
     @Test
     fun `login should return success when credentials are correct`() {
-        // Given
-        every { validateUsernameUseCase.validateUserName(UserMock.validUser.username) } returns Result.success(Unit)
-        every { validatePasswordUseCase.validatePassword(UserMock.validUser.password) } returns Result.success(Unit)
-        every { userRepository.getUsers() } returns Result.success(UserMock.userList)
+        val username = UserMock.validUser.username
+        val password = UserMock.validUser.password
 
-        // When
-        val result = loginUseCase.login(UserMock.validUser.username, UserMock.validUser.password)
+        every { authRepositoryImpl.loginUser(username, password) } returns Result.success("Login successfully")
 
-        // Then
-        assertTrue(result.isSuccess)
-        assertEquals("Login successfully", result.getOrNull())
+        val result = loginUseCase.login(username, password)
+
+        assertThat(result.isSuccess).isTrue()
     }
+
     @Test
-    fun `login should return failure when password are incorrect`(){
-        //Given
-            every { userRepository.getUsers() } returns Result.success(listOf(UserMock.validUser))
-        //When
-            val result = loginUseCase.login(UserMock.validUser.username, UserMock.invalidUser.password)
-        //Then
-            assertTrue(result.isFailure)
-            assertEquals("Password validation failed: Invalid password", result.exceptionOrNull()?.message)
+    fun `login should return success message when credentials are correct`() {
+        val username = UserMock.validUser.username
+        val password = UserMock.validUser.password
+
+        every { authRepositoryImpl.loginUser(username, password) } returns Result.success("Login successfully")
+
+        val result = loginUseCase.login(username, password)
+
+        assertThat(result.getOrNull()).isEqualTo("Login successfully")
     }
+
     @Test
-    fun `login should return failure when userName are incorrect`(){
-        //Given
-        every { userRepository.getUsers() } returns Result.success(listOf(UserMock.validUser))
+    fun `login should return failure when authentication fails`() {
+        val username = UserMock.validUser.username
+        val password = "wrong password"
+        val exception = EiffelFlowException.AuthenticationException(emptySet())
 
-        //When
-        val result = loginUseCase.login("wrong username", UserMock.validUser.password)
+        every { authRepositoryImpl.loginUser(username, password) } returns Result.failure(exception)
 
-        //Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthenticationException::class.java)
+        val result = loginUseCase.login(username, password)
+
+        assertThat(result.isFailure).isTrue()
     }
+
     @Test
-    fun `login should return failure when userRepository returns failure`() {
-        // Given
-        val exception = RuntimeException("Data source error")
-        every { userRepository.getUsers() } returns Result.failure(exception)
+    fun `login should return authentication exception when authentication fails`() {
+        val username = UserMock.validUser.username
+        val password = "wrong password"
+        val exception = EiffelFlowException.AuthenticationException(emptySet())
 
-        // When
-        val result = loginUseCase.login("validUser", "validPass")
+        every { authRepositoryImpl.loginUser(username, password) } returns Result.failure(exception)
 
-        // Then
-        assertTrue(result.isFailure)
-        assertEquals("Data source error", result.exceptionOrNull()?.message)
+        val result = loginUseCase.login(username, password)
+
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
+
     @Test
-    fun `register should fail when username validation fails`(){
-        val validationException =
-            EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.USERNAME_TOO_LONG))
+    fun `login should return failure when saving login fails`() {
+        val username = UserMock.validUser.username
+        val password = UserMock.validUser.password
+        val exception = RuntimeException("Failed to save login")
 
-        every { validateUsernameUseCase.validateUserName(UserMock.invalidUser.username) } returns Result.failure(validationException)
+        every { authRepositoryImpl.loginUser(username, password) } returns Result.failure(exception)
 
-        val result = loginUseCase.login(UserMock.invalidUser.username, UserMock.validUser.password)
+        val result = loginUseCase.login(username, password)
 
-        assertTrue(result.isFailure)
-        assertEquals(validationException, result.exceptionOrNull())
-
-        verify { validateUsernameUseCase.validateUserName(UserMock.invalidUser.username) }
+        assertThat(result.isFailure).isTrue()
     }
+
     @Test
-    fun `register should fail when password validation fails`() {
-        val validationException = EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.PASSWORD_TOO_SHORT))
+    fun `login should return save exception when saving login fails`() {
+        val username = UserMock.validUser.username
+        val password = UserMock.validUser.password
+        val exception = RuntimeException("Failed to save login")
 
-        every { validatePasswordUseCase.validatePassword(UserMock.invalidUser.password) } returns Result.failure(validationException)
+        every { authRepositoryImpl.loginUser(username, password) } returns Result.failure(exception)
 
-        val result = loginUseCase.login(UserMock.validUser.username, UserMock.invalidUser.password)
+        val result = loginUseCase.login(username, password)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(validationException::class.java)
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 }

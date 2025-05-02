@@ -5,8 +5,6 @@ import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.*
 import org.example.data.storage.task.TaskDataSource
 import org.example.data.storage.task.TaskDataSourceImpl
-import org.example.data.storage.user.UserDataSource
-import org.example.data.storage.user.UserDataSourceImpl
 import org.example.domain.repository.*
 import org.koin.dsl.module
 import java.io.File
@@ -27,13 +25,6 @@ val appModule = module {
         )
     }
 
-    single<UserDataSource> {
-        UserDataSourceImpl(
-            userMapper = get<UserCsvMapper>(),
-            csvManager = FileDataSource(File(UserDataSourceImpl.FILE_NAME))
-        )
-    }
-
     //repose
     single<AuditRepository> {
         AuditRepositoryImpl(
@@ -49,8 +40,14 @@ val appModule = module {
         )
     }
     single<TaskRepository> { TaskRepositoryImpl(get(), get()) }
-    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    single<UserRepository> { 
+        UserRepositoryImpl(
+            userMapper = get<UserCsvMapper>(),
+            csvManager = FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
+            auditRepository = get()
+        ) 
+    }
     single<AuthRepository> {
-        AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)))
+        AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)) , get())
     }
 }
