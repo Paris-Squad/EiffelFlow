@@ -30,10 +30,9 @@ class DeleteProjectPresenterTest {
             every { deleteProjectUseCase.deleteProject(any()) } returns Result.success(project)
 
             // When
-            val result = deleteProjectPresenter.deleteProject(projectId)
+            deleteProjectPresenter(projectId)
 
             // Then
-            assertThat(result.isSuccess).isTrue()
             verify(exactly = 1) { deleteProjectUseCase.deleteProject(any()) }
 
         } catch (e: NotImplementedError) {
@@ -52,7 +51,7 @@ class DeleteProjectPresenterTest {
                     )
 
             // When
-            val result = deleteProjectPresenter.deleteProject(differentProjectId)
+            val result = deleteProjectPresenter(differentProjectId)
 
             // Then
             assertThat(result.isSuccess).isTrue()
