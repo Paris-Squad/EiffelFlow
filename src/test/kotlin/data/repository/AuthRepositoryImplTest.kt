@@ -9,7 +9,7 @@ import io.mockk.verify
 import org.example.data.repository.AuthRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
-import org.example.data.storage.mapper.UserCsvMapper
+import org.example.data.storage.parser.UserCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuthRepository
 import org.junit.jupiter.api.AfterEach
@@ -22,7 +22,7 @@ import java.io.IOException
 class AuthRepositoryImplTest {
     private lateinit var authRepository: AuthRepository
     private val fileManager: FileDataSource = mockk()
-    private val userMapper: UserCsvMapper = mockk()
+    private val userMapper: UserCsvParser = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -40,7 +40,7 @@ class AuthRepositoryImplTest {
         val user = UserMock.adminUser
         val userCsv = "user-csv-string"
 
-        every { userMapper.mapTo(user) } returns userCsv
+        every { userMapper.serialize(user) } returns userCsv
         every { fileManager.writeLinesToFile(userCsv) } just runs
 
         val result = authRepository.saveUserLogin(user)
@@ -53,7 +53,7 @@ class AuthRepositoryImplTest {
         val user = UserMock.adminUser
         val userCsv = "user-csv-string"
 
-        every { userMapper.mapTo(user) } returns userCsv
+        every { userMapper.serialize(user) } returns userCsv
         every { fileManager.writeLinesToFile(userCsv) } just runs
 
         authRepository.saveUserLogin(user)
@@ -66,7 +66,7 @@ class AuthRepositoryImplTest {
         val user = UserMock.adminUser
         val userCsv = "user-csv-string"
 
-        every { userMapper.mapTo(user) } returns userCsv
+        every { userMapper.serialize(user) } returns userCsv
         every { fileManager.writeLinesToFile(userCsv) } just runs
 
         authRepository.saveUserLogin(user)
@@ -80,7 +80,7 @@ class AuthRepositoryImplTest {
         val userCsv = "user-csv-string"
         val exception = IOException("Failed to write file")
 
-        every { userMapper.mapTo(user) } returns userCsv
+        every { userMapper.serialize(user) } returns userCsv
         every { fileManager.writeLinesToFile(userCsv) } throws exception
 
         val result = authRepository.saveUserLogin(user)
@@ -94,7 +94,7 @@ class AuthRepositoryImplTest {
         val userCsv = "user-csv-string"
         val exception = IOException("Failed to write file")
 
-        every { userMapper.mapTo(user) } returns userCsv
+        every { userMapper.serialize(user) } returns userCsv
         every { fileManager.writeLinesToFile(userCsv) } throws exception
 
         val result = authRepository.saveUserLogin(user)
@@ -109,7 +109,7 @@ class AuthRepositoryImplTest {
         val user = UserMock.adminUser
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(userCsv) } returns user
+        every { userMapper.parseCsvLine(userCsv) } returns user
 
         val result = authRepository.isUserLoggedIn()
 
@@ -124,7 +124,7 @@ class AuthRepositoryImplTest {
         val user = UserMock.adminUser
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(userCsv) } returns user
+        every { userMapper.parseCsvLine(userCsv) } returns user
 
         authRepository.isUserLoggedIn()
 
@@ -260,8 +260,8 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
-        every { userMapper.mapTo(user) } returns "user-csv-string"
+        every { userMapper.parseCsvLine(any()) } returns user
+        every { userMapper.serialize(user) } returns "user-csv-string"
         every { fileManager.writeLinesToFile(any()) } just runs
 
         val result = authRepository.loginUser(username, password)
@@ -277,8 +277,8 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
-        every { userMapper.mapTo(user) } returns "user-csv-string"
+        every { userMapper.parseCsvLine(any()) } returns user
+        every { userMapper.serialize(user) } returns "user-csv-string"
         every { fileManager.writeLinesToFile(any()) } just runs
 
         val result = authRepository.loginUser(username, password)
@@ -294,8 +294,8 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
-        every { userMapper.mapTo(user) } returns "user-csv-string"
+        every { userMapper.parseCsvLine(any()) } returns user
+        every { userMapper.serialize(user) } returns "user-csv-string"
         every { fileManager.writeLinesToFile(any()) } just runs
 
         authRepository.loginUser(username, password)
@@ -311,7 +311,7 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
+        every { userMapper.parseCsvLine(any()) } returns user
 
         val result = authRepository.loginUser(username, password)
 
@@ -326,7 +326,7 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
+        every { userMapper.parseCsvLine(any()) } returns user
 
         val result = authRepository.loginUser(username, password)
 
@@ -341,7 +341,7 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
+        every { userMapper.parseCsvLine(any()) } returns user
 
         val result = authRepository.loginUser(username, password)
 
@@ -356,7 +356,7 @@ class AuthRepositoryImplTest {
         val lines = listOf("user-csv-string")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(any()) } returns user
+        every { userMapper.parseCsvLine(any()) } returns user
 
         val result = authRepository.loginUser(username, password)
 
@@ -397,8 +397,8 @@ class AuthRepositoryImplTest {
         val lines = listOf("", "  ", "user-csv-string", "\n")
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom("user-csv-string") } returns user
-        every { userMapper.mapTo(user) } returns "user-csv-string"
+        every { userMapper.parseCsvLine("user-csv-string") } returns user
+        every { userMapper.serialize(user) } returns "user-csv-string"
         every { fileManager.writeLinesToFile(any()) } just runs
 
         val result = authRepository.loginUser(username, password)
@@ -427,7 +427,7 @@ class AuthRepositoryImplTest {
         val user = UserMock.adminUser
 
         every { fileManager.readLinesFromFile() } returns lines
-        every { userMapper.mapFrom(userCsv) } returns user
+        every { userMapper.parseCsvLine(userCsv) } returns user
 
         val result = authRepository.isUserLoggedIn()
 

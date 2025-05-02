@@ -3,8 +3,6 @@ package org.example.di
 import org.example.data.repository.*
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.*
-import org.example.data.storage.user.UserDataSource
-import org.example.data.storage.user.UserDataSourceImpl
 import org.example.domain.repository.*
 import org.koin.dsl.module
 import java.io.File
@@ -39,8 +37,8 @@ val appModule = module {
     }
     single<UserRepository> {
         UserRepositoryImpl(
-            userMapper = get<UserCsvParser>(),
-            csvManager = FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
+            userCsvParser = get<UserCsvParser>(),
+            fileDataSource = FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
             auditRepository = get()
         )
     }
