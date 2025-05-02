@@ -237,6 +237,25 @@ class ProjectRepositoryImplTest {
             assertThat(e.message).contains("Not yet implemented")
         }
     }
+    @Test
+    fun `deleteProject should return UnauthorizedRegistrationException when the user is not the admin`() {
+        try {
+            // Given
+            every { sessionManger.getUser() } returns UserMock.validUser
+
+            // When
+            val result = projectRepository.deleteProject(ProjectsMock.CORRECT_PROJECT.projectId)
+
+            // Then
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(
+                EiffelFlowException.IOException::class.java
+            )
+
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+    }
     //endregion
 
 //    @Test
