@@ -10,5 +10,5 @@ val useCasesModule = module {
     factory { ValidatePasswordUseCase() }
     factory { ValidateUserNameUseCase() }
     factory { HashPasswordUseCase() }
-    factory { RegisterUseCase(get(), get(), get(), get()) }
+    factory { RegisterUseCase(get(), get()) }
 }
