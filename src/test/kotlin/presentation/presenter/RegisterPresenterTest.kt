@@ -12,13 +12,13 @@ import org.junit.jupiter.api.Test
 import utils.UserMock
 
 class RegisterPresenterTest {
-    private val registerUseCase: RegisterUseCase = mockk()
-    private lateinit var presenter: RegisterPresenter
+    private val registerUseCase: RegisterUseCase = mockk(relaxed = true)
+    private lateinit var registerPresenter: RegisterPresenter
     private val user = UserMock
 
     @BeforeEach
     fun setup() {
-        presenter = RegisterPresenter(registerUseCase)
+        registerPresenter = RegisterPresenter(registerUseCase)
 
     }
 
@@ -29,10 +29,11 @@ class RegisterPresenterTest {
         every { registerUseCase.register(user.validUser.username, user.validUser.password, user.validUser.role
         ) }returns Result.success(user.validUser)
 
-        val result = presenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
+        val result = registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(user)
+
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not implement yet")
         }
@@ -47,10 +48,11 @@ class RegisterPresenterTest {
         every { registerUseCase.register(user.validUser.username, user.validUser.password, user.validUser.role
         ) } returns Result.failure(exception)
 
-        val result = presenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
+        val result = registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.exceptionOrNull()).isEqualTo(exception)
+
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not implement yet")
         }
