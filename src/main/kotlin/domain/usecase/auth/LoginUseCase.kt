@@ -1,9 +1,9 @@
 package org.example.domain.usecase.auth
 
-import org.example.data.repository.AuthRepositoryImpl
+import org.example.domain.repository.AuthRepository
 
-class LoginUseCase(private val authRepositoryImpl: AuthRepositoryImpl) {
+class LoginUseCase(private val authRepository: AuthRepository) {
 
     fun login(userName: String, password: String): Result<String> =
-        authRepositoryImpl.loginUser(userName, password)
+        authRepository.loginUser(userName, password)
 }
