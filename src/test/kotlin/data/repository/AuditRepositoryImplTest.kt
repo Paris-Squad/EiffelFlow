@@ -7,7 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import org.example.data.repository.AuditRepositoryImpl
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.mapper.AuditCsvMapper
+import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.BeforeEach
@@ -19,11 +19,11 @@ class AuditRepositoryImplTest {
 
     private lateinit var auditRepository: AuditRepository
     private val csvStorageManager: FileDataSource = mockk()
-    private val auditCsvMapper: AuditCsvMapper = mockk()
+    private val AuditCsvParser: AuditCsvParser = mockk()
 
     @BeforeEach
     fun setUp() {
-        auditRepository = AuditRepositoryImpl(auditCsvMapper, csvStorageManager)
+        auditRepository = AuditRepositoryImpl(AuditCsvParser, csvStorageManager)
     }
 
     @Test
@@ -79,7 +79,7 @@ class AuditRepositoryImplTest {
     fun `getAuditLogs should return Result with list of AuditLogs when CSV contains valid lines`() {
         // Given
         every { csvStorageManager.readLinesFromFile() } returns listOf(MockAuditLog.FULL_CSV_STRING_LINE)
-        every { auditCsvMapper.mapFrom(MockAuditLog.FULL_CSV_STRING_LINE) } returns MockAuditLog.AUDIT_LOG
+        every { AuditCsvParser.parseCsvLine(MockAuditLog.FULL_CSV_STRING_LINE) } returns MockAuditLog.AUDIT_LOG
 
         // When / Then
         try {
@@ -128,7 +128,7 @@ class AuditRepositoryImplTest {
         val itemId = MockAuditLog.AUDIT_LOG.itemId
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
         every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { auditCsvMapper.mapFrom(csvLines[0]) } returns MockAuditLog.AUDIT_LOG
+        every { AuditCsvParser.parseCsvLine(csvLines[0]) } returns MockAuditLog.AUDIT_LOG
 
         // When / Then
         try {
@@ -146,7 +146,7 @@ class AuditRepositoryImplTest {
         val auditLogWithNewId = MockAuditLog.AUDIT_LOG.copy(itemId = UUID.randomUUID())
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
         every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { auditCsvMapper.mapFrom(csvLines[0]) } returns auditLogWithNewId
+        every { AuditCsvParser.parseCsvLine(csvLines[0]) } returns auditLogWithNewId
 
         // When / Then
         try {
@@ -180,7 +180,7 @@ class AuditRepositoryImplTest {
         val itemId = MockAuditLog.AUDIT_LOG.itemId
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
         every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { auditCsvMapper.mapFrom(csvLines[0]) } returns MockAuditLog.AUDIT_LOG
+        every { AuditCsvParser.parseCsvLine(csvLines[0]) } returns MockAuditLog.AUDIT_LOG
 
         // When / Then
         try {
@@ -198,7 +198,7 @@ class AuditRepositoryImplTest {
         val auditLogWithNewId = MockAuditLog.AUDIT_LOG.copy(itemId = UUID.randomUUID())
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
         every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { auditCsvMapper.mapFrom(csvLines[0]) } returns auditLogWithNewId
+        every { AuditCsvParser.parseCsvLine(csvLines[0]) } returns auditLogWithNewId
 
         // When / Then
         try {

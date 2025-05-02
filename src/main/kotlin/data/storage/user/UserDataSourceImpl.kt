@@ -1,20 +1,20 @@
 package org.example.data.storage.user
 
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.Mapper
+import org.example.data.storage.parser.UserCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import java.io.FileNotFoundException
 import java.util.UUID
 
 class UserDataSourceImpl(
-    private val userMapper: Mapper<String, User>,
-    private val csvManager: FileDataSource
+    private val userCsvParser: UserCsvParser,
+    private val fileDataSource: FileDataSource
 ) : UserDataSource {
     override fun createUser(user: User): Result<User> {
         return try {
-            val userAsCsv = userMapper.mapTo(user)
-            csvManager.writeLinesToFile(userAsCsv)
+            val userAsCsv = userCsvParser.serialize(user)
+            fileDataSource.writeLinesToFile(userAsCsv)
             Result.success(user)
         } catch (e: Throwable) {
             Result.failure(EiffelFlowException.IOException(e.message))
@@ -35,10 +35,10 @@ class UserDataSourceImpl(
 
     override fun getUsers(): Result<List<User>> {
         return try {
-            val lines = csvManager.readLinesFromFile()
+            val lines = fileDataSource.readLinesFromFile()
             val users = lines
                 .filter { it.isNotBlank() }
-                .map { line -> userMapper.mapFrom(line) }
+                .map { line -> userCsvParser.parseCsvLine(line) }
 
             Result.success(users)
         } catch (_: FileNotFoundException) {

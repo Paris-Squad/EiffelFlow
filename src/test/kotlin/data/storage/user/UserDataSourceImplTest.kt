@@ -6,7 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.mapper.UserCsvMapper
+import org.example.data.storage.parser.UserCsvParser
 import org.example.data.storage.user.UserDataSource
 import org.example.data.storage.user.UserDataSourceImpl
 import org.example.domain.model.RoleType
@@ -20,7 +20,7 @@ import java.util.*
 
 class UserDataSourceImplTest {
     private lateinit var userDataSource: UserDataSource
-    private val userMapper: UserCsvMapper = mockk()
+    private val userMapper: UserCsvParser = mockk()
     private val csvManager: FileDataSource = mockk()
 
     @BeforeEach
@@ -38,7 +38,7 @@ class UserDataSourceImplTest {
         )
         val userCsv = "test,test,ADMIN,${user.userId}"
 
-        every { userMapper.mapTo(user) } returns userCsv
+        every { userMapper.serialize(user) } returns userCsv
         every { csvManager.writeLinesToFile(userCsv) } just runs
 
         val result = userDataSource.createUser(user)
@@ -56,7 +56,7 @@ class UserDataSourceImplTest {
         )
         val exception = IOException("Failed to write file")
 
-        every { userMapper.mapTo(user) } returns "user_csv_string"
+        every { userMapper.serialize(user) } returns "user_csv_string"
         every { csvManager.writeLinesToFile(any()) } throws exception
 
         val result = userDataSource.createUser(user)
@@ -108,8 +108,8 @@ class UserDataSourceImplTest {
         val user2 = User(UUID.fromString("00000000-0000-0000-0000-000000000002"), "user2", "pass2", RoleType.MATE)
 
         every { csvManager.readLinesFromFile() } returns csvLines
-        every { userMapper.mapFrom("user1,pass1,ADMIN,uuid1") } returns user1
-        every { userMapper.mapFrom("user2,pass2,MATE,uuid2") } returns user2
+        every { userMapper.parseCsvLine("user1,pass1,ADMIN,uuid1") } returns user1
+        every { userMapper.parseCsvLine("user2,pass2,MATE,uuid2") } returns user2
 
         val result = userDataSource.getUsers()
 

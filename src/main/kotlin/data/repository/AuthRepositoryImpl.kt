@@ -7,7 +7,7 @@ import org.example.domain.repository.AuthRepository
 import java.io.FileNotFoundException
 
 class AuthRepositoryImpl(
-    private val storageManager: FileDataSource
+    private val fileDataSource: FileDataSource
 ) : AuthRepository {
     override fun saveUserLogin(user: User): Result<Boolean> {
         TODO("TO handle write")
@@ -22,7 +22,7 @@ class AuthRepositoryImpl(
 
     override fun getIsUserLoggedIn(): Result<Boolean> {
         return try {
-            val lines = storageManager.readLinesFromFile()
+            val lines = fileDataSource.readLinesFromFile()
             Result.success(lines.any { it.isNotBlank() })
 //            SessionManger.login(user)
             TODO("TO map the line to user and save it to SessionManager")
@@ -35,7 +35,7 @@ class AuthRepositoryImpl(
 
     override fun clearLogin(): Result<Boolean> {
         return try {
-            storageManager.clearFile()
+            fileDataSource.clearFile()
             SessionManger.logout()
             Result.success(true)
         } catch (e: Exception) {

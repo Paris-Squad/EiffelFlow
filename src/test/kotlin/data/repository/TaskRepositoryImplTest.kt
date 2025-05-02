@@ -15,7 +15,7 @@ import java.util.UUID
 import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
-import org.example.data.storage.mapper.TaskCsvMapper
+import org.example.data.storage.parser.TaskCsvParser
 import org.example.domain.exception.EiffelFlowException
 
 import utils.UserMock
@@ -23,7 +23,7 @@ import utils.UserMock
 class TaskRepositoryImplTest {
 
     private val fileDataSource: FileDataSource = mockk(relaxed = true)
-    private val taskMapper: TaskCsvMapper = mockk(relaxed = true)
+    private val taskMapper: TaskCsvParser = mockk(relaxed = true)
     private val auditRepository: AuditRepository = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private lateinit var taskRepository: TaskRepositoryImpl
@@ -33,7 +33,7 @@ class TaskRepositoryImplTest {
     @BeforeEach
     fun setUp() {
         taskRepository = TaskRepositoryImpl(
-            taskMapper = taskMapper,
+            taskCsvParser = taskMapper,
             fileDataSource = fileDataSource,
             auditRepository = auditRepository
         )
@@ -45,7 +45,7 @@ class TaskRepositoryImplTest {
         // Given
         every { sessionManger.getUser() } returns UserMock.adminUser
         every {
-            taskMapper.mapTo(TaskMock.validTask)
+            taskMapper.serialize(TaskMock.validTask)
         } returns TaskMock.ValidTaskCSV
         every {
             fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV)
@@ -66,7 +66,7 @@ class TaskRepositoryImplTest {
         //Given
         every { sessionManger.getUser() } returns UserMock.adminUser
         every {
-            taskMapper.mapTo(TaskMock.validTask)
+            taskMapper.serialize(TaskMock.validTask)
         } throws IOException("Error")
         every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
 
@@ -82,7 +82,7 @@ class TaskRepositoryImplTest {
         //Given
         every { sessionManger.getUser() } returns UserMock.adminUser
         every {
-            taskMapper.mapTo(TaskMock.validTask)
+            taskMapper.serialize(TaskMock.validTask)
         } returns TaskMock.ValidTaskCSV
         every {
             fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV)
@@ -103,8 +103,8 @@ class TaskRepositoryImplTest {
     @Test
     fun `updateTask should return success if the task is updated`() {
         //Given
-        every { taskMapper.mapTo(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
-        every { taskMapper.mapTo(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
+        every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
+        every { taskMapper.serialize(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
         every {
             fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV)
         } just runs
@@ -123,8 +123,8 @@ class TaskRepositoryImplTest {
         //Given
         val exception = IOException("Error")
         every { sessionManger.getUser() } returns UserMock.validUser
-        every { taskMapper.mapTo(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
-        every { taskMapper.mapTo(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
+        every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
+        every { taskMapper.serialize(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
         every { fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV) } throws exception
 
         //When
@@ -141,7 +141,7 @@ class TaskRepositoryImplTest {
         //Given
         val lines = listOf(TaskMock.ValidTaskCSV)
         every { fileDataSource.readLinesFromFile() } returns lines
-        every { taskMapper.mapFrom(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
 
         //When
         val result = taskRepository.deleteTask(TaskMock.validTask.taskId)
@@ -156,7 +156,7 @@ class TaskRepositoryImplTest {
         val lines = listOf(TaskMock.ValidTaskCSV)
 
         every { fileDataSource.readLinesFromFile() } returns lines
-        every { taskMapper.mapFrom(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
 
         val result = taskRepository.deleteTask(nonExistentTaskId)
 
@@ -169,7 +169,7 @@ class TaskRepositoryImplTest {
         val exception = IOException("Error deleting task")
 
         every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
-        every { taskMapper.mapFrom(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
         every { fileDataSource.deleteLineFromFile(any()) } throws exception
 
         val result = taskRepository.deleteTask(taskId)
@@ -185,7 +185,7 @@ class TaskRepositoryImplTest {
         val taskList = listOf(TaskMock.validTask)
 
         every { fileDataSource.readLinesFromFile() } returns csvLines
-        every { taskMapper.mapFrom(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
 
         val result = taskRepository.getTasks()
 
@@ -206,7 +206,7 @@ class TaskRepositoryImplTest {
     @Test
     fun `getTaskById should return task when found`() {
         every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
-        every { taskMapper.mapFrom(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
 
         val result = taskRepository.getTaskById(TaskMock.validTask.taskId)
 
@@ -218,7 +218,7 @@ class TaskRepositoryImplTest {
         val nonExistentTaskId = UUID.randomUUID()
 
         every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
-        every { taskMapper.mapFrom(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
 
         val result = taskRepository.getTaskById(nonExistentTaskId)
 
