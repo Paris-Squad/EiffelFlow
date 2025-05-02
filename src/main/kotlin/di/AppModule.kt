@@ -3,8 +3,6 @@ package org.example.di
 import org.example.data.repository.*
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.*
-import org.example.data.storage.task.TaskDataSource
-import org.example.data.storage.task.TaskDataSourceImpl
 import org.example.data.storage.user.UserDataSource
 import org.example.data.storage.user.UserDataSourceImpl
 import org.example.domain.repository.*
@@ -20,13 +18,6 @@ val appModule = module {
     single<UserCsvMapper> { UserCsvMapper() }
 
     //DataSource
-    single<TaskDataSource> {
-        TaskDataSourceImpl(
-            taskMapper = get<TaskCsvMapper>(),
-            csvManager = FileDataSource(File(TaskDataSourceImpl.FILE_NAME))
-        )
-    }
-
     single<UserDataSource> {
         UserDataSourceImpl(
             userMapper = get<UserCsvMapper>(),
@@ -48,7 +39,12 @@ val appModule = module {
             auditRepository = get()
         )
     }
-    single<TaskRepository> { TaskRepositoryImpl(get(), get()) }
+    single<TaskRepository> {
+        TaskRepositoryImpl(
+            taskMapper = get<TaskCsvMapper>(),
+            fileDataSource = FileDataSource(File(TaskRepositoryImpl.FILE_NAME)),
+            auditRepository = get())
+    }
     single<UserRepository> { UserRepositoryImpl(get(), get()) }
     single<AuthRepository> {
         AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)))

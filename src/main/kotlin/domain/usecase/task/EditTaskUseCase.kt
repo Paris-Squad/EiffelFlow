@@ -18,7 +18,6 @@ class EditTaskUseCase(private val taskRepository: TaskRepository) {
         return taskRepository.updateTask(
             task = request,
             oldTask = originalTask,
-            editor = editor,
             changedField = changedField
         )
     }

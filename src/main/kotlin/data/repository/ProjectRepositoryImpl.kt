@@ -23,7 +23,10 @@ class ProjectRepositoryImpl(
        return runCatching{
             val csvLine = projectMapper.mapTo(project)
             csvManager.writeLinesToFile(csvLine + "\n")
-            val auditLog = project.toAuditLog(SessionManger.getUser(), actionType = AuditLogAction.CREATE)
+            val auditLog = project.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.CREATE,
+                newValue = project.projectName)
             auditRepository.createAuditLog(auditLog)
            project
        }.recoverCatching {
@@ -49,7 +52,10 @@ class ProjectRepositoryImpl(
             csvManager.writeLinesToFile(lines.joinToString("\n"))
             val deletedProject = projectMapper.mapFrom(removedLine)
 
-            val auditLog = deletedProject.toAuditLog(SessionManger.getUser(), actionType = AuditLogAction.CREATE)
+            val auditLog = deletedProject.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.CREATE,
+                newValue = deletedProject.projectName)
             auditRepository.createAuditLog(auditLog)
             deletedProject
         }.recoverCatching {
