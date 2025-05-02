@@ -2,7 +2,7 @@ package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
-import org.example.data.storage.mapper.UserCsvMapper
+import org.example.data.storage.parser.UserCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
@@ -14,14 +14,14 @@ import java.util.UUID
 import kotlin.Result
 
 class UserRepositoryImpl(
-    private val userMapper: UserCsvMapper,
-    private val csvManager: FileDataSource,
+    private val userCsvParser: UserCsvParser,
+    private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : UserRepository {
     override fun createUser(user: User, createdBy: User): Result<User> {
         return runCatching {
-            val userAsCsv = userMapper.mapTo(user)
-            csvManager.writeLinesToFile(userAsCsv)
+            val userAsCsv = userCsvParser.serialize(user)
+            fileDataSource.writeLinesToFile(userAsCsv)
             val auditLog = user.toAuditLog(createdBy, AuditLogAction.CREATE)
             auditRepository.createAuditLog(auditLog)
             user
@@ -39,10 +39,10 @@ class UserRepositoryImpl(
             val existingUser = users.find { it.userId == user.userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID ${user.userId} not found")
 
-            val oldUserCsv = userMapper.mapTo(existingUser)
-            val newUserCsv = userMapper.mapTo(user)
+            val oldUserCsv = userCsvParser.serialize(existingUser)
+            val newUserCsv = userCsvParser.serialize(user)
 
-            csvManager.updateLinesToFile(newUserCsv, oldUserCsv)
+            fileDataSource.updateLinesToFile(newUserCsv, oldUserCsv)
 
             val auditLog = user.toAuditLog(
                 SessionManger.getUser(), 
@@ -67,8 +67,8 @@ class UserRepositoryImpl(
             val userToDelete = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
 
-            val userCsv = userMapper.mapTo(userToDelete)
-            csvManager.deleteLineFromFile(userCsv)
+            val userCsv = userCsvParser.serialize(userToDelete)
+            fileDataSource.deleteLineFromFile(userCsv)
 
             val auditLog = userToDelete.toAuditLog(
                 SessionManger.getUser(), 
@@ -88,10 +88,10 @@ class UserRepositoryImpl(
 
     override fun getUserById(userId: UUID): Result<User> {
         return runCatching {
-            val lines = csvManager.readLinesFromFile()
+            val lines = fileDataSource.readLinesFromFile()
             val users = lines
                 .filter { it.isNotBlank() }
-                .map { line -> userMapper.mapFrom(line) }
+                .map { line -> userCsvParser.parseCsvLine(line) }
 
             val user = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
@@ -106,11 +106,10 @@ class UserRepositoryImpl(
 
     override fun getUsers(): Result<List<User>> {
         return runCatching {
-            val lines = csvManager.readLinesFromFile()
+            val lines = fileDataSource.readLinesFromFile()
             val users = lines
                 .filter { it.isNotBlank() }
-                .map { line -> userMapper.mapFrom(line) }
-
+                .map { line -> userCsvParser.parseCsvLine(line) }
             users
         }.recoverCatching { e ->
             when (e) {
