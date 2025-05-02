@@ -1,8 +1,8 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
-import org.example.common.Constants
-import org.example.domain.model.exception.EiffelFlowException.UserNameValidationException
+import org.example.domain.utils.ValidationErrorMessage
+import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.usecase.auth.ValidateUserNameUseCase
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -21,39 +21,39 @@ class ValidateUserNameUseCaseTest {
     }
 
     @Test
-    fun `validateUserName() should return UserNameValidationException when username is too short`() {
+    fun `validateUserName() should return AuthenticationException when username is too short`() {
         val invalidUserName = "us"
 
         val result = useCase.validateUserName(invalidUserName)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(UserNameValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
        }
 
     @Test
-    fun `validateUserName() should return UserNameValidationException when username is too long`() {
+    fun `validateUserName() should return AuthenticationException when username is too long`() {
         val invalidUserName = "thisusernameiswaytoolongandexceedsthethirtycharacterlimit"
 
         val result = useCase.validateUserName(invalidUserName)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(UserNameValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
-    fun `validateUserName() should return UserNameValidationException when username contains invalid characters`() {
+    fun `validateUserName() should return AuthenticationException when username contains invalid characters`() {
         val invalidUserName = "invalid@username!"
 
         val result = useCase.validateUserName(invalidUserName)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(UserNameValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
-    fun `validateUserName() should return UserNameValidationException with all errors when username fails multiple validations`() {
+    fun `validateUserName() should return AuthenticationException with all errors when username fails multiple validations`() {
         val invalidUserName = "@"
 
         val result = useCase.validateUserName(invalidUserName)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(UserNameValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Nested
@@ -75,7 +75,7 @@ class ValidateUserNameUseCaseTest {
 
             val errors = useCase.getUserNameValidationErrors(invalidUsername)
 
-            assertThat(errors).contains(Constants.ValidationRule.USERNAME_TOO_SHORT)
+            assertThat(errors).contains(ValidationErrorMessage.USERNAME_TOO_SHORT)
         }
 
         @Test
@@ -84,7 +84,7 @@ class ValidateUserNameUseCaseTest {
 
             val errors = useCase.getUserNameValidationErrors(invalidUsername)
 
-            assertThat(errors).contains(Constants.ValidationRule.USERNAME_TOO_LONG)
+            assertThat(errors).contains(ValidationErrorMessage.USERNAME_TOO_LONG)
         }
 
         @Test
@@ -93,7 +93,7 @@ class ValidateUserNameUseCaseTest {
 
             invalidUserNames.forEach { username ->
                 val errors = useCase.getUserNameValidationErrors(username)
-                assertThat(errors).contains(Constants.ValidationRule.USERNAME_INVALID_CHARACTERS)
+                assertThat(errors).contains(ValidationErrorMessage.USERNAME_INVALID_CHARACTERS)
             }
         }
 

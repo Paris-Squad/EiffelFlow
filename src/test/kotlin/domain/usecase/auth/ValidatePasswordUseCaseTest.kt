@@ -1,8 +1,8 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
-import org.example.common.Constants
-import org.example.domain.model.exception.EiffelFlowException.PasswordValidationException
+import org.example.domain.utils.ValidationErrorMessage
+import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -35,7 +35,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -44,7 +44,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -53,7 +53,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -62,7 +62,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Test
@@ -71,7 +71,7 @@ class ValidatePasswordUseCaseTest {
 
         val result = useCase.validatePassword(invalidPassword)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(PasswordValidationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
     }
 
     @Nested
@@ -92,7 +92,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_TOO_SHORT)
+            assertThat(errors).contains(ValidationErrorMessage.PASSWORD_TOO_SHORT)
         }
 
         @Test
@@ -101,7 +101,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_UPPERCASE)
+            assertThat(errors).contains(ValidationErrorMessage.PASSWORD_NO_UPPERCASE)
         }
 
         @Test
@@ -110,7 +110,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_LOWERCASE)
+            assertThat(errors).contains(ValidationErrorMessage.PASSWORD_NO_LOWERCASE)
         }
 
         @Test
@@ -119,7 +119,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_DIGIT)
+            assertThat(errors).contains(ValidationErrorMessage.PASSWORD_NO_DIGIT)
         }
 
         @Test
@@ -128,7 +128,7 @@ class ValidatePasswordUseCaseTest {
 
             val errors = useCase.getPasswordValidationErrors(invalidPassword)
 
-            assertThat(errors).contains(Constants.ValidationRule.PASSWORD_NO_SPECIAL_CHAR)
+            assertThat(errors).contains(ValidationErrorMessage.PASSWORD_NO_SPECIAL_CHAR)
         }
 
         @Test

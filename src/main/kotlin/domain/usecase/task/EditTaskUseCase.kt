@@ -1,9 +1,8 @@
 package org.example.domain.usecase.task
 
-import org.example.common.Constants
-import org.example.domain.model.entities.Task
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.Task
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 
 class EditTaskUseCase(private val taskRepository: TaskRepository) {
@@ -12,7 +11,7 @@ class EditTaskUseCase(private val taskRepository: TaskRepository) {
         if (taskResult.isFailure) return taskResult
 
         val originalTask = taskResult.getOrThrow()
-        if (originalTask == request) return Result.failure(EiffelFlowException.NoChangesException())
+        if (originalTask == request) return Result.failure(EiffelFlowException.IOException("No changes detected"))
 
         val changedField = detectChangedField(originalTask, request)
 
@@ -25,15 +24,15 @@ class EditTaskUseCase(private val taskRepository: TaskRepository) {
     }
 
     private fun detectChangedField(original: Task, updated: Task): String {
-        val changes = mutableListOf<Constants.TaskField>()
+        val changes = mutableListOf<String>()
 
-        if (original.title != updated.title) changes.add(Constants.TaskField.TITLE)
-        if (original.description != updated.description) changes.add(Constants.TaskField.DESCRIPTION)
-        if (original.assignedId != updated.assignedId) changes.add(Constants.TaskField.ASSIGNEE)
-        if (original.state != updated.state) changes.add(Constants.TaskField.STATE)
-        if (original.role != updated.role) changes.add(Constants.TaskField.ROLE)
-        if (original.projectId != updated.projectId) changes.add(Constants.TaskField.PROJECT)
+        if (original.title != updated.title) changes.add("TITLE")
+        if (original.description != updated.description) changes.add("DESCRIPTION")
+        if (original.assignedId != updated.assignedId) changes.add("ASSIGNEE")
+        if (original.state != updated.state) changes.add("STATE")
+        if (original.role != updated.role) changes.add("ROLE")
+        if (original.projectId != updated.projectId) changes.add("PROJECT")
 
-        return changes.joinToString(", ") { it.displayName }
+        return changes.joinToString(", ") { it }
     }
 }

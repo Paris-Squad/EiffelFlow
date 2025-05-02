@@ -4,11 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import org.example.data.repository.UserRepositoryImpl
-import org.example.data.storage.audit.AuditDataSource
+import org.example.domain.repository.AuditRepository
 import org.example.data.storage.user.UserDataSource
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.UserMock.validUser
@@ -16,12 +16,12 @@ import java.util.*
 
 class UserRepositoryImplTest {
     private val userDataSource: UserDataSource = mockk(relaxed = true)
-    private val auditDataSource: AuditDataSource = mockk(relaxed = true)
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
     private lateinit var userRepository: UserRepositoryImpl
 
     @BeforeEach
     fun setUp() {
-        userRepository = UserRepositoryImpl(userDataSource, auditDataSource)
+        userRepository = UserRepositoryImpl(userDataSource, auditRepository)
     }
 
     @Test
@@ -48,7 +48,7 @@ class UserRepositoryImplTest {
             password = "test",
             role = RoleType.ADMIN
         )
-        val exception = EiffelFlowException.UserCreationException("Database error")
+        val exception = EiffelFlowException.IOException("Database error")
 
         every { userDataSource.createUser(validUser) } returns Result.failure(exception)
 
@@ -121,7 +121,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `getUsers should return failure when data source throws exception`() {
-        val exception = EiffelFlowException.UserStorageException("Database error")
+        val exception = EiffelFlowException.IOException("Database error")
 
         every { userDataSource.getUsers() } returns Result.failure(exception)
 

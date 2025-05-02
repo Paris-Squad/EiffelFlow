@@ -1,8 +1,8 @@
 package org.example.domain.usecase.auth
 
-import org.example.domain.model.exception.EiffelFlowException
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
 import kotlin.Result
 
@@ -14,7 +14,7 @@ class RegisterUseCase(
 ) {
     fun register(username: String, password: String, role: RoleType, creator: User): Result<User> {
         if (creator.role != RoleType.ADMIN) {
-            return Result.failure(EiffelFlowException.UnauthorizedRegistrationException())
+            return Result.failure(EiffelFlowException.AuthorizationException("Only admins can register users."))
         }
 
         val usernameValidation = validateUsername(username)
@@ -45,7 +45,7 @@ class RegisterUseCase(
 
     private fun onCheckUsernameAvailability(username: String, existingUsers: List<User>): Result<Unit> {
         return if (existingUsers.any { it.username.equals(username, ignoreCase = true) }) {
-            Result.failure(EiffelFlowException. UsernameAlreadyExistsException())
+            Result.failure(EiffelFlowException. AuthorizationException("Username '$username' is already taken. Please choose another username."))
         } else {
             Result.success(Unit)
         }

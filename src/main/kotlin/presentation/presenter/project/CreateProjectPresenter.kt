@@ -1,6 +1,6 @@
 package org.example.presentation.presenter.project
 
-import org.example.domain.model.entities.Project
+import org.example.domain.model.Project
 import org.example.domain.usecase.project.CreateProjectUseCase
 
 class CreateProjectPresenter(

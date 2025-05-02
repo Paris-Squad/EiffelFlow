@@ -1,50 +1,33 @@
 package org.example.data.repository
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.example.data.storage.audit.AuditDataSource
-import org.example.data.storage.project.ProjectDataSource
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
-import org.example.domain.model.entities.Project
+
+import org.example.data.storage.FileDataSource
+import org.example.data.storage.SessionManger
+import org.example.data.storage.mapper.ProjectCsvMapper
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.mapper.toAuditLog
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.Project
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
 class ProjectRepositoryImpl(
-    private val projectDataSource: ProjectDataSource,
-    private val auditDataSource: AuditDataSource
+    private val projectMapper: ProjectCsvMapper,
+    private val csvManager: FileDataSource,
+    private val auditRepository: AuditRepository
 ) : ProjectRepository {
 
     override fun createProject(project: Project): Result<Project> {
-
-        val createdProject = projectDataSource.createProject(project)
-
-        return createdProject.fold(
-            onSuccess = { createdProject ->
-                val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                val auditLog = AuditLog(
-                    auditId = UUID.randomUUID(),
-                    itemId = createdProject.projectId,
-                    itemName = createdProject.projectName,
-                    userId = createdProject.adminId,
-                    editorName = "Admin",
-                    actionType = AuditAction.CREATE,
-                    auditTime = currentTime,
-                    changedField = null,
-                    oldValue = null,
-                    newValue = createdProject.projectName
-                )
-
-                return auditDataSource.createAuditLog(auditLog).fold(
-                    onSuccess = { Result.success(createdProject) },
-                    onFailure = { Result.failure(it) }
-                )
-            },
-            onFailure = { throwable ->
-                Result.failure(throwable)
-            }
-        )
+       return runCatching{
+            val csvLine = projectMapper.mapTo(project)
+            csvManager.writeLinesToFile(csvLine + "\n")
+            val auditLog = project.toAuditLog(SessionManger.getUser(), actionType = AuditLogAction.CREATE)
+            auditRepository.createAuditLog(auditLog)
+           project
+       }.recoverCatching {
+           throw EiffelFlowException.IOException("Can't create project. ${it.message}")
+       }
     }
 
     override fun updateProject(project: Project): Result<Project> {
@@ -52,40 +35,51 @@ class ProjectRepositoryImpl(
     }
 
     override fun deleteProject(projectId: UUID): Result<Project> {
-        val deletedProject = projectDataSource.deleteProject(projectId)
+        return runCatching {
+            val lines = csvManager.readLinesFromFile().toMutableList()
 
-        return deletedProject.fold(
-            onSuccess = {project->
-                val auditLog = AuditLog(
-                    auditId = UUID.randomUUID(),
-                    itemId = project.projectId,
-                    itemName = project.projectName,
-                    userId = project.adminId,
-                    editorName = "Admin",
-                    actionType = AuditAction.DELETE,
-                    auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                    changedField = null,
-                    oldValue = null,
-                    newValue = project.projectName
-                )
-                return auditDataSource.createAuditLog(auditLog).fold(
-                    onSuccess = {
-                        Result.success(project)
-                    },
-                    onFailure = {
-                        Result.failure(it)
-                    }
-                )
-            },
-            onFailure = {
-                Result.failure(it)
+            val removedLine = lines.find { line ->
+                val project = projectMapper.mapFrom(line)
+                project.projectId == projectId
             }
-        )
+                ?: return Result.failure(EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId."))
 
+            lines.remove(removedLine)
+            csvManager.writeLinesToFile(lines.joinToString("\n"))
+            val deletedProject = projectMapper.mapFrom(removedLine)
+
+            val auditLog = deletedProject.toAuditLog(SessionManger.getUser(), actionType = AuditLogAction.CREATE)
+            auditRepository.createAuditLog(auditLog)
+            deletedProject
+        }.recoverCatching {
+            throw  EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId, ${it.message}")
+        }
     }
 
-    override fun getProjectById(projectId: UUID): Result<Project> = projectDataSource.getProjectById(projectId)
+    override fun getProjects(): Result<List<Project>> {
+        return runCatching {
+            csvManager.readLinesFromFile()
+                .map(projectMapper::mapFrom)
+                .ifEmpty {
+                    throw EiffelFlowException.NotFoundException("No projects found")
+                }
+        }.recoverCatching {
+            throw EiffelFlowException.NotFoundException("No projects found")
+        }
+    }
 
-    override fun getProjects(): Result<List<Project>> = projectDataSource.getProjects()
+    override fun getProjectById(projectId: UUID): Result<Project> {
+        return runCatching {
+            csvManager.readLinesFromFile()
+                .map(projectMapper::mapFrom)
+                .firstOrNull { it.projectId == projectId }
+                ?: throw EiffelFlowException.NotFoundException("Project not found")
+        }.recoverCatching {
+            throw EiffelFlowException.NotFoundException("Project not found")
+        }
+    }
 
+    companion object {
+        const val FILE_NAME: String = "projects.csv"
+    }
 }

@@ -4,10 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.example.common.Constants
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.utils.ValidationErrorMessage
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.auth.RegisterUseCase
@@ -55,7 +55,7 @@ class RegisterUseCaseTest {
     fun `register with non-admin caller role should fail with unauthorized exception`() {
         val result = registerUseCase.register(username, password, mateRole, validUser)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UnauthorizedRegistrationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
     }
 
     @Test
@@ -87,7 +87,7 @@ class RegisterUseCaseTest {
     @Test
     fun `register should fail when username validation fails`() {
         val validationException =
-            EiffelFlowException.UserNameValidationException(setOf(Constants.ValidationRule.USERNAME_TOO_LONG))
+            EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.USERNAME_TOO_LONG))
 
         every { validateUsernameUseCase.validateUserName(username) } returns Result.failure(validationException)
 
@@ -101,7 +101,7 @@ class RegisterUseCaseTest {
 
     @Test
     fun `register should fail when password validation fails`() {
-        val validationException = EiffelFlowException.PasswordValidationException(setOf(Constants.ValidationRule.PASSWORD_TOO_SHORT))
+        val validationException = EiffelFlowException.AuthenticationException(setOf(ValidationErrorMessage.PASSWORD_TOO_SHORT))
 
         every { validatePasswordUseCase.validatePassword(password) } returns Result.failure(validationException)
 
@@ -118,7 +118,7 @@ class RegisterUseCaseTest {
 
         val result = registerUseCase.register(username, password, mateRole, adminUser)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UsernameAlreadyExistsException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
     }
 
     @Test

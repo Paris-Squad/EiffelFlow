@@ -5,13 +5,13 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.UserCsvMapper
 import org.example.data.storage.user.UserDataSource
 import org.example.data.storage.user.UserDataSourceImpl
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.User
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
@@ -21,7 +21,7 @@ import java.util.*
 class UserDataSourceImplTest {
     private lateinit var userDataSource: UserDataSource
     private val userMapper: UserCsvMapper = mockk()
-    private val csvManager: CsvStorageManager = mockk()
+    private val csvManager: FileDataSource = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -61,7 +61,7 @@ class UserDataSourceImplTest {
 
         val result = userDataSource.createUser(user)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UserCreationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
@@ -132,6 +132,6 @@ class UserDataSourceImplTest {
 
         val result = userDataSource.getUsers()
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.UserStorageException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 }

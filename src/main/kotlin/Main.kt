@@ -9,4 +9,5 @@ fun main() {
     startKoin {
         modules(appModule, useCasesModule, uiModule)
     }
+    //getUser data to know the state
 }

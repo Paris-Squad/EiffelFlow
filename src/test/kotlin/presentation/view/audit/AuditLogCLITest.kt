@@ -3,7 +3,7 @@ package presentation.view.audit
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.example.presentation.presenter.audit.GetProjectAuditLogsPresenter
 import org.example.presentation.view.audit.GetProjectAuditLogsCLI
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +38,7 @@ class GetProjectAuditLogsCLITest {
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.ElementNotFoundException("Project not found")
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             getProjectAuditLogsPresenter.getProjectAuditLogsById(any())
         } returns Result.failure(exception)

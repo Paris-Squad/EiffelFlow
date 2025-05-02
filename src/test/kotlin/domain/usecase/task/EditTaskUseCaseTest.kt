@@ -4,10 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.example.common.Constants
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.State
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.RoleType
+import org.example.domain.model.TaskState
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.EditTaskUseCase
 import org.junit.jupiter.api.BeforeEach
@@ -41,13 +40,13 @@ class EditTaskUseCaseTest {
         assertThat(result.isSuccess).isTrue()
         verify {
             taskRepository.updateTask(
-                inProgressTask, validTask, validUser, match { it.contains(Constants.TaskField.STATE.displayName) })
+                inProgressTask, validTask, validUser, match { it.contains("STATE") })
         }
     }
 
     @Test
-    fun `editTask should fail with NoChangesException when no changes detected`() {
-        val exception = EiffelFlowException.NoChangesException()
+    fun `editTask should fail with IOException when no changes detected`() {
+        val exception = EiffelFlowException.IOException(null)
         every { taskRepository.getTaskById(validTask.taskId) } returns Result.success(validTask)
 
         val result = editTaskUseCase.editTask(validTask, validUser)
@@ -57,7 +56,7 @@ class EditTaskUseCaseTest {
 
     @Test
     fun `editTask should fail when task is not found`() {
-        val exception = EiffelFlowException.TaskNotFoundException()
+        val exception = EiffelFlowException.NotFoundException("Task not found")
         every { taskRepository.getTaskById(validTask.taskId) } returns Result.failure(exception)
 
         val result = editTaskUseCase.editTask(validTask, validUser)
@@ -84,7 +83,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.TITLE.displayName) }
+                match { it.contains("TITLE") }
             )
         }
     }
@@ -108,7 +107,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.DESCRIPTION.displayName) })
+                match { it.contains("DESCRIPTION") })
         }
     }
 
@@ -131,7 +130,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.ASSIGNEE.displayName) }
+                match { it.contains("ASSIGNEE") }
             )
         }
     }
@@ -155,7 +154,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.ROLE.displayName) }
+                match { it.contains("ROLE") }
             )
         }
     }
@@ -179,7 +178,7 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.PROJECT.displayName) }
+                match { it.contains("PROJECT") }
             )
         }
     }
@@ -187,7 +186,7 @@ class EditTaskUseCaseTest {
     @Test
     fun `editTask should identify state changes`() {
         val originalTask = validTask
-        val updatedTask = originalTask.copy(state = State(name = "in progress"))
+        val updatedTask = originalTask.copy(state = TaskState(name = "in progress"))
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
         every { taskRepository.updateTask(updatedTask, originalTask, validUser, any()) } returns Result.success(
@@ -203,14 +202,14 @@ class EditTaskUseCaseTest {
                 updatedTask,
                 originalTask,
                 validUser,
-                match { it.contains(Constants.TaskField.STATE.displayName) }
+                match { it.contains("STATE") }
             )
         }
     }
 
     @Throws
     @Test
-    fun `editTask  should threw NoChangesException when no fields changed`() {
+    fun `editTask  should threw IOException when no fields changed`() {
         val originalTask = validTask
         val updatedTask = validTask.copy() // Same task, no changes
 
@@ -218,7 +217,7 @@ class EditTaskUseCaseTest {
 
         val result = editTaskUseCase.editTask(updatedTask, validUser)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NoChangesException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
@@ -240,9 +239,9 @@ class EditTaskUseCaseTest {
         verify {
             taskRepository.updateTask(
                 updatedTask, originalTask, validUser, match {
-                    it.contains(Constants.TaskField.TITLE.displayName) &&
-                            it.contains(Constants.TaskField.DESCRIPTION.displayName) &&
-                            it.contains(Constants.TaskField.ASSIGNEE.displayName)
+                    it.contains("TITLE") &&
+                            it.contains("DESCRIPTION") &&
+                            it.contains("ASSIGNEE")
                 })
         }
     }

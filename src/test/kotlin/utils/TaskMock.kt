@@ -1,12 +1,11 @@
 package utils
 import kotlinx.datetime.LocalDateTime
-import org.example.domain.model.entities.AuditAction
-import org.example.domain.model.entities.AuditLog
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.State
-import org.example.domain.model.entities.Task
+import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
+import org.example.domain.model.RoleType
+import org.example.domain.model.TaskState
+import org.example.domain.model.Task
 import java.util.UUID
-import java.util.*
 
 object TaskMock {
     val mockTaskId: UUID = UUID.randomUUID()
@@ -24,7 +23,7 @@ object TaskMock {
         projectId = mockProjectId,
         assignedId = mockAssignedId,
         role = RoleType.MATE,
-        state = State(name = "todo")
+        state = TaskState(name = "todo")
     )
 
     val inProgressTask = Task(
@@ -36,7 +35,7 @@ object TaskMock {
         projectId = mockProjectId,
         assignedId = mockAssignedId,
         role = RoleType.MATE,
-        state = State(name = "in progress")
+        state = TaskState(name = "in progress")
     )
 
     val ValidTaskCSV =
@@ -47,7 +46,7 @@ object TaskMock {
         itemName = validTask.title,
         userId = validTask.creatorId,
         editorName = "Admin",
-        actionType = AuditAction.CREATE,
+        actionType = AuditLogAction.CREATE,
         auditTime = validTask.createdAt,
         changedField = null,
         oldValue = null,

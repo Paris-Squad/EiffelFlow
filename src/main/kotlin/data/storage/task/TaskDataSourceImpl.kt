@@ -1,14 +1,14 @@
 package org.example.data.storage.task
 
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.TaskCsvMapper
-import org.example.domain.model.entities.Task
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.model.Task
+import org.example.domain.exception.EiffelFlowException
 import java.util.UUID
 
 class TaskDataSourceImpl(
     private val taskMapper: TaskCsvMapper,
-    private val csvManager: CsvStorageManager
+    private val csvManager: FileDataSource
 ) : TaskDataSource {
     override fun createTask(task: Task): Result<Task> {
         return try {
@@ -16,7 +16,7 @@ class TaskDataSourceImpl(
             csvManager.writeLinesToFile(csvLine)
             Result.success(task)
         } catch (exception: Exception) {
-            Result.failure( EiffelFlowException.TaskCreationException(exception.message))
+            Result.failure( EiffelFlowException.IOException(exception.message))
         }
     }
 
@@ -27,7 +27,7 @@ class TaskDataSourceImpl(
             csvManager.updateLinesToFile(taskCsv, oldTaskCsv)
             Result.success(task)
         } catch (e: Exception) {
-            Result.failure(EiffelFlowException.TaskCreationException("Failed to update task: $e"))
+            Result.failure(EiffelFlowException.IOException("Failed to update task: $e"))
         }
     }
 
@@ -35,14 +35,14 @@ class TaskDataSourceImpl(
         return try {
             val lines = csvManager.readLinesFromFile()
             val taskLine = lines.find { taskMapper.mapFrom(it).taskId == taskId }
-                ?: return Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+                ?: return Result.failure(EiffelFlowException.NotFoundException("Task not found"))
 
             val task = taskMapper.mapFrom(taskLine)
             csvManager.deleteLineFromFile(taskLine)
 
             Result.success(task)
         } catch (e: Exception) {
-            Result.failure(EiffelFlowException.TaskDeletionException())
+            Result.failure(EiffelFlowException.IOException(e.message))
         }
     }
 
@@ -52,7 +52,7 @@ class TaskDataSourceImpl(
         return if (task != null) {
             Result.success(taskMapper.mapFrom(task))
         } else {
-            Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+            Result.failure(EiffelFlowException.NotFoundException("Task not found"))
         }
     }
 
@@ -61,7 +61,7 @@ class TaskDataSourceImpl(
         return if (lines.isNotEmpty()) {
             Result.success(lines)
         } else {
-            Result.failure(EiffelFlowException.TaskNotFoundException("Task not found"))
+            Result.failure(EiffelFlowException.NotFoundException("Task not found"))
         }
     }
 

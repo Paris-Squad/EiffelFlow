@@ -1,9 +1,9 @@
 package domain.usecase.task
 
 import kotlinx.datetime.LocalDateTime
-import org.example.domain.model.entities.RoleType
-import org.example.domain.model.entities.State
-import org.example.domain.model.entities.Task
+import org.example.domain.model.RoleType
+import org.example.domain.model.TaskState
+import org.example.domain.model.Task
 import java.util.*
 
 object TaskMock {
@@ -22,7 +22,7 @@ object TaskMock {
         projectId = mockProjectId,
         assignedId = mockAssignedId,
         role = RoleType.MATE,
-        state = State(name = "todo")
+        state = TaskState(name = "todo")
     )
 
 }

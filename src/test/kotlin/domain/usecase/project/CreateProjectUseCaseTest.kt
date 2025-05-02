@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import io.mockk.verify
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 
@@ -43,7 +43,7 @@ class CreateProjectUseCaseTest {
     fun `should return Result of Failure when creating project fails`() {
         try {
 
-            every { projectRepository.createProject(correctProject) } returns Result.failure(EiffelFlowException.ProjectCreationException("Failed to create project"))
+            every { projectRepository.createProject(correctProject) } returns Result.failure(EiffelFlowException.IOException("Failed to create project"))
 
             val result = createProjectUseCase.createProject(correctProject)
 

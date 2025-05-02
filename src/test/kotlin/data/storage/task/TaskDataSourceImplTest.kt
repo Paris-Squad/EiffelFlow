@@ -5,11 +5,11 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import org.example.data.storage.CsvStorageManager
+import org.example.data.storage.FileDataSource
 import org.example.data.storage.mapper.TaskCsvMapper
 import org.example.data.storage.task.TaskDataSource
 import org.example.data.storage.task.TaskDataSourceImpl
-import org.example.domain.model.exception.EiffelFlowException
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.TaskMock.ValidTaskCSV
@@ -20,7 +20,7 @@ import java.util.*
 
 class TaskDataSourceImplTest {
     private lateinit var taskDataSource: TaskDataSource
-    private val csvStorageManager: CsvStorageManager = mockk(relaxed = true)
+    private val csvStorageManager: FileDataSource = mockk(relaxed = true)
     private val taskMapper: TaskCsvMapper = mockk(relaxed = true)
 
     @BeforeEach
@@ -45,7 +45,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.createTask(validTask)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskCreationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
 
@@ -69,7 +69,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.updateTask(validTask, inProgressTask)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskCreationException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
@@ -96,7 +96,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.deleteTask(nonExistentTaskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test
@@ -110,7 +110,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.deleteTask(taskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskDeletionException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
@@ -132,7 +132,7 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.getTasks()
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test
@@ -154,6 +154,6 @@ class TaskDataSourceImplTest {
 
         val result = taskDataSource.getTaskById(nonExistentTaskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.TaskNotFoundException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 }

@@ -1,6 +1,6 @@
 package org.example.domain.repository
 
-import org.example.domain.model.entities.User
+import org.example.domain.model.User
 import java.util.UUID
 
 interface UserRepository {

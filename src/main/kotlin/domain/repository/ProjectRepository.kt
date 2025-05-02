@@ -1,6 +1,6 @@
 package org.example.domain.repository
 
-import org.example.domain.model.entities.Project
+import org.example.domain.model.Project
 import java.util.UUID
 
 interface ProjectRepository {
