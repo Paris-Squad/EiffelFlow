@@ -19,6 +19,7 @@ class ProjectRepositoryImpl(
 ) : ProjectRepository {
 
     override fun createProject(project: Project): Result<Project> {
+        if(SessionManger.isAdmin().not()) return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
        return runCatching{
             val csvLine = projectMapper.mapTo(project)
             csvManager.writeLinesToFile(csvLine + "\n")

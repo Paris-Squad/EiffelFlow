@@ -100,6 +100,22 @@ class ProjectRepositoryImplTest {
     }
 
     @Test
+    fun `createProject should return AuthorizationException when user is not admin`() {
+        // Given
+        every { sessionManger.getUser() } returns (UserMock.validUser)
+
+        // When / then
+        try {
+            val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
+            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
+
+        } catch (e: NotImplementedError) {
+            assertThat(e.message).contains("Not yet implemented")
+        }
+
+    }
+
+    @Test
     fun `createProject should return failure when auditRepository fails`() {
         try {
             every { sessionManger.getUser() } returns UserMock.adminUser
