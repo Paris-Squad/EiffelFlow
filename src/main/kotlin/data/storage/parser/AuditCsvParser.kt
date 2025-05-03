@@ -1,15 +1,15 @@
-package org.example.data.storage.mapper
+package org.example.data.storage.parser
 
 import kotlinx.datetime.LocalDateTime
-import org.example.data.storage.Mapper
+import org.example.data.storage.CsvParser
 import org.example.data.utils.AuditCsvColumnIndex
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.AuditLog
 import java.util.UUID
 
-class AuditCsvMapper : Mapper<String, AuditLog> {
-    override fun mapFrom(input: String): AuditLog {
-        val parts = input.split(",")
+class AuditCsvParser : CsvParser<AuditLog> {
+    override fun parseCsvLine(csvLine: String): AuditLog {
+        val parts = csvLine.split(",")
 
         return AuditLog(
             auditId = UUID.fromString(parts[AuditCsvColumnIndex.AUDIT_ID]),
@@ -25,18 +25,19 @@ class AuditCsvMapper : Mapper<String, AuditLog> {
         )
     }
 
-    override fun mapTo(output: AuditLog): String {
+    override fun serialize(item: AuditLog): String {
         return listOf(
-            output.auditId.toString(),
-            output.itemId.toString(),
-            output.itemName,
-            output.userId.toString(),
-            output.editorName,
-            output.actionType.name,
-            output.auditTime.toString(),
-            output.changedField ?: "",
-            output.oldValue ?: "",
-            output.newValue ?: ""
+            item.auditId.toString(),
+            item.itemId.toString(),
+            item.itemName,
+            item.userId.toString(),
+            item.editorName,
+            item.actionType.name,
+            item.auditTime.toString(),
+            item.changedField ?: "",
+            item.oldValue ?: "",
+            item.newValue ?: ""
         ).joinToString(",")
     }
+
 }

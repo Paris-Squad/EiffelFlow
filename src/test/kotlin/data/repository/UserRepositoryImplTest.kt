@@ -8,7 +8,7 @@ import io.mockk.unmockkObject
 import org.example.data.repository.UserRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
-import org.example.data.storage.mapper.UserCsvMapper
+import org.example.data.storage.parser.UserCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
@@ -30,7 +30,7 @@ import utils.UserMock.validUser
 import java.util.*
 
 class UserRepositoryImplTest {
-    private val userMapper: UserCsvMapper = mockk(relaxed = true)
+    private val userMapper: UserCsvParser = mockk(relaxed = true)
     private val csvManager: FileDataSource = mockk(relaxed = true)
     private val auditRepository: AuditRepository = mockk(relaxed = true)
     private lateinit var userRepository: UserRepositoryImpl
@@ -48,7 +48,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `createUser should return the created user on success`() {
-        every { userMapper.mapTo(validUser) } returns userCsv
+        every { userMapper.serialize(validUser) } returns userCsv
         every { csvManager.writeLinesToFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.success(mockk<AuditLog>())
 
@@ -59,7 +59,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `createUser should return failure when file operation fails`() {
-        every { userMapper.mapTo(validUser) } returns userCsv
+        every { userMapper.serialize(validUser) } returns userCsv
         every { csvManager.writeLinesToFile(userCsv) } throws fileNotFoundException
 
         val result = userRepository.createUser(user = validUser, createdBy = adminUser)
@@ -69,7 +69,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `createUser should return IOException when file operation fails`() {
-        every { userMapper.mapTo(validUser) } returns userCsv
+        every { userMapper.serialize(validUser) } returns userCsv
         every { csvManager.writeLinesToFile(userCsv) } throws fileNotFoundException
 
         val result = userRepository.createUser(user = validUser, createdBy = adminUser)
@@ -79,7 +79,7 @@ class UserRepositoryImplTest {
 
     @Test
     fun `createUser should return failure when audit log creation fails`() {
-        every { userMapper.mapTo(validUser) } returns userCsv
+        every { userMapper.serialize(validUser) } returns userCsv
         every { csvManager.writeLinesToFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.failure(runtimeException)
 
@@ -91,7 +91,7 @@ class UserRepositoryImplTest {
     @Test
     fun `createUser should pass through EiffelFlowException when thrown`() {
         val authException = EiffelFlowException.AuthorizationException("Authorization failed")
-        every { userMapper.mapTo(validUser) } returns userCsv
+        every { userMapper.serialize(validUser) } returns userCsv
         every { csvManager.writeLinesToFile(userCsv) } throws authException
 
         val result = userRepository.createUser(user = validUser, createdBy = adminUser)
@@ -103,9 +103,9 @@ class UserRepositoryImplTest {
     fun `updateUser should return success when update is successful`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns existingUser
-        every { userMapper.mapTo(existingUser) } returns oldUserCsv
-        every { userMapper.mapTo(updateUser) } returns newUserCsv
+        every { userMapper.parseCsvLine(any()) } returns existingUser
+        every { userMapper.serialize(existingUser) } returns oldUserCsv
+        every { userMapper.serialize(updateUser) } returns newUserCsv
         every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.success(mockk<AuditLog>())
 
@@ -118,9 +118,9 @@ class UserRepositoryImplTest {
     fun `updateUser should return the updated user on success`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns existingUser
-        every { userMapper.mapTo(existingUser) } returns oldUserCsv
-        every { userMapper.mapTo(updateUser) } returns newUserCsv
+        every { userMapper.parseCsvLine(any()) } returns existingUser
+        every { userMapper.serialize(existingUser) } returns oldUserCsv
+        every { userMapper.serialize(updateUser) } returns newUserCsv
         every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.success(mockk<AuditLog>())
 
@@ -132,7 +132,7 @@ class UserRepositoryImplTest {
     @Test
     fun `updateUser should return failure when user is not found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.updateUser(updateUser)
 
@@ -142,7 +142,7 @@ class UserRepositoryImplTest {
     @Test
     fun `updateUser should return NotFoundException when user is not found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.updateUser(updateUser)
 
@@ -153,9 +153,9 @@ class UserRepositoryImplTest {
     fun `updateUser should return failure when file operation fails`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns existingUser
-        every { userMapper.mapTo(existingUser) } returns oldUserCsv
-        every { userMapper.mapTo(updateUser) } returns newUserCsv
+        every { userMapper.parseCsvLine(any()) } returns existingUser
+        every { userMapper.serialize(existingUser) } returns oldUserCsv
+        every { userMapper.serialize(updateUser) } returns newUserCsv
         every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } throws runtimeException
 
         val result = userRepository.updateUser(updateUser)
@@ -167,9 +167,9 @@ class UserRepositoryImplTest {
     fun `updateUser should return IOException when file operation fails`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns existingUser
-        every { userMapper.mapTo(existingUser) } returns oldUserCsv
-        every { userMapper.mapTo(updateUser) } returns newUserCsv
+        every { userMapper.parseCsvLine(any()) } returns existingUser
+        every { userMapper.serialize(existingUser) } returns oldUserCsv
+        every { userMapper.serialize(updateUser) } returns newUserCsv
         every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } throws runtimeException
 
         val result = userRepository.updateUser(updateUser)
@@ -181,9 +181,9 @@ class UserRepositoryImplTest {
     fun `updateUser should return failure when audit log creation fails`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns existingUser
-        every { userMapper.mapTo(existingUser) } returns oldUserCsv
-        every { userMapper.mapTo(updateUser) } returns newUserCsv
+        every { userMapper.parseCsvLine(any()) } returns existingUser
+        every { userMapper.serialize(existingUser) } returns oldUserCsv
+        every { userMapper.serialize(updateUser) } returns newUserCsv
         every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.failure(runtimeException)
 
@@ -196,8 +196,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should return success when delete is successful`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userToDelete
-        every { userMapper.mapTo(userToDelete) } returns userCsv
+        every { userMapper.parseCsvLine(any()) } returns userToDelete
+        every { userMapper.serialize(userToDelete) } returns userCsv
         every { csvManager.deleteLineFromFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.success(mockk<AuditLog>())
 
@@ -210,8 +210,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should return the deleted user on success`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userToDelete
-        every { userMapper.mapTo(userToDelete) } returns userCsv
+        every { userMapper.parseCsvLine(any()) } returns userToDelete
+        every { userMapper.serialize(userToDelete) } returns userCsv
         every { csvManager.deleteLineFromFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.success(mockk<AuditLog>())
 
@@ -223,7 +223,7 @@ class UserRepositoryImplTest {
     @Test
     fun `deleteUser should return failure when user is not found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.deleteUser(UUID.randomUUID())
 
@@ -233,7 +233,7 @@ class UserRepositoryImplTest {
     @Test
     fun `deleteUser should return NotFoundException when user is not found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.deleteUser(UUID.randomUUID())
 
@@ -244,8 +244,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should return failure when file operation fails`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userToDelete
-        every { userMapper.mapTo(userToDelete) } returns userCsv
+        every { userMapper.parseCsvLine(any()) } returns userToDelete
+        every { userMapper.serialize(userToDelete) } returns userCsv
         every { csvManager.deleteLineFromFile(userCsv) } throws runtimeException
 
         val result = userRepository.deleteUser(userToDelete.userId)
@@ -257,8 +257,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should return IOException when file operation fails`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userToDelete
-        every { userMapper.mapTo(userToDelete) } returns userCsv
+        every { userMapper.parseCsvLine(any()) } returns userToDelete
+        every { userMapper.serialize(userToDelete) } returns userCsv
         every { csvManager.deleteLineFromFile(userCsv) } throws runtimeException
 
         val result = userRepository.deleteUser(userToDelete.userId)
@@ -270,8 +270,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should return failure when audit log creation fails`() {
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userToDelete
-        every { userMapper.mapTo(userToDelete) } returns userCsv
+        every { userMapper.parseCsvLine(any()) } returns userToDelete
+        every { userMapper.serialize(userToDelete) } returns userCsv
         every { csvManager.deleteLineFromFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.failure(runtimeException)
 
@@ -283,7 +283,7 @@ class UserRepositoryImplTest {
     @Test
     fun `getUserById should return success when user is found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userById
+        every { userMapper.parseCsvLine(any()) } returns userById
 
         val result = userRepository.getUserById(userById.userId)
 
@@ -293,7 +293,7 @@ class UserRepositoryImplTest {
     @Test
     fun `getUserById should return the user on success`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userById
+        every { userMapper.parseCsvLine(any()) } returns userById
 
         val result = userRepository.getUserById(userById.userId)
 
@@ -303,7 +303,7 @@ class UserRepositoryImplTest {
     @Test
     fun `getUserById should return failure when user is not found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.getUserById(UUID.randomUUID())
 
@@ -313,7 +313,7 @@ class UserRepositoryImplTest {
     @Test
     fun `getUserById should return NotFoundException when user is not found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.getUserById(UUID.randomUUID())
 
@@ -371,7 +371,7 @@ class UserRepositoryImplTest {
     fun `getUserById should handle EiffelFlowException from the outer try block`() {
        val randomId = UUID.randomUUID() // Different from the one in validUser
         every { csvManager.readLinesFromFile() } returns listOf("user1")
-        every { userMapper.mapFrom(any()) } returns validUser
+        every { userMapper.parseCsvLine(any()) } returns validUser
 
         val result = userRepository.getUserById(randomId)
 
@@ -382,8 +382,8 @@ class UserRepositoryImplTest {
     fun `getUserById should filter blank lines`() {
         val randomId = UUID.randomUUID()
         every { csvManager.readLinesFromFile() } returns listOf("line1", "", "line2", "   ")
-        every { userMapper.mapFrom("line1") } returns multipleUsers[0]
-        every { userMapper.mapFrom("line2") } returns multipleUsers[1]
+        every { userMapper.parseCsvLine("line1") } returns multipleUsers[0]
+        every { userMapper.parseCsvLine("line2") } returns multipleUsers[1]
 
         val result = userRepository.getUserById(randomId)
 
@@ -393,8 +393,8 @@ class UserRepositoryImplTest {
     @Test
     fun `getUsers should return success when users are found`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom("line1") } returns multipleUsers[0]
-        every { userMapper.mapFrom("line2") } returns multipleUsers[1]
+        every { userMapper.parseCsvLine("line1") } returns multipleUsers[0]
+        every { userMapper.parseCsvLine("line2") } returns multipleUsers[1]
 
         val result = userRepository.getUsers()
 
@@ -404,8 +404,8 @@ class UserRepositoryImplTest {
     @Test
     fun `getUsers should return list with correct size on success`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom("line1") } returns multipleUsers[0]
-        every { userMapper.mapFrom("line2") } returns multipleUsers[1]
+        every { userMapper.parseCsvLine("line1") } returns multipleUsers[0]
+        every { userMapper.parseCsvLine("line2") } returns multipleUsers[1]
 
         val result = userRepository.getUsers()
 
@@ -460,8 +460,8 @@ class UserRepositoryImplTest {
     @Test
     fun `getUsers should filter blank lines`() {
         every { csvManager.readLinesFromFile() } returns listOf("line1", "", "line2", "   ")
-        every { userMapper.mapFrom("line1") } returns multipleUsers[0]
-        every { userMapper.mapFrom("line2") } returns multipleUsers[1]
+        every { userMapper.parseCsvLine("line1") } returns multipleUsers[0]
+        every { userMapper.parseCsvLine("line2") } returns multipleUsers[1]
 
         val result = userRepository.getUsers()
 
@@ -473,8 +473,8 @@ class UserRepositoryImplTest {
     fun `getUsers should handle blank and non-blank lines`() {
         val fileLines = listOf("validLine", "", "  ", "\n", "\t", "anotherValidLine")
         every { csvManager.readLinesFromFile() } returns fileLines
-        every { userMapper.mapFrom("validLine") } returns multipleUsers[0]
-        every { userMapper.mapFrom("anotherValidLine") } returns multipleUsers[1]
+        every { userMapper.parseCsvLine("validLine") } returns multipleUsers[0]
+        every { userMapper.parseCsvLine("anotherValidLine") } returns multipleUsers[1]
 
         val result = userRepository.getUsers()
 
@@ -486,9 +486,9 @@ class UserRepositoryImplTest {
         val authException = EiffelFlowException.AuthorizationException("Authorization failed")
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns existingUser
-        every { userMapper.mapTo(existingUser) } returns oldUserCsv
-        every { userMapper.mapTo(updateUser) } returns newUserCsv
+        every { userMapper.parseCsvLine(any()) } returns existingUser
+        every { userMapper.serialize(existingUser) } returns oldUserCsv
+        every { userMapper.serialize(updateUser) } returns newUserCsv
         every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } throws authException
 
         val result = userRepository.updateUser(updateUser)
@@ -501,8 +501,8 @@ class UserRepositoryImplTest {
         val authException = EiffelFlowException.AuthorizationException("Authorization failed")
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-        every { userMapper.mapFrom(any()) } returns userToDelete
-        every { userMapper.mapTo(userToDelete) } returns userCsv
+        every { userMapper.parseCsvLine(any()) } returns userToDelete
+        every { userMapper.serialize(userToDelete) } returns userCsv
         every { csvManager.deleteLineFromFile(userCsv) } throws authException
 
         val result = userRepository.deleteUser(userToDelete.userId)

@@ -2,50 +2,45 @@ package org.example.di
 
 import org.example.data.repository.*
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.mapper.*
-import org.example.data.storage.task.TaskDataSource
-import org.example.data.storage.task.TaskDataSourceImpl
+import org.example.data.storage.parser.*
 import org.example.domain.repository.*
 import org.koin.dsl.module
 import java.io.File
 
 val appModule = module {
 
-    single<AuditCsvMapper> { AuditCsvMapper() }
-    single<ProjectCsvMapper> { ProjectCsvMapper(get()) }
-    single<TaskCsvMapper> { TaskCsvMapper(get()) }
-    single<StateCsvMapper> { StateCsvMapper() }
-    single<UserCsvMapper> { UserCsvMapper() }
-
-    //DataSource
-    single<TaskDataSource> {
-        TaskDataSourceImpl(
-            taskMapper = get<TaskCsvMapper>(),
-            csvManager = FileDataSource(File(TaskDataSourceImpl.FILE_NAME))
-        )
-    }
+    single<AuditCsvParser> { AuditCsvParser() }
+    single<ProjectCsvParser> { ProjectCsvParser(get()) }
+    single<TaskCsvParser> { TaskCsvParser(get()) }
+    single<StateCsvParser> { StateCsvParser() }
+    single<UserCsvParser> { UserCsvParser() }
 
     //repose
     single<AuditRepository> {
         AuditRepositoryImpl(
-            auditMapper = get<AuditCsvMapper>(),
-            csvManager = FileDataSource(File(AuditRepositoryImpl.FILE_NAME))
+            auditCsvParser = get<AuditCsvParser>(),
+            fileDataSource = FileDataSource(File(AuditRepositoryImpl.FILE_NAME))
         )
     }
     single<ProjectRepository> {
         ProjectRepositoryImpl(
-            projectMapper = get<ProjectCsvMapper>(),
-            csvManager = FileDataSource(File(ProjectRepositoryImpl.FILE_NAME)),
+            projectCsvParser = get<ProjectCsvParser>(),
+            fileDataSource = FileDataSource(File(ProjectRepositoryImpl.FILE_NAME)),
             auditRepository = get()
         )
     }
-    single<TaskRepository> { TaskRepositoryImpl(get(), get()) }
-    single<UserRepository> { 
+    single<TaskRepository> {
+        TaskRepositoryImpl(
+            taskCsvParser = get<TaskCsvParser>(),
+            fileDataSource = FileDataSource(File(TaskRepositoryImpl.FILE_NAME)),
+            auditRepository = get())
+    }
+    single<UserRepository> {
         UserRepositoryImpl(
-            userMapper = get<UserCsvMapper>(),
-            csvManager = FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
+            userCsvParser = get<UserCsvParser>(),
+            fileDataSource = FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
             auditRepository = get()
-        ) 
+        )
     }
     single<AuthRepository> {
         AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)) , get())
