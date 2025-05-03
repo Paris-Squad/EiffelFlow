@@ -23,49 +23,40 @@ class DeleteProjectUseCaseTest {
     }
 
     @Test
-    fun `should return the deleted project when project gets deleted successfully`(){
-        try {
-            // Given
-            val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
-            every { projectRepository.deleteProject(any()) } returns Result.success(correctProject)
+    fun `should return the deleted project when project gets deleted successfully`() {
+        // Given
+        val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
+        every { projectRepository.deleteProject(any()) } returns Result.success(correctProject)
 
-            // When
-            val result = deleteProjectUseCase.deleteProject(projectId)
+        // When
+        val result = deleteProjectUseCase.deleteProject(projectId)
 
-            // Then
-            assertThat(result.isSuccess).isTrue()
-            verify {projectRepository.deleteProject(any())}
+        // Then
+        assertThat(result.isSuccess).isTrue()
+        verify { projectRepository.deleteProject(any()) }
 
-        }catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
     }
 
     @Test
-    fun `should return an UnableToFindTheCorrectProject exception when the project doesn't get deleted`(){
-        try {
-            // Given
-            val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
-            every { projectRepository.deleteProject(any()) } returns
-                    Result.failure(
-                        EiffelFlowException.IOException("unable to find correct project")
-                    )
+    fun `should return an UnableToFindTheCorrectProject exception when the project doesn't get deleted`() {
+        // Given
+        val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
+        every { projectRepository.deleteProject(any()) } returns
+                Result.failure(
+                    EiffelFlowException.IOException("unable to find correct project")
+                )
 
-            // When
-            val result = projectRepository.deleteProject(differentProjectId)
+        // When
+        val result = projectRepository.deleteProject(differentProjectId)
 
-            // Then
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.IOException::class.java
-            )
-
-        }catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // Then
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(
+            EiffelFlowException.IOException::class.java
+        )
     }
 
-    companion object{
+    companion object {
         private val correctProject = ProjectsMock.CORRECT_PROJECT
     }
 

@@ -4,9 +4,9 @@ import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import java.util.UUID
 
-class GetProjectAuditUseCase(
+class GetTaskAuditUseCase(
     private val auditRepository: AuditRepository
 ) {
-    fun getProjectAuditLogsById(projectId: UUID): Result<List<AuditLog>> =
-        auditRepository.getProjectAuditLogById(projectId)
+    fun getTaskAuditLogsById(taskId: UUID): Result<List<AuditLog>> =
+        auditRepository.getTaskAuditLogById(taskId)
 }
