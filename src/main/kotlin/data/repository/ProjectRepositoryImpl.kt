@@ -54,7 +54,6 @@ class ProjectRepositoryImpl(
                         "Can't delete project. Project not found with ID: $projectId."
                     )
                 )
-
             lines.remove(removedLine)
             fileDataSource.writeLinesToFile(lines.joinToString("\n"))
             val deletedProject = projectCsvParser.parseCsvLine(removedLine)

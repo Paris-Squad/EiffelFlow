@@ -5,6 +5,7 @@ import org.example.presentation.presenter.project.DeleteProjectPresenter
 import java.util.UUID
 
 class DeleteProjectCLI (private val deleteProjectPresenter: DeleteProjectPresenter){
+
     operator fun invoke(projectId1: UUID) {
         println("DELETE PROJECT")
         val input = readln().trim()
