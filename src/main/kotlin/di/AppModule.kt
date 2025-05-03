@@ -19,7 +19,8 @@ val appModule = module {
     single<AuditRepository> {
         AuditRepositoryImpl(
             auditCsvParser = get<AuditCsvParser>(),
-            fileDataSource = FileDataSource(File(AuditRepositoryImpl.FILE_NAME))
+            fileDataSource = FileDataSource(File(AuditRepositoryImpl.FILE_NAME)),
+            taskRepository = get()
         )
     }
     single<ProjectRepository> {

@@ -5,11 +5,13 @@ import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
+import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
 class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
-    private val fileDataSource: FileDataSource
+    private val fileDataSource: FileDataSource,
+    private val taskRepository: TaskRepository
 ) : AuditRepository {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
         return try {
@@ -49,19 +51,7 @@ class AuditRepositoryImpl(
     }
 
     override fun getProjectAuditLogById(projectId: UUID): Result<List<AuditLog>> {
-        //TODO retrieve the tasks related to the project and get it's own history
-        val lines = fileDataSource.readLinesFromFile()
-        if (lines.isEmpty())  return Result.success(emptyList())
-
-        val auditLogs = lines.map { line ->
-            auditCsvParser.parseCsvLine(line)
-        }.filter { it.itemId == projectId }
-
-        return if (auditLogs.isEmpty()) {
-            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $projectId"))
-        } else {
-            Result.success(auditLogs)
-        }
+        TODO("Not implement yet")
     }
 
     override fun getAuditLogs(): Result<List<AuditLog>> {
