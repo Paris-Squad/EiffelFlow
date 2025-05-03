@@ -238,7 +238,7 @@ class ProjectRepositoryImplTest {
         }
     }
     @Test
-    fun `deleteProject should return UnauthorizedRegistrationException when the user is not the admin`() {
+    fun `deleteProject should return AuthorizationException when the user is not the admin`() {
         try {
             // Given
             every { sessionManger.getUser() } returns UserMock.validUser
@@ -249,7 +249,7 @@ class ProjectRepositoryImplTest {
             // Then
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.IOException::class.java
+                EiffelFlowException.AuthorizationException::class.java
             )
 
         } catch (e: NotImplementedError) {
