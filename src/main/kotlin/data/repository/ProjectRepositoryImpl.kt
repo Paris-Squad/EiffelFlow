@@ -34,8 +34,26 @@ class ProjectRepositoryImpl(
        }
     }
 
-    override fun updateProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
+    override fun updateProject(project: Project ,oldProject: Project ,changedField: String): Result<Project> {
+        if(SessionManger.isAdmin().not()) return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
+        return runCatching {
+            val projectCsv = projectCsvParser.serialize(project)
+            val oldProjectCsv = projectCsvParser.serialize(oldProject)
+            fileDataSource.updateLinesToFile(projectCsv, oldProjectCsv)
+
+            val auditLog = project.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.UPDATE,
+                changedField = changedField,
+                oldValue = oldProject.toString(),
+                newValue = project.toString()
+            )
+            auditRepository.createAuditLog(auditLog)
+
+            project
+        }.recoverCatching {
+            throw EiffelFlowException.IOException("Can't update project. ${it.message}")
+        }
     }
 
     override fun deleteProject(projectId: UUID): Result<Project> {

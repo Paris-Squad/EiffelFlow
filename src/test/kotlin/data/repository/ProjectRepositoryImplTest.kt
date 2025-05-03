@@ -2,10 +2,8 @@ package data.repository
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.mockk
-import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.ProjectRepositoryImpl
 import org.example.domain.repository.AuditRepository
-import org.example.domain.model.Project
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -13,6 +11,9 @@ import org.example.domain.model.AuditLogAction
 import org.example.domain.model.AuditLog
 import io.mockk.verify
 import io.mockk.every
+import io.mockk.just
+import io.mockk.justRun
+import io.mockk.runs
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -33,6 +34,7 @@ class ProjectRepositoryImplTest {
     private val auditRepository: AuditRepository = mockk(relaxed = true)
     private val projectMapper: ProjectCsvParser = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
+    private val changedField = "projectDescription"
 
     @BeforeEach
     fun setUp() {
@@ -139,23 +141,84 @@ class ProjectRepositoryImplTest {
     }
     //endregion
 
-    @Test
-    fun `updateProject should return the updated project`() {
-        val project = Project(
-            projectName = "Test Project",
-            projectDescription = "Updated Description",
-            createdAt = LocalDateTime(2023, 1, 1, 12, 0),
-            adminId = UUID.randomUUID(),
-            taskStates = emptyList()
-        )
-        every { sessionManger.getUser() } returns UserMock.adminUser
 
-        try {
-            projectRepository.updateProject(project)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+    //region updateProject
+    @Test
+    fun `updateProject should return failure when user is not admin`() {
+        // Given
+        every { sessionManger.getUser() } returns (UserMock.validUser)
+
+        // When
+        val result = projectRepository.updateProject(
+            project = updatedProject,
+            oldProject = ProjectsMock.CORRECT_PROJECT,
+            changedField = changedField
+        )
+
+        // Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
     }
+
+    @Test
+    fun `updateProject should return success if the project is updated`() {
+
+        every { sessionManger.getUser() } returns UserMock.adminUser
+        every { projectMapper.serialize(ProjectsMock.CORRECT_PROJECT) } returns oldProjectCsv
+        every { projectMapper.serialize(updatedProject) } returns updatedProjectCsv
+        every { csvStorageManager.updateLinesToFile(updatedProjectCsv,oldProjectCsv) } just runs
+        justRun { auditRepository.createAuditLog(any()) }
+
+
+        // When
+        val result = projectRepository.updateProject(
+            project = updatedProject,
+            oldProject = ProjectsMock.CORRECT_PROJECT,
+            changedField = "projectDescription"
+        )
+
+        // Then
+        assertThat(result.getOrNull()).isEqualTo(updatedProject)
+    }
+
+    @Test
+    fun `updateProject should return failure when fileDataSource throws exception`() {
+        // Given
+        val exception = IOException("File write error")
+
+        every { sessionManger.getUser() } returns UserMock.adminUser
+        every { projectMapper.serialize(updatedProject) } returns updatedProjectCsv
+        every { projectMapper.serialize(ProjectsMock.CORRECT_PROJECT) } returns oldProjectCsv
+
+        every { csvStorageManager.updateLinesToFile(updatedProjectCsv, oldProjectCsv) } throws exception
+
+        // When
+        val result = projectRepository.updateProject(
+            project = updatedProject,
+            oldProject = ProjectsMock.CORRECT_PROJECT,
+            changedField = changedField
+        )
+
+        // Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+    }
+
+    @Test
+    fun `updateProject should return failure when audit creation throws exception`() {
+
+        every { sessionManger.getUser() } returns UserMock.adminUser
+        every { projectMapper.serialize(updatedProject) } returns updatedProjectCsv
+        every { projectMapper.serialize(ProjectsMock.CORRECT_PROJECT) } returns oldProjectCsv
+        every { csvStorageManager.updateLinesToFile(updatedProjectCsv, oldProjectCsv) } just runs
+        every { auditRepository.createAuditLog(any()) } throws IOException("Audit log failed")
+
+        // When
+        val result = projectRepository.updateProject(project = updatedProject, oldProject = ProjectsMock.CORRECT_PROJECT, changedField = changedField)
+
+        // Then
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+    }
+    //endregion
+
 
     //region deleteProject
     @Test
@@ -394,4 +457,11 @@ class ProjectRepositoryImplTest {
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
     //endregion
+
+    companion object{
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(projectDescription = "UpdatedProject")
+        const val oldProjectCsv = ProjectsMock.CORRECT_CSV_STRING_LINE
+        const val updatedProjectCsv = "id1,Project1,UpdatedProject,1999-08-07T22:22:22,admin-id,..."
+    }
+
 }
