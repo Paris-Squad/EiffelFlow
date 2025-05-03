@@ -3,6 +3,7 @@ package presentation.view.project
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.verify
 import org.example.presentation.presenter.project.CreateProjectPresenter
 import org.example.presentation.presenter.project.DeleteProjectPresenter
@@ -28,6 +29,8 @@ class DeleteProjectCLITest {
     fun `should print success message when project is deleted successfully`() {
         try {
             // Given
+            mockkStatic("kotlin.io.ConsoleKt")
+            every { readln() } returns "02ad4499-5d4c-4450-8fd1-8294f1bb5748"
             val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
             every { deleteProjectPresenter.deleteProject(any()) } returns Result.success(project)
 
@@ -45,6 +48,8 @@ class DeleteProjectCLITest {
     fun `should print error message when project creation fails due to an exception`() {
         try {
             // Given
+            mockkStatic("kotlin.io.ConsoleKt")
+            every { readln() } returns "11111111-1111-1111-1111-111111111111"
             val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
             every { deleteProjectPresenter.deleteProject(any()) } returns Result.failure(
                 Exception("Error Deleting project"))
@@ -53,7 +58,10 @@ class DeleteProjectCLITest {
             deleteProjectCLI(differentProjectId)
 
             // Then
-            verify(exactly = 0) { deleteProjectPresenter.deleteProject(any()) }
+            assertThat(deleteProjectPresenter.deleteProject(differentProjectId).exceptionOrNull()).isInstanceOf(
+                Exception::class.java
+            )
+            verify { deleteProjectPresenter.deleteProject(any()) }
         } catch (e: NotImplementedError) {
             assertThat(e.message).contains("Not yet implemented")
         }

@@ -42,7 +42,7 @@ class DeleteProjectPresenterTest {
     }
 
     @Test
-    fun `should return UnableToFindTheCorrectProject exception when deleteProject returns failure`(){
+    fun `should return IOException exception when deleteProject returns failure`(){
         try {
             // Given
             val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
@@ -55,9 +55,9 @@ class DeleteProjectPresenterTest {
             val result = deleteProjectPresenter.deleteProject(differentProjectId)
 
             // Then
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException::class.java
+                EiffelFlowException.IOException::class.java
             )
 
         } catch (e: NotImplementedError) {
