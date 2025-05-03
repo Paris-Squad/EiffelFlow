@@ -32,7 +32,7 @@ class DeleteProjectCLITest {
             every { deleteProjectPresenter.deleteProject(any()) } returns Result.success(project)
 
             // When
-            deleteProjectCLI()
+            deleteProjectCLI(projectId)
 
             // Then
             verify { deleteProjectPresenter.deleteProject(any()) }
@@ -50,7 +50,7 @@ class DeleteProjectCLITest {
                 Exception("Error Deleting project"))
 
             // When
-            deleteProjectCLI()
+            deleteProjectCLI(differentProjectId)
 
             // Then
             verify(exactly = 0) { deleteProjectPresenter.deleteProject(any()) }
