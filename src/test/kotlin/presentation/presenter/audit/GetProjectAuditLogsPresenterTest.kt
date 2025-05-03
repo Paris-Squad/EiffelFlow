@@ -23,51 +23,37 @@ class GetProjectAuditLogsPresenterTest {
 
     @Test
     fun `should return project Audit Logs when the project have Audit Logs`() {
-        try {
-            val logs = listOf(MockAuditLog.AUDIT_LOG, MockAuditLog.AUDIT_LOG)
-            every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns Result.success(logs)
+        val logs = listOf(MockAuditLog.AUDIT_LOG, MockAuditLog.AUDIT_LOG)
+        every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns Result.success(logs)
 
-            val result = getProjectAuditPresenter.getProjectAuditLogsById(projectId)
+        val result = getProjectAuditPresenter.getProjectAuditLogsById(projectId)
 
-            assertThat(result.isSuccess).isTrue()
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
     fun `should return failure when Audit Logs is empty`() {
-        try {
-            val logs = emptyList<MockAuditLog>()
-            every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns Result.failure(
-                EiffelFlowException.NotFoundException("No audit records were found for this project"))
+        val logs = emptyList<MockAuditLog>()
+        every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns Result.failure(
+            EiffelFlowException.NotFoundException("No audit records were found for this project")
+        )
 
-            val result = getProjectAuditPresenter.getProjectAuditLogsById(projectId)
+        val result = getProjectAuditPresenter.getProjectAuditLogsById(projectId)
 
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull())
-                .hasMessageThat()
-                .contains("No audit records were found for this project")
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull())
+            .hasMessageThat()
+            .contains("No audit records were found for this project")
     }
 
     @Test
     fun `should return exception when the project haven't Audit Logs`() {
-        try {
-            every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns
-                    Result.failure(Exception("No audit records were found for this project"))
+        every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns
+                Result.failure(Exception("No audit records were found for this project"))
 
-            val result = getProjectAuditPresenter.getProjectAuditLogsById(projectId)
+        val result = getProjectAuditPresenter.getProjectAuditLogsById(projectId)
 
-            assertThat(result.isFailure).isTrue()
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        assertThat(result.isFailure).isTrue()
     }
 
 
