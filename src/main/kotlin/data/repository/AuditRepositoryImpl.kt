@@ -6,7 +6,7 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
-import java.util.UUID
+import java.util.*
 
 class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
@@ -37,7 +37,7 @@ class AuditRepositoryImpl(
 
     override fun getTaskAuditLogById(taskId: UUID): Result<List<AuditLog>> {
         val lines = fileDataSource.readLinesFromFile()
-        if (lines.isEmpty())  return Result.success(emptyList())
+        if (lines.isEmpty()) return Result.success(emptyList())
 
         val auditLogs = lines.map { line ->
             auditCsvParser.parseCsvLine(line)
@@ -51,7 +51,39 @@ class AuditRepositoryImpl(
     }
 
     override fun getProjectAuditLogById(projectId: UUID): Result<List<AuditLog>> {
-        TODO("Not implement yet")
+        return try {
+            val csvLines = fileDataSource.readLinesFromFile()
+            if (csvLines.isEmpty()) return Result.success(emptyList())
+
+            val tasksResult = taskRepository.getTasks()
+            if (tasksResult.isFailure) return Result.failure(tasksResult.exceptionOrNull()!!)
+
+            val tasksForProject =
+                tasksResult.getOrThrow().filter { it.projectId == projectId }.map { it.taskId }.toSet()
+
+            val parsedAuditLogs = csvLines.mapNotNull { line ->
+                try {
+                    auditCsvParser.parseCsvLine(line)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            val projectAuditLogs = parsedAuditLogs.filter { log ->
+                tasksForProject.contains(log.itemId)
+            }
+
+            return if (projectAuditLogs.isEmpty()) {
+                Result.failure(
+                    EiffelFlowException.NotFoundException("No audit logs found for project or related tasks: $projectId")
+                )
+            } else {
+                Result.success(projectAuditLogs)
+            }
+
+        } catch (exception: Exception) {
+            return Result.failure(exception)
+        }
     }
 
     override fun getAuditLogs(): Result<List<AuditLog>> {
