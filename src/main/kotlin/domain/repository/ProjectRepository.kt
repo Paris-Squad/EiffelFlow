@@ -7,7 +7,7 @@ interface ProjectRepository {
 
     fun createProject(project: Project): Result<Project>
 
-    fun updateProject(project: Project): Result<Project>
+    fun updateProject(project: Project ,oldProject: Project ,changedField: String): Result<Project>
 
     fun deleteProject(projectId: UUID): Result<Project>
 
