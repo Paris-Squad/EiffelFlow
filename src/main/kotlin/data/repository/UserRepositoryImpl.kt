@@ -18,11 +18,16 @@ class UserRepositoryImpl(
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : UserRepository {
-    override fun createUser(user: User, createdBy: User): Result<User> {
+    override fun createUser(user: User): Result<User> {
         return runCatching {
             val userAsCsv = userCsvParser.serialize(user)
+            val users = getUsers().getOrThrow()
+
+            validateUsernameUniqueness(users, user.username)
+            validateAdminPermission()
+
             fileDataSource.writeLinesToFile(userAsCsv)
-            val auditLog = user.toAuditLog(createdBy, AuditLogAction.CREATE)
+            val auditLog = user.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
             auditRepository.createAuditLog(auditLog)
             user
         }.recoverCatching {
@@ -30,6 +35,18 @@ class UserRepositoryImpl(
                 is EiffelFlowException -> throw it
                 else -> throw EiffelFlowException.IOException(it.message)
             }
+        }
+    }
+
+    private fun validateUsernameUniqueness(users: List<User>, username: String) {
+        if (users.any { it.username.equals(username, ignoreCase = true) }) {
+            throw EiffelFlowException.AuthorizationException("Username '$username' is already taken. Please choose another username.")
+        }
+    }
+
+    private fun validateAdminPermission() {
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Only admin can create user")
         }
     }
 
@@ -45,9 +62,9 @@ class UserRepositoryImpl(
             fileDataSource.updateLinesToFile(newUserCsv, oldUserCsv)
 
             val auditLog = user.toAuditLog(
-                SessionManger.getUser(), 
-                AuditLogAction.UPDATE, 
-                changedField = "user", 
+                SessionManger.getUser(),
+                AuditLogAction.UPDATE,
+                changedField = "user",
                 oldValue = existingUser.toString()
             )
             auditRepository.createAuditLog(auditLog)
@@ -71,9 +88,7 @@ class UserRepositoryImpl(
             fileDataSource.deleteLineFromFile(userCsv)
 
             val auditLog = userToDelete.toAuditLog(
-                SessionManger.getUser(), 
-                AuditLogAction.DELETE, 
-                oldValue = userToDelete.toString()
+                SessionManger.getUser(), AuditLogAction.DELETE, oldValue = userToDelete.toString()
             )
             auditRepository.createAuditLog(auditLog)
 
@@ -89,9 +104,7 @@ class UserRepositoryImpl(
     override fun getUserById(userId: UUID): Result<User> {
         return runCatching {
             val lines = fileDataSource.readLinesFromFile()
-            val users = lines
-                .filter { it.isNotBlank() }
-                .map { line -> userCsvParser.parseCsvLine(line) }
+            val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
 
             val user = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
@@ -107,9 +120,7 @@ class UserRepositoryImpl(
     override fun getUsers(): Result<List<User>> {
         return runCatching {
             val lines = fileDataSource.readLinesFromFile()
-            val users = lines
-                .filter { it.isNotBlank() }
-                .map { line -> userCsvParser.parseCsvLine(line) }
+            val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
             users
         }.recoverCatching { e ->
             when (e) {

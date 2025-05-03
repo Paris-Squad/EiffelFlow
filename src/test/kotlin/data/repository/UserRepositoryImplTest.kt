@@ -11,6 +11,8 @@ import org.example.data.storage.SessionManger
 import org.example.data.storage.parser.UserCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
+import org.example.domain.model.RoleType
+import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -48,55 +50,127 @@ class UserRepositoryImplTest {
 
     @Test
     fun `createUser should return the created user on success`() {
+        // Setup
+        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.getUser() } returns adminUser
         every { userMapper.serialize(validUser) } returns userCsv
+        every { csvManager.readLinesFromFile() } returns emptyList()
         every { csvManager.writeLinesToFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.success(mockk<AuditLog>())
 
-        val result = userRepository.createUser(user = validUser, createdBy = adminUser)
+        // Execute
+        val result = userRepository.createUser(user = validUser)
 
+        // Verify
         assertThat(result.getOrNull()).isEqualTo(validUser)
     }
 
     @Test
     fun `createUser should return failure when file operation fails`() {
+        // Setup
+        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.getUser() } returns adminUser
         every { userMapper.serialize(validUser) } returns userCsv
+        every { csvManager.readLinesFromFile() } returns emptyList()
         every { csvManager.writeLinesToFile(userCsv) } throws fileNotFoundException
 
-        val result = userRepository.createUser(user = validUser, createdBy = adminUser)
+        // Execute
+        val result = userRepository.createUser(user = validUser)
 
+        // Verify
         assertThat(result.isFailure).isEqualTo(true)
     }
 
     @Test
     fun `createUser should return IOException when file operation fails`() {
+        // Setup
+        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.getUser() } returns adminUser
         every { userMapper.serialize(validUser) } returns userCsv
+        every { csvManager.readLinesFromFile() } returns emptyList()
         every { csvManager.writeLinesToFile(userCsv) } throws fileNotFoundException
 
-        val result = userRepository.createUser(user = validUser, createdBy = adminUser)
+        // Execute
+        val result = userRepository.createUser(user = validUser)
 
+        // Verify
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 
     @Test
     fun `createUser should return failure when audit log creation fails`() {
+        // Setup
+        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.getUser() } returns adminUser
         every { userMapper.serialize(validUser) } returns userCsv
+        every { csvManager.readLinesFromFile() } returns emptyList()
         every { csvManager.writeLinesToFile(userCsv) } returns Unit
         every { auditRepository.createAuditLog(any()) } returns Result.failure(runtimeException)
 
-        val result = userRepository.createUser(user = validUser, createdBy = adminUser)
+        // Execute
+        val result = userRepository.createUser(user = validUser)
 
+        // Verify
         assertThat(result.isSuccess).isEqualTo(true)
     }
 
     @Test
     fun `createUser should pass through EiffelFlowException when thrown`() {
+        // Setup
         val authException = EiffelFlowException.AuthorizationException("Authorization failed")
+        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.getUser() } returns adminUser
         every { userMapper.serialize(validUser) } returns userCsv
+        every { csvManager.readLinesFromFile() } returns emptyList()
         every { csvManager.writeLinesToFile(userCsv) } throws authException
 
-        val result = userRepository.createUser(user = validUser, createdBy = adminUser)
+        // Execute
+        val result = userRepository.createUser(user = validUser)
 
+        // Verify
         assertThat(result.exceptionOrNull()).isEqualTo(authException)
+    }
+
+    @Test
+    fun `createUser should throw AuthorizationException when username is already taken`() {
+        // Setup
+        every { SessionManger.isAdmin() } returns true
+        every { csvManager.readLinesFromFile() } returns listOf("user1")
+
+        // Create a user with the same username as validUser
+        val existingUserWithSameUsername = User(
+            userId = UUID.randomUUID(),
+            username = validUser.username,
+            password = "password",
+            role = RoleType.MATE
+        )
+
+        every { userMapper.parseCsvLine("user1") } returns existingUserWithSameUsername
+
+        // Execute
+        val result = userRepository.createUser(validUser)
+
+        // Verify
+        assertThat(result.isFailure).isTrue()
+        val exception = result.exceptionOrNull()
+        assertThat(exception).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
+        assertThat(exception?.message).contains("is already taken")
+    }
+
+    @Test
+    fun `createUser should throw AuthorizationException when user is not admin`() {
+        // Setup
+        every { SessionManger.isAdmin() } returns false
+        every { csvManager.readLinesFromFile() } returns emptyList()
+
+        // Execute
+        val result = userRepository.createUser(validUser)
+
+        // Verify
+        assertThat(result.isFailure).isTrue()
+        val exception = result.exceptionOrNull()
+        assertThat(exception).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
+        assertThat(exception?.message).contains("Only admin can create user")
     }
 
     @Test
