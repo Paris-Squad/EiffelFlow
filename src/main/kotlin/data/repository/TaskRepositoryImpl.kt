@@ -20,6 +20,7 @@ class TaskRepositoryImpl(
         return runCatching {
             val csvLine = taskCsvParser.serialize(task)
             fileDataSource.writeLinesToFile(csvLine)
+
             val auditLog = task.toAuditLog(
                 editor = SessionManger.getUser(),
                 actionType = AuditLogAction.CREATE,
@@ -28,6 +29,7 @@ class TaskRepositoryImpl(
                 newValue = task.title
             )
             auditRepository.createAuditLog(auditLog)
+
             task
         }.recoverCatching {
             throw EiffelFlowException.IOException("Can't create task. ${it.message}")
@@ -39,6 +41,7 @@ class TaskRepositoryImpl(
             val taskCsv = taskCsvParser.serialize(task)
             val oldTaskCsv = taskCsvParser.serialize(oldTask)
             fileDataSource.updateLinesToFile(taskCsv, oldTaskCsv)
+
             val auditLog = task.toAuditLog(
                 editor = SessionManger.getUser(),
                 actionType = AuditLogAction.UPDATE,
@@ -47,6 +50,7 @@ class TaskRepositoryImpl(
                 newValue = task.toString()
             )
             auditRepository.createAuditLog(auditLog)
+
             task
         }.recoverCatching {
             throw EiffelFlowException.IOException("Can't update task. ${it.message}")
@@ -57,10 +61,20 @@ class TaskRepositoryImpl(
         return runCatching {
             val lines = fileDataSource.readLinesFromFile()
             val taskLine = lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
-                ?: return Result.failure(EiffelFlowException.NotFoundException("Task not found"))
+                ?: throw EiffelFlowException.NotFoundException("Task not found")
 
             val task = taskCsvParser.parseCsvLine(taskLine)
             fileDataSource.deleteLineFromFile(taskLine)
+
+            val auditLog = task.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.DELETE,
+                changedField = null,
+                oldValue = task.toString(),
+                newValue = ""
+            )
+            auditRepository.createAuditLog(auditLog)
+
             task
         }.recoverCatching {
             throw EiffelFlowException.NotFoundException("Can't delete task with ID: $taskId because ${it.message}")
@@ -70,12 +84,9 @@ class TaskRepositoryImpl(
     override fun getTaskById(taskId: UUID): Result<Task> {
         return runCatching {
             val lines = fileDataSource.readLinesFromFile()
-            val task = lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
-            if (task != null) {
-                taskCsvParser.parseCsvLine(task)
-            } else {
-                throw EiffelFlowException.NotFoundException("Task not found")
-            }
+            lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
+                ?.let { taskCsvParser.parseCsvLine(it) }
+                ?: throw EiffelFlowException.NotFoundException("Task not found")
         }.recoverCatching {
             throw EiffelFlowException.NotFoundException("Can't get task with ID: $taskId because ${it.message}")
         }
@@ -83,12 +94,13 @@ class TaskRepositoryImpl(
 
     override fun getTasks(): Result<List<Task>> {
         return runCatching {
-            val lines = fileDataSource.readLinesFromFile().map { taskCsvParser.parseCsvLine(it) }
-            lines.ifEmpty {
-                throw EiffelFlowException.NotFoundException("No tasks found in the database. Please create a new task first.")
-            }
+            fileDataSource.readLinesFromFile()
+                .map { taskCsvParser.parseCsvLine(it) }
+                .ifEmpty {
+                    throw EiffelFlowException.NotFoundException("No tasks found in the database. Please create a new task first.")
+                }
         }.recoverCatching {
-          throw EiffelFlowException.IOException("Can't get tasks because ${it.message}")
+            throw EiffelFlowException.IOException("Can't get tasks because ${it.message}")
         }
     }
 
