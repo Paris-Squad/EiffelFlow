@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.TaskMock.inProgressTask
 import utils.TaskMock.validTask
-import utils.UserMock.validUser
 import java.util.*
 
 class EditTaskUseCaseTest {
@@ -34,7 +33,7 @@ class EditTaskUseCaseTest {
             inProgressTask
         )
 
-        val result = editTaskUseCase.editTask(inProgressTask, validUser)
+        val result = editTaskUseCase.editTask(inProgressTask)
 
         assertThat(result.getOrNull()).isEqualTo(inProgressTask)
         assertThat(result.isSuccess).isTrue()
@@ -49,7 +48,7 @@ class EditTaskUseCaseTest {
         val exception = EiffelFlowException.IOException(null)
         every { taskRepository.getTaskById(validTask.taskId) } returns Result.success(validTask)
 
-        val result = editTaskUseCase.editTask(validTask, validUser)
+        val result = editTaskUseCase.editTask(validTask)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
     }
@@ -59,7 +58,7 @@ class EditTaskUseCaseTest {
         val exception = EiffelFlowException.NotFoundException("Task not found")
         every { taskRepository.getTaskById(validTask.taskId) } returns Result.failure(exception)
 
-        val result = editTaskUseCase.editTask(validTask, validUser)
+        val result = editTaskUseCase.editTask(validTask)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
     }
@@ -74,7 +73,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
@@ -98,7 +97,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
@@ -121,7 +120,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
@@ -145,7 +144,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
@@ -169,7 +168,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
@@ -193,7 +192,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
@@ -215,7 +214,7 @@ class EditTaskUseCaseTest {
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns Result.success(originalTask)
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
@@ -232,7 +231,7 @@ class EditTaskUseCaseTest {
             updatedTask
         )
 
-        val result = editTaskUseCase.editTask(updatedTask, validUser)
+        val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result.getOrNull()).isEqualTo(updatedTask)
 
