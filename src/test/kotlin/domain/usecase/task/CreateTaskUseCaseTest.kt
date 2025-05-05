@@ -3,10 +3,12 @@ package domain.usecase.task
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.CreateTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.TaskMock.validTask
 import java.io.IOException
 
@@ -23,23 +25,24 @@ class CreateTaskUseCaseTest {
 
     @Test
     fun `createTask should return success when repository returns success`() {
-        every { taskRepository.createTask(validTask) } returns Result.success(validTask)
+        every { taskRepository.createTask(validTask) } returns validTask
 
         val result = createTaskUseCase.createTask(validTask)
 
-        assertThat(result.getOrNull()).isEqualTo(validTask)
+        assertThat(result).isEqualTo(validTask)
     }
 
 
     @Test
     fun `createTask should return failure when repository returns failure`() {
         val exception = IOException("Failed to create task")
-        every { taskRepository.createTask(validTask) } returns Result.failure(exception)
+        every { taskRepository.createTask(validTask) } throws EiffelFlowException.IOException("Can't create task. ${exception.message}")
 
-        val result = createTaskUseCase.createTask(validTask)
+        val thrownException = assertThrows<EiffelFlowException.IOException> {
+            createTaskUseCase.createTask(validTask)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(IOException::class.java)
-
+        assertThat(thrownException.message).contains("Can't create task")
     }
 
 }

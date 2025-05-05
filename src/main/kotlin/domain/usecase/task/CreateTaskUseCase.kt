@@ -6,7 +6,7 @@ import org.example.domain.repository.TaskRepository
 class CreateTaskUseCase(
     private val taskRepository: TaskRepository
 ) {
-    fun createTask(task: Task): Result<Task> {
+    fun createTask(task: Task): Task {
         return taskRepository.createTask(task)
     }
 }

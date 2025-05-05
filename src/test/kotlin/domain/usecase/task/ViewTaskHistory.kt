@@ -31,21 +31,19 @@ class ViewTaskHistoryTest {
 
         val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
 
-        assertThat(result.isSuccess).isTrue()
+        // Unwrap the result and compare the value inside
         assertThat(result.getOrNull()).isEqualTo(listOf(validAuditLog))
     }
 
     @Test
     fun `viewTaskHistory should fail when task is not found`() {
-
         val exception = EiffelFlowException.NotFoundException("History not found")
         every { auditRepository.getTaskAuditLogById(taskId) } returns Result.failure(exception)
 
-        val result =viewTaskHistoryUseCase.viewTaskHistory(taskId)
+        val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException::class.java)
-
-
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("History not found")
     }
 
     @Test
@@ -55,7 +53,6 @@ class ViewTaskHistoryTest {
 
         val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 }
