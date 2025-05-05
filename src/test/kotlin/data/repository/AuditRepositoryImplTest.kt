@@ -38,13 +38,8 @@ class AuditRepositoryImplTest {
         every { csvStorageManager.writeLinesToFile(line) } just Runs
 
         // When / then
-        try {
             val result = auditRepository.createAuditLog(auditLog)
             assertThat(result.isSuccess).isTrue()
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
 
     }
 
@@ -71,12 +66,8 @@ class AuditRepositoryImplTest {
         every { csvStorageManager.readLinesFromFile() } returns emptyList()
 
         // When / Then
-        try {
             val result = auditRepository.getAuditLogs()
             assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
     }
 
     @Test
@@ -86,12 +77,9 @@ class AuditRepositoryImplTest {
         every { auditCsvParser.parseCsvLine(MockAuditLog.FULL_CSV_STRING_LINE) } returns AUDIT_LOG
 
         // When / Then
-        try {
             val result = auditRepository.getAuditLogs()
             assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(AUDIT_LOG))
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+
     }
 
 
@@ -100,14 +88,11 @@ class AuditRepositoryImplTest {
         // Given
         every { csvStorageManager.readLinesFromFile() } returns listOf("invalid,line")
         // When / Then
-        try {
             val result = auditRepository.getAuditLogs()
             assertThat(result.exceptionOrNull()).isInstanceOf(
                 EiffelFlowException.NotFoundException::class.java
             )
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+
     }
     //endregion
 
