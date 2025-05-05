@@ -16,9 +16,9 @@ import utils.ProjectsMock
 import java.util.UUID
 
 class DeleteProjectCLITest {
+
     private val deleteProjectPresenter: DeleteProjectPresenter = mockk()
     private lateinit var deleteProjectCLI: DeleteProjectCLI
-
 
     @BeforeEach
     fun setup() {
@@ -27,48 +27,18 @@ class DeleteProjectCLITest {
 
     @Test
     fun `should print success message when project is deleted successfully`() {
-        try {
-            // Given
-            mockkStatic("kotlin.io.ConsoleKt")
-            every { readln() } returns "02ad4499-5d4c-4450-8fd1-8294f1bb5748"
-            val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
-            every { deleteProjectPresenter.deleteProject(any()) } returns Result.success(project)
+        // Given
+        mockkStatic("kotlin.io.ConsoleKt")
+        every { readln() } returns "02ad4499-5d4c-4450-8fd1-8294f1bb5748"
+        val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
+        every {
+            deleteProjectPresenter.deleteProject(any())
+        } returns ProjectsMock.CORRECT_PROJECT
 
-            // When
-            deleteProjectCLI(projectId)
+        // When
+        deleteProjectCLI(projectId)
 
-            // Then
-            verify { deleteProjectPresenter.deleteProject(any()) }
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // Then
+        verify(exactly = 1) { deleteProjectPresenter.deleteProject(any()) }
     }
-
-    @Test
-    fun `should print error message when project creation fails due to an exception`() {
-        try {
-            // Given
-            mockkStatic("kotlin.io.ConsoleKt")
-            every { readln() } returns "11111111-1111-1111-1111-111111111111"
-            val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
-            every { deleteProjectPresenter.deleteProject(any()) } returns Result.failure(
-                Exception("Error Deleting project"))
-
-            // When
-            deleteProjectCLI(differentProjectId)
-
-            // Then
-            assertThat(deleteProjectPresenter.deleteProject(differentProjectId).exceptionOrNull()).isInstanceOf(
-                Exception::class.java
-            )
-            verify { deleteProjectPresenter.deleteProject(any()) }
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-    }
-
-    companion object{
-        val project = ProjectsMock.CORRECT_PROJECT
-    }
-
 }

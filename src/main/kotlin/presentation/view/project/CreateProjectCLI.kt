@@ -7,6 +7,6 @@ class CreateProjectCLI(
     private val presenter: CreateProjectPresenter
 ) {
     fun createProject(project: Project) {
-        TODO("Not yet implemented")
+        presenter.createProject(project)
     }
 }

@@ -8,6 +8,7 @@ import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.presentation.presenter.project.GetProjectPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
 import java.util.UUID
 
@@ -22,63 +23,61 @@ class GetProjectPresenterTest {
     }
 
     @Test
-    fun `should return Result of Projects when Projects are found`() {
+    fun `should return list of Projects when Projects are found`() {
         // Given
         every {
             getProjectUseCase.getProjects()
-        } returns Result.success(listOf(ProjectsMock.CORRECT_PROJECT))
+        } returns listOf(ProjectsMock.CORRECT_PROJECT)
 
         // When
         val result = getProjectPresenter.getProjects()
 
         // Then
-        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
+        assertThat(result).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
     }
 
     @Throws(EiffelFlowException.NotFoundException::class)
 
     @Test
-    fun `should return Result of ElementNotFoundException when projects cannot be retrieved`() {
+    fun `should throw NotFoundException when no projects founded`() {
         // Given
-        val exception = EiffelFlowException.NotFoundException("Projects not found")
-        every { getProjectUseCase.getProjects() } returns Result.failure(exception)
+        every {
+            getProjectUseCase.getProjects()
+        } throws EiffelFlowException.NotFoundException("Projects not found")
 
-        // When
-        val result = getProjectPresenter.getProjects()
-
-        // Then
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException> {
+            getProjectPresenter.getProjects()
+        }
     }
 
     @Test
-    fun `should return Result of Project when project with given id exists`() {
+    fun `should return Project when project with given id exists`() {
         // Given
         val projectId = ProjectsMock.CORRECT_PROJECT.projectId
         every {
             getProjectUseCase.getProjectById(projectId)
-        } returns Result.success(ProjectsMock.CORRECT_PROJECT)
+        } returns ProjectsMock.CORRECT_PROJECT
 
         // When
         val result = getProjectPresenter.getProjectById(projectId)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(ProjectsMock.CORRECT_PROJECT)
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
     @Throws(EiffelFlowException.NotFoundException::class)
-
     @Test
-    fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
+    fun `should throw NotFoundException when project with given id does not exist`() {
         // Given
         val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             getProjectUseCase.getProjectById(any())
-        } returns Result.failure(exception)
+        } throws exception
 
-        // When
-        val result = getProjectPresenter.getProjectById(UUID.randomUUID())
-
-        // Then
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException> {
+            getProjectPresenter.getProjectById(UUID.randomUUID())
+        }
     }
 }

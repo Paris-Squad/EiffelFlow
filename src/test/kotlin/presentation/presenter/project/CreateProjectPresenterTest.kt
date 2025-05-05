@@ -5,8 +5,10 @@ import org.example.presentation.presenter.project.CreateProjectPresenter
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
+import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
 
 class CreateProjectPresenterTest {
@@ -19,37 +21,31 @@ class CreateProjectPresenterTest {
         createProjectPresenter = CreateProjectPresenter(createProjectUseCase)
     }
 
-
     @Test
-    fun `should return Result of Project when project is successfully created`() {
-        try {
-            every { createProjectUseCase.createProject(project) } returns Result.success(project)
+    fun `should return the created Project when project is successfully created`() {
+        //Given
+        every {
+            createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
+        } returns ProjectsMock.CORRECT_PROJECT
 
-            val result = createProjectPresenter.createProject(project)
+        //When
+        val result = createProjectPresenter.createProject(ProjectsMock.CORRECT_PROJECT)
 
-            assertThat(result.isSuccess).isTrue()
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        //Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
     }
 
     @Test
-    fun `should return failure when project creation fails `() {
-        try {
-            every { createProjectUseCase.createProject(project) } returns Result.failure(Exception("Error writing to file"))
+    fun `should throw IOException when project creation fails `() {
+        //Given
+        every {
+            createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
+        } throws EiffelFlowException.IOException("Error writing to file")
 
-            val result = createProjectPresenter.createProject(project)
-
-            assertThat(result.isFailure).isTrue()
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+        //When / Then
+        assertThrows<EiffelFlowException.IOException> {
+            createProjectPresenter.createProject(ProjectsMock.CORRECT_PROJECT)
         }
-    }
-
-    companion object{
-        val project = ProjectsMock.CORRECT_PROJECT
     }
 
 }

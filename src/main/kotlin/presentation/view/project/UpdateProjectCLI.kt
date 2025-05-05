@@ -7,6 +7,6 @@ class UpdateProjectCLI(
     private val presenter: UpdateProjectPresenter
 ) {
     fun updateProject(project: Project) {
-        TODO("Not yet implemented")
+        presenter.updateProject(project)
     }
 }
