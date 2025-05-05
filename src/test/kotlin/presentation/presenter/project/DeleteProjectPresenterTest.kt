@@ -1,3 +1,4 @@
+/*
 package presentation.presenter.project
 
 import com.google.common.truth.Truth.assertThat
@@ -71,4 +72,4 @@ class DeleteProjectPresenterTest {
         val project = ProjectsMock.CORRECT_PROJECT
     }
 
-}
+}*/

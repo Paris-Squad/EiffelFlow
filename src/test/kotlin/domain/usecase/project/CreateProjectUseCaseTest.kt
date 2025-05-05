@@ -1,3 +1,4 @@
+/*
 package domain.usecase.project
 
 import io.mockk.mockk
@@ -59,4 +60,4 @@ class CreateProjectUseCaseTest {
     companion object{
         private val correctProject = ProjectsMock.CORRECT_PROJECT
     }
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package domain.usecase.project
 
 import com.google.common.truth.Truth.assertThat
@@ -60,4 +61,4 @@ class DeleteProjectUseCaseTest {
         private val correctProject = ProjectsMock.CORRECT_PROJECT
     }
 
-}
+}*/

@@ -4,6 +4,7 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
 import org.example.domain.repository.ProjectRepository
 
+/*
 class UpdateProjectUseCase(private val repository: ProjectRepository) {
     fun updateProject(updatedProject: Project): Result<Project> {
 
@@ -33,4 +34,4 @@ class UpdateProjectUseCase(private val repository: ProjectRepository) {
 
         return changes.joinToString(", ") { it }
     }
-}
+}*/

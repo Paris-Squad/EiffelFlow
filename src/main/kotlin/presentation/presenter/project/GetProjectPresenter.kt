@@ -8,11 +8,11 @@ class GetProjectPresenter(
     private val getProjectUseCase: GetProjectUseCase
 ) {
 
-    fun getProjectById(projectId: UUID): Result<Project> {
+    fun getProjectById(projectId: UUID): Project {
         return getProjectUseCase.getProjectById(projectId)
     }
 
-    fun getProjects(): Result<List<Project>> {
+    fun getProjects(): List<Project> {
         return getProjectUseCase.getProjects()
     }
 }

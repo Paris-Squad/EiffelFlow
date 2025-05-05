@@ -1,3 +1,4 @@
+/*
 package org.example.presentation.view.project
 
 import org.example.domain.model.Project
@@ -9,4 +10,4 @@ class UpdateProjectCLI(
     fun updateProject(project: Project) {
         TODO("Not yet implemented")
     }
-}
+}*/

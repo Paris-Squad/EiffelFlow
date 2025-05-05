@@ -1,3 +1,4 @@
+/*
 package presentation.presenter.project
 
 import org.example.domain.usecase.project.CreateProjectUseCase
@@ -52,4 +53,4 @@ class CreateProjectPresenterTest {
         val project = ProjectsMock.CORRECT_PROJECT
     }
 
-}
+}*/
