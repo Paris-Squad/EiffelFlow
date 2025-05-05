@@ -1,14 +1,11 @@
 package domain.usecase.auth
 
-import com.google.common.truth.Truth.assertThat
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import org.example.domain.repository.AuthRepository
 import org.example.domain.usecase.auth.LogoutUseCase
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.io.IOException
 
 class LogoutUseCaseTest {
@@ -21,23 +18,20 @@ class LogoutUseCaseTest {
     }
 
     @Test
-    fun `logout should return success when clearLogin succeeds`() {
-        every { authRepository.clearLogin() } returns Result.success(true)
+    fun `logout should remove user when clearLogin succeed`() {
+        every { authRepository.clearLogin() } just runs
 
-        val result = logoutUseCase.logout()
+        logoutUseCase.logout()
 
-        assertTrue(result.isSuccess)
-        verify { authRepository.clearLogin() }
+        verify(exactly = 1) { authRepository.clearLogin() }
     }
 
     @Test
     fun `logout should return failure when clearLogin fails`() {
         val exception = IOException("Failed to clear login")
-        every { authRepository.clearLogin() } returns Result.failure(exception)
+        every { authRepository.clearLogin() } throws exception
 
-        val result = logoutUseCase.logout()
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
-        verify { authRepository.clearLogin() }
+        assertThrows<IOException> { logoutUseCase.logout() }
+        verify(exactly = 1) { authRepository.clearLogin() }
     }
 }
