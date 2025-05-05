@@ -1,15 +1,17 @@
 package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.mapper.AuditCsvMapper
+import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
-import java.util.UUID
+import org.example.domain.repository.TaskRepository
+import java.util.*
 
 class AuditRepositoryImpl(
-    private val auditMapper: AuditCsvMapper,
-    private val csvManager: FileDataSource
+    private val auditCsvParser: AuditCsvParser,
+    private val fileDataSource: FileDataSource,
+    private val taskRepository: TaskRepository
 ) : AuditRepository {
     override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
         return try {
@@ -26,7 +28,7 @@ class AuditRepositoryImpl(
                 auditLog.newValue
             ).joinToString(",")
 
-            csvManager.writeLinesToFile(line)
+            fileDataSource.writeLinesToFile(line)
             Result.success(auditLog)
         } catch (e: Exception) {
             Result.failure(e)
@@ -34,11 +36,11 @@ class AuditRepositoryImpl(
     }
 
     override fun getTaskAuditLogById(taskId: UUID): Result<List<AuditLog>> {
-        val lines = csvManager.readLinesFromFile()
-        if (lines.isEmpty())  return Result.success(emptyList())
+        val lines = fileDataSource.readLinesFromFile()
+        if (lines.isEmpty()) return Result.success(emptyList())
 
         val auditLogs = lines.map { line ->
-            auditMapper.mapFrom(line)
+            auditCsvParser.parseCsvLine(line)
         }.filter { it.itemId == taskId }
 
         return if (auditLogs.isEmpty()) {
@@ -49,28 +51,48 @@ class AuditRepositoryImpl(
     }
 
     override fun getProjectAuditLogById(projectId: UUID): Result<List<AuditLog>> {
-        //TODO retrieve the tasks related to the project and get it's own history
-        val lines = csvManager.readLinesFromFile()
-        if (lines.isEmpty())  return Result.success(emptyList())
+        return try {
+            val csvLines = fileDataSource.readLinesFromFile()
+            if (csvLines.isEmpty()) return Result.success(emptyList())
 
-        val auditLogs = lines.map { line ->
-            auditMapper.mapFrom(line)
-        }.filter { it.itemId == projectId }
+            val tasksResult = taskRepository.getTasks()
+            if (tasksResult.isFailure) return Result.failure(tasksResult.exceptionOrNull()!!)
 
-        return if (auditLogs.isEmpty()) {
-            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $projectId"))
-        } else {
-            Result.success(auditLogs)
+            val tasksForProject =
+                tasksResult.getOrThrow().filter { it.projectId == projectId }.map { it.taskId }.toSet()
+
+            val parsedAuditLogs = csvLines.mapNotNull { line ->
+                try {
+                    auditCsvParser.parseCsvLine(line)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            val projectAuditLogs = parsedAuditLogs.filter { log ->
+                tasksForProject.contains(log.itemId)
+            }
+
+            return if (projectAuditLogs.isEmpty()) {
+                Result.failure(
+                    EiffelFlowException.NotFoundException("No audit logs found for project or related tasks: $projectId")
+                )
+            } else {
+                Result.success(projectAuditLogs)
+            }
+
+        } catch (exception: Exception) {
+            return Result.failure(exception)
         }
     }
 
     override fun getAuditLogs(): Result<List<AuditLog>> {
-        val lines = csvManager.readLinesFromFile()
+        val lines = fileDataSource.readLinesFromFile()
         if (lines.isEmpty()) return Result.failure(EiffelFlowException.NotFoundException("Audit logs not found"))
 
         val logs = lines.mapNotNull { line ->
             try {
-                auditMapper.mapFrom(line)
+                auditCsvParser.parseCsvLine(line)
             } catch (e: Exception) {
                 null
             }

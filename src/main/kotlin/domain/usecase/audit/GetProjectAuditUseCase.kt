@@ -5,10 +5,8 @@ import org.example.domain.repository.AuditRepository
 import java.util.UUID
 
 class GetProjectAuditUseCase(
-    private val repository: AuditRepository
+    private val auditRepository: AuditRepository
 ) {
-
-    fun getProjectAuditLogsById(auditId: UUID): Result<List<AuditLog>> {
-        TODO("Not yet implemented")
-    }
+    fun getProjectAuditLogsById(projectId: UUID): Result<List<AuditLog>> =
+        auditRepository.getProjectAuditLogById(projectId)
 }

@@ -8,7 +8,6 @@ import io.mockk.unmockkObject
 import org.example.data.storage.SessionManger
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.auth.RegisterUseCase
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import utils.UserMock.adminUser
-import utils.UserMock.validUser
 import java.io.FileNotFoundException
 
 class RegisterUseCaseTest {
@@ -43,33 +41,12 @@ class RegisterUseCaseTest {
     }
 
     @Test
-    fun `register should fail when repository getUsers fails`() {
-        val repositoryException = FileNotFoundException("Failed to retrieve users")
-
-        every { userRepository.getUsers() } returns Result.failure(repositoryException)
-
-        val result = registerUseCase.register(username, password, mateRole)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(repositoryException::class.java)
-    }
-
-    @Test
-    fun `register with non-admin caller role should fail with unauthorized exception`() {
-        every { SessionManger.getUser() } returns validUser
-        every { SessionManger.isAdmin() } returns false
-
-        val result = registerUseCase.register(username, password, mateRole)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
-    }
-
-    @Test
     fun `register with admin caller role should succeed when all validations pass`() {
         val createdUser = User(username = username, password = hashedPassword, role = mateRole)
 
         every { userRepository.getUsers() } returns Result.success(emptyList())
         every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any() , any()) } returns Result.success(createdUser)
+        every { userRepository.createUser(any()) } returns Result.success(createdUser)
 
         val result = registerUseCase.register(username, password, mateRole)
 
@@ -82,23 +59,11 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.success(emptyList())
         every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any() , any()) } returns Result.success(createdUser)
+        every { userRepository.createUser(any()) } returns Result.success(createdUser)
 
         val result = registerUseCase.register(username, password, mateRole)
 
         assertEquals(createdUser, result.getOrNull())
-    }
-
-
-    @Test
-    fun `register should fail when username already exists`() {
-        val existingUsers = listOf(User(username = username, password = "otherpass", role = RoleType.MATE))
-
-        every { userRepository.getUsers() } returns Result.success(existingUsers)
-
-        val result = registerUseCase.register(username, password, mateRole)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.AuthorizationException::class.java)
     }
 
     @Test
@@ -107,14 +72,12 @@ class RegisterUseCaseTest {
 
         every { userRepository.getUsers() } returns Result.success(emptyList())
         every { hashPasswordUseCase.hashPassword(any()) } returns "hashedPassword"
-        every { userRepository.createUser(any(),any()) } returns Result.failure(repositoryException)
+        every { userRepository.createUser(any()) } returns Result.failure(repositoryException)
 
         val result = registerUseCase.register(username, password, mateRole)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(repositoryException::class.java)
     }
-
-
 
     companion object {
         private const val username = "testuser"

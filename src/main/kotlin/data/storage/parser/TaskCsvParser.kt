@@ -1,6 +1,6 @@
-package org.example.data.storage.mapper
+package org.example.data.storage.parser
 
-import org.example.data.storage.Mapper
+import org.example.data.storage.CsvParser
 import org.example.domain.model.Task
 import kotlinx.datetime.LocalDateTime
 import org.example.data.utils.TaskCsvColumnIndex
@@ -8,12 +8,12 @@ import org.example.domain.model.RoleType
 
 import java.util.UUID
 
-class TaskCsvMapper(
-    private val stateCsvMapper: StateCsvMapper
-) : Mapper<String, Task> {
+class TaskCsvParser(
+    private val StateCsvParser: StateCsvParser
+) : CsvParser<Task> {
 
-    override fun mapFrom(input: String): Task {
-        val parts = input.split(",")
+    override fun parseCsvLine(csvLine: String): Task {
+        val parts = csvLine.split(",")
 
         val stateString = listOf(
             parts[TaskCsvColumnIndex.STATE_ID],
@@ -28,25 +28,25 @@ class TaskCsvMapper(
             creatorId = UUID.fromString(parts[TaskCsvColumnIndex.CREATOR_ID]),
             projectId = UUID.fromString(parts[TaskCsvColumnIndex.PROJECT_ID]),
             assignedId = UUID.fromString(parts[TaskCsvColumnIndex.ASSIGNED_ID]),
-            state = stateCsvMapper.mapFrom(stateString),
+            state = StateCsvParser.parseCsvLine(stateString),
             role = RoleType.valueOf(parts[TaskCsvColumnIndex.ROLE])
         )
     }
 
-    override fun mapTo(output: Task): String {
-        val stateString = stateCsvMapper.mapTo(output.state).split(",") // returns "stateId,stateName"
+    override fun serialize(item: Task): String {
+        val stateString = StateCsvParser.serialize(item.state).split(",") // returns "stateId,stateName"
 
         return listOf(
-            output.taskId.toString(),
-            output.title,
-            output.description,
-            output.createdAt.toString(),
-            output.creatorId.toString(),
-            output.projectId.toString(),
-            output.assignedId.toString(),
+            item.taskId.toString(),
+            item.title,
+            item.description,
+            item.createdAt.toString(),
+            item.creatorId.toString(),
+            item.projectId.toString(),
+            item.assignedId.toString(),
             stateString[0],
             stateString[1],
-            output.role.name
+            item.role.name
         ).joinToString(",")
     }
 }

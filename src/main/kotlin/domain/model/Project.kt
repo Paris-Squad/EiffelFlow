@@ -14,4 +14,3 @@ data class Project(
     val adminId: UUID,
     val taskStates: List<TaskState> = emptyList()
 )
-

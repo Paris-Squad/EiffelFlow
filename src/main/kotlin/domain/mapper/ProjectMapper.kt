@@ -6,7 +6,13 @@ import org.example.domain.model.Project
 import org.example.domain.model.User
 import java.util.UUID
 
-fun Project.toAuditLog(editor: User, actionType: AuditLogAction): AuditLog {
+fun Project.toAuditLog(
+    editor: User,
+    actionType: AuditLogAction,
+    changedField: String? = null,
+    oldValue: String? = null,
+    newValue: String
+): AuditLog {
     return AuditLog(
         auditId = UUID.randomUUID(),
         itemId = this.projectId,
@@ -14,8 +20,8 @@ fun Project.toAuditLog(editor: User, actionType: AuditLogAction): AuditLog {
         userId = editor.userId,
         editorName = editor.username,
         actionType = actionType,
-        changedField = null,
-        oldValue = null,
-        newValue = this.projectName
+        changedField = changedField,
+        oldValue = oldValue,
+        newValue = newValue
     )
 }

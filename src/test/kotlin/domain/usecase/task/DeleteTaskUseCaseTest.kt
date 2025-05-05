@@ -1,7 +1,6 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import domain.usecase.task.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
 import org.example.domain.exception.EiffelFlowException
@@ -9,6 +8,8 @@ import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import utils.TaskMock.validTask
 import java.util.UUID
 
 class DeleteTaskUseCaseTest {
@@ -26,12 +27,13 @@ class DeleteTaskUseCaseTest {
 
     @Test
     fun `deleteTask should return success when task exists`() {
-        every { taskRepository.deleteTask(taskIdToDelete) } returns Result.success(validTask)
+        every { taskRepository.deleteTask(taskIdToDelete) } returns validTask
 
         val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
 
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(validTask)
+        assertThat(result).isEqualTo(validTask)
+
+
     }
 
     @Test
@@ -40,12 +42,12 @@ class DeleteTaskUseCaseTest {
 
         every {
             taskRepository.deleteTask(taskIdNotFound)
-        } returns Result.failure(EiffelFlowException.NotFoundException("Task not found: $taskIdNotFound"))
+        } throws EiffelFlowException.NotFoundException("Task not found: $taskIdNotFound")
 
-        val result = deleteTaskUseCase.deleteTask(taskIdNotFound)
+        assertThrows<EiffelFlowException.NotFoundException> {
+            deleteTaskUseCase.deleteTask(taskIdNotFound)
+        }
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     @Test
@@ -54,11 +56,13 @@ class DeleteTaskUseCaseTest {
 
         every {
             taskRepository.deleteTask(taskIdWithError)
-        } returns Result.failure(EiffelFlowException.IOException(null))
+        } throws EiffelFlowException.IOException(null)
 
-        val result = deleteTaskUseCase.deleteTask(taskIdWithError)
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(Exception::class.java)
+        assertThrows<EiffelFlowException.IOException> {
+            deleteTaskUseCase.deleteTask(taskIdWithError)
+        }
+
     }
 }
+

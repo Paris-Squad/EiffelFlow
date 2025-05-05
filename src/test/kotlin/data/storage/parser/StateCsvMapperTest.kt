@@ -1,20 +1,20 @@
-package data.storage.mapper
+package data.storage.parser
 
 import com.google.common.truth.Truth.assertThat
-import org.example.data.storage.mapper.StateCsvMapper
+import org.example.data.storage.parser.StateCsvParser
 import org.example.domain.model.TaskState
 import java.util.*
 import kotlin.test.Test
 
-class StateCsvMapperTest {
+class StateCsvParserTest {
 
-    private val stateCsvMapper = StateCsvMapper()
+    private val StateCsvParser = StateCsvParser()
 
     @Test
     fun `should map CSV line to State entity correctly`() {
 
         //Given / When
-        val result = stateCsvMapper.mapFrom(CSV_STRING_LINE)
+        val result = StateCsvParser.parseCsvLine(CSV_STRING_LINE)
 
         // Then
         assertThat(result).isEqualTo(STATE)
@@ -25,7 +25,7 @@ class StateCsvMapperTest {
     fun `should map State entity to CSV line correctly`() {
 
         //Given / When
-        val result = stateCsvMapper.mapTo(STATE)
+        val result = StateCsvParser.serialize(STATE)
 
         // Then
         assertThat(result).isEqualTo(CSV_STRING_LINE)

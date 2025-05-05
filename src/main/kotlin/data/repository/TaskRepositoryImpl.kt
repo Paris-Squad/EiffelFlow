@@ -1,80 +1,110 @@
 package org.example.data.repository
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.example.domain.repository.AuditRepository
-import org.example.data.storage.task.TaskDataSource
+import org.example.data.storage.FileDataSource
+import org.example.data.storage.SessionManger
+import org.example.data.storage.parser.TaskCsvParser
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
-import org.example.domain.model.AuditLog
 import org.example.domain.model.Task
-import org.example.domain.model.User
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
 class TaskRepositoryImpl(
-    private val taskDataSource: TaskDataSource,
+    private val taskCsvParser: TaskCsvParser,
+    private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : TaskRepository {
     override fun createTask(task: Task): Result<Task> {
-        val createdTask = taskDataSource.createTask(task)
+        return runCatching {
+            val csvLine = taskCsvParser.serialize(task)
+            fileDataSource.writeLinesToFile(csvLine)
 
-        return createdTask.fold(
-            onSuccess = {
-                val auditLog = AuditLog(
-                    itemId = task.taskId,
-                    itemName = task.title,
-                    userId = task.creatorId,
-                    editorName = "Admin",
-                    actionType = AuditLogAction.CREATE,
-                    auditTime = task.createdAt,
-                    changedField = null,
-                    oldValue = null,
-                    newValue = task.title
-                )
+            val auditLog = task.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.CREATE,
+                changedField = null,
+                oldValue = null,
+                newValue = task.title
+            )
+            auditRepository.createAuditLog(auditLog)
 
-                return auditRepository.createAuditLog(auditLog).fold(
-                    onSuccess = { Result.success(task) },
-                    onFailure = { Result.failure(it) }
-                )
-            },
-            onFailure = { return Result.failure(it) }
-        )
+            task
+        }.recoverCatching {
+            throw EiffelFlowException.IOException("Can't create task. ${it.message}")
+        }
     }
 
+    override fun updateTask(task: Task, oldTask: Task, changedField: String): Result<Task> {
+        return runCatching {
+            val taskCsv = taskCsvParser.serialize(task)
+            val oldTaskCsv = taskCsvParser.serialize(oldTask)
+            fileDataSource.updateLinesToFile(taskCsv, oldTaskCsv)
 
-    override fun updateTask(task: Task, oldTask: Task, editor: User, changedField: String): Result<Task> {
-        return taskDataSource.updateTask(task = task, oldTask = oldTask).also { result ->
-            result.onSuccess { updatedTask ->
-                createAuditLogForTaskUpdate(task, oldTask, editor, changedField, updatedTask)
-            }
+            val auditLog = task.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.UPDATE,
+                changedField = changedField,
+                oldValue = oldTask.toString(),
+                newValue = task.toString()
+            )
+            auditRepository.createAuditLog(auditLog)
+
+            task
+        }.recoverCatching {
+            throw EiffelFlowException.IOException("Can't update task. ${it.message}")
         }
     }
 
     override fun deleteTask(taskId: UUID): Result<Task> {
-        return taskDataSource.deleteTask(taskId)
+        return runCatching {
+            val lines = fileDataSource.readLinesFromFile()
+            val taskLine = lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
+                ?: throw EiffelFlowException.NotFoundException("Task not found")
+
+            val task = taskCsvParser.parseCsvLine(taskLine)
+            fileDataSource.deleteLineFromFile(taskLine)
+
+            val auditLog = task.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.DELETE,
+                changedField = null,
+                oldValue = task.toString(),
+                newValue = ""
+            )
+            auditRepository.createAuditLog(auditLog)
+
+            task
+        }.recoverCatching {
+            throw EiffelFlowException.NotFoundException("Can't delete task with ID: $taskId because ${it.message}")
+        }
     }
 
     override fun getTaskById(taskId: UUID): Result<Task> {
-        return taskDataSource.getTaskById(taskId)
+        return runCatching {
+            val lines = fileDataSource.readLinesFromFile()
+            lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
+                ?.let { taskCsvParser.parseCsvLine(it) }
+                ?: throw EiffelFlowException.NotFoundException("Task not found")
+        }.recoverCatching {
+            throw EiffelFlowException.NotFoundException("Can't get task with ID: $taskId because ${it.message}")
+        }
     }
 
     override fun getTasks(): Result<List<Task>> {
-        return taskDataSource.getTasks()
+        return runCatching {
+            fileDataSource.readLinesFromFile()
+                .map { taskCsvParser.parseCsvLine(it) }
+                .ifEmpty {
+                    throw EiffelFlowException.NotFoundException("No tasks found in the database. Please create a new task first.")
+                }
+        }.recoverCatching {
+            throw EiffelFlowException.IOException("Can't get tasks because ${it.message}")
+        }
     }
 
-    private fun createAuditLogForTaskUpdate(task: Task, oldTask: Task, editor: User, changedField: String, updatedTask: Task) {
-        val auditLog = AuditLog(
-            itemId = task.taskId,
-            itemName = task.title,
-            userId = editor.userId,
-            editorName = editor.username,
-            actionType = AuditLogAction.UPDATE,
-            auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-            changedField = changedField,
-            oldValue = oldTask.toString(),
-            newValue = updatedTask.toString()
-        )
-        auditRepository.createAuditLog(auditLog)
+    companion object {
+        const val FILE_NAME: String = "tasks.csv"
     }
 }

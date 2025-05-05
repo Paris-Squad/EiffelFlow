@@ -28,12 +28,12 @@ class GetProjectAuditUseCaseTest {
             auditRepository.getProjectAuditLogById(any())
         } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
 
-        // When / Then
-        try {
-            val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
+
+        // Then
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).containsExactly(MockAuditLog.AUDIT_LOG)
     }
 
     @Test
@@ -44,12 +44,12 @@ class GetProjectAuditUseCaseTest {
             auditRepository.getProjectAuditLogById(any())
         } returns Result.failure(exception)
 
-        // When / Then
-        try {
-            val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
+
+        // Then
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 
 }

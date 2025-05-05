@@ -1,0 +1,37 @@
+package org.example.domain.usecase.project
+
+import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.Project
+import org.example.domain.repository.ProjectRepository
+
+/*
+class UpdateProjectUseCase(private val repository: ProjectRepository) {
+    fun updateProject(updatedProject: Project): Result<Project> {
+
+        val projectResult = repository.getProjectById(updatedProject.projectId)
+        if (projectResult.isFailure) return projectResult
+
+        val originalProject = projectResult.getOrThrow()
+
+        if (originalProject == updatedProject) {
+            return Result.failure(EiffelFlowException.IOException("No changes detected"))
+        }
+
+        val changedField = detectChangedField(originalProject, updatedProject)
+        return repository.updateProject(
+            project = updatedProject,
+            oldProject = originalProject,
+            changedField = changedField
+        )
+    }
+
+    private fun detectChangedField(original: Project, updated: Project): String {
+        val changes = mutableListOf<String>()
+        if (original.projectName != updated.projectName) changes.add("PROJECT_NAME")
+        if (original.projectDescription != updated.projectDescription) changes.add("PROJECT_DESCRIPTION")
+        if (original.adminId != updated.adminId) changes.add("ADMIN_ID")
+        if (original.taskStates != updated.taskStates) changes.add("TASK_STATES")
+
+        return changes.joinToString(", ") { it }
+    }
+}*/
