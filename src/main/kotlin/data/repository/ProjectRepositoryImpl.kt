@@ -44,7 +44,7 @@ class ProjectRepositoryImpl(
     @Throws(EiffelFlowException::class)
     override fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
         if (SessionManger.isAdmin().not()) {
-            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to update project")
         }
 
         return try {
@@ -70,7 +70,7 @@ class ProjectRepositoryImpl(
     @Throws(EiffelFlowException::class)
     override fun deleteProject(projectId: UUID): Project {
         if (SessionManger.isAdmin().not()) {
-            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to delete project")
         }
 
         return try {
