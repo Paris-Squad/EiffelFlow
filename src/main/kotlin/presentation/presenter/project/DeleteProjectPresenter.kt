@@ -8,7 +8,5 @@ import java.util.UUID
 class DeleteProjectPresenter(
     private val deleteProjectUseCase: DeleteProjectUseCase
 ) {
-    fun deleteProject(projectId : UUID): Result<Project>{
-        return deleteProjectUseCase.deleteProject(projectId)
-    }
+    fun deleteProject(projectId : UUID): Project = deleteProjectUseCase.deleteProject(projectId)
 }

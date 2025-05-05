@@ -11,6 +11,7 @@ import org.example.domain.model.Project
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
+import kotlin.jvm.Throws
 
 class ProjectRepositoryImpl(
     private val projectCsvParser: ProjectCsvParser,
@@ -18,25 +19,35 @@ class ProjectRepositoryImpl(
     private val auditRepository: AuditRepository
 ) : ProjectRepository {
 
-    override fun createProject(project: Project): Result<Project> {
-        if(SessionManger.isAdmin().not()) return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
-       return runCatching{
+    @Throws(EiffelFlowException::class)
+    override fun createProject(project: Project): Project {
+
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
+        }
+
+        return try {
             val csvLine = projectCsvParser.serialize(project)
             fileDataSource.writeLinesToFile(csvLine + "\n")
             val auditLog = project.toAuditLog(
                 editor = SessionManger.getUser(),
                 actionType = AuditLogAction.CREATE,
-                newValue = project.projectName)
+                newValue = project.projectName
+            )
             auditRepository.createAuditLog(auditLog)
-           project
-       }.recoverCatching {
-           throw EiffelFlowException.IOException("Can't create project. ${it.message}")
-       }
+            project
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException("Can't create project. ${throwable.message}")
+        }
     }
 
-    override fun updateProject(project: Project ,oldProject: Project ,changedField: String): Result<Project> {
-        if(SessionManger.isAdmin().not()) return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
-        return runCatching {
+    @Throws(EiffelFlowException::class)
+    override fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to update project")
+        }
+
+        return try {
             val projectCsv = projectCsvParser.serialize(project)
             val oldProjectCsv = projectCsvParser.serialize(oldProject)
             fileDataSource.updateLinesToFile(projectCsv, oldProjectCsv)
@@ -51,27 +62,27 @@ class ProjectRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
 
             project
-        }.recoverCatching {
-            throw EiffelFlowException.IOException("Can't update project. ${it.message}")
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException("Can't update project. ${throwable.message}")
         }
     }
 
-    override fun deleteProject(projectId: UUID): Result<Project> {
-        if(SessionManger.isAdmin().not())
-            return Result.failure(EiffelFlowException.AuthorizationException("Not Allowed"))
+    @Throws(EiffelFlowException::class)
+    override fun deleteProject(projectId: UUID): Project {
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to delete project")
+        }
 
-        return runCatching {
+        return try {
             val lines = fileDataSource.readLinesFromFile().toMutableList()
 
             val removedLine = lines.find { line ->
                 val project = projectCsvParser.parseCsvLine(line)
                 project.projectId == projectId
-            }
-                ?: return Result.failure(
-                    EiffelFlowException.IOException(
-                        "Can't delete project. Project not found with ID: $projectId."
-                    )
-                )
+            } ?: throw EiffelFlowException.IOException(
+                "Can't delete project. Project not found with ID: $projectId."
+            )
+
             lines.remove(removedLine)
             fileDataSource.writeLinesToFile(lines.joinToString("\n"))
             val deletedProject = projectCsvParser.parseCsvLine(removedLine)
@@ -79,36 +90,36 @@ class ProjectRepositoryImpl(
             val auditLog = deletedProject.toAuditLog(
                 editor = SessionManger.getUser(),
                 actionType = AuditLogAction.CREATE,
-                newValue = deletedProject.projectName)
+                newValue = deletedProject.projectName
+            )
             auditRepository.createAuditLog(auditLog)
             deletedProject
-        }.recoverCatching {
-            throw  EiffelFlowException.IOException(
-                "Can't delete project. Project not found with ID: $projectId, ${it.message}"
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException(
+                "Can't delete project. Project not found with ID: $projectId, ${throwable.message}"
             )
         }
     }
 
-    override fun getProjects(): Result<List<Project>> {
-        return runCatching {
+    @Throws(EiffelFlowException::class)
+    override fun getProjects(): List<Project> {
+        return try {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
-                .ifEmpty {
-                    throw EiffelFlowException.NotFoundException("No projects found")
-                }
-        }.recoverCatching {
-            throw EiffelFlowException.NotFoundException("No projects found")
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.NotFoundException("No projects found, ${throwable.message}")
         }
     }
 
-    override fun getProjectById(projectId: UUID): Result<Project> {
-        return runCatching {
+    @Throws(EiffelFlowException::class)
+    override fun getProjectById(projectId: UUID): Project {
+        return try {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
                 .firstOrNull { it.projectId == projectId }
                 ?: throw EiffelFlowException.NotFoundException("Project not found")
-        }.recoverCatching {
-            throw EiffelFlowException.NotFoundException("Project not found")
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.NotFoundException("Project not found, ${throwable.message}")
         }
     }
 

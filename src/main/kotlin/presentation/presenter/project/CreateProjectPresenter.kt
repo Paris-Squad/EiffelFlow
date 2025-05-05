@@ -6,7 +6,5 @@ import org.example.domain.usecase.project.CreateProjectUseCase
 class CreateProjectPresenter(
     private val createProjectUseCase: CreateProjectUseCase
 ) {
-    fun createProject(project: Project): Result<Project> {
-        TODO("Not yet implemented")
-    }
+    fun createProject(project: Project): Project = createProjectUseCase.createProject(project)
 }

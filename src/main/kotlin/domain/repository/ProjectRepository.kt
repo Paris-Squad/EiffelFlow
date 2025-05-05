@@ -5,13 +5,13 @@ import java.util.UUID
 
 interface ProjectRepository {
 
-    fun createProject(project: Project): Result<Project>
+    fun createProject(project: Project): Project
 
-    fun updateProject(project: Project ,oldProject: Project ,changedField: String): Result<Project>
+    fun updateProject(project: Project ,oldProject: Project ,changedField: String): Project
 
-    fun deleteProject(projectId: UUID): Result<Project>
+    fun deleteProject(projectId: UUID): Project
 
-    fun getProjectById(projectId: UUID): Result<Project>
+    fun getProjectById(projectId: UUID): Project
 
-    fun getProjects(): Result<List<Project>>
+    fun getProjects(): List<Project>
 }

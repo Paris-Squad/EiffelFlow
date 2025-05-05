@@ -4,8 +4,8 @@ import io.mockk.mockk
 import org.example.presentation.presenter.project.CreateProjectPresenter
 import org.example.presentation.view.project.CreateProjectCLI
 import org.junit.jupiter.api.BeforeEach
-import com.google.common.truth.Truth.assertThat
 import io.mockk.every
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 
@@ -14,7 +14,6 @@ class CreateProjectCLITest {
     private val createProjectPresenter: CreateProjectPresenter = mockk()
     private lateinit var createProjectCLI: CreateProjectCLI
 
-
     @BeforeEach
     fun setup() {
         createProjectCLI = CreateProjectCLI(createProjectPresenter)
@@ -22,30 +21,15 @@ class CreateProjectCLITest {
 
     @Test
     fun `should print success message when project is created successfully`() {
+        //Given
+        every {
+            createProjectPresenter.createProject(ProjectsMock.CORRECT_PROJECT)
+        } returns ProjectsMock.CORRECT_PROJECT
 
-        every { createProjectPresenter.createProject(project) } returns Result.success(project)
+        //When
+        createProjectCLI.createProject(ProjectsMock.CORRECT_PROJECT)
 
-        try {
-            val result = createProjectCLI.createProject(project)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        //Then
+        verify(exactly = 1) { createProjectPresenter.createProject(ProjectsMock.CORRECT_PROJECT) }
     }
-
-    @Test
-    fun `should print error message when project creation fails due to an exception`() {
-
-        every { createProjectPresenter.createProject(project) } returns Result.failure(Exception("Error creating project"))
-
-        try {
-            val result = createProjectCLI.createProject(project)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
-    }
-
-    companion object{
-        val project = ProjectsMock.CORRECT_PROJECT
-    }
-
 }

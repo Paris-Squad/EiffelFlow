@@ -10,8 +10,9 @@ import io.mockk.verify
 import org.example.domain.model.TaskState
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
-import java.util.*
+import java.util.UUID
 
 class UpdateProjectUseCaseTest {
 
@@ -25,153 +26,200 @@ class UpdateProjectUseCaseTest {
     }
 
     @Test
-    fun `updateProject should successfully update project when changes are detected`() {
+    fun `updateProject should successfully update project and return it when changes are detected`() {
         // Given
-        val updatedProject = originalProject.copy(projectDescription = "Updated Description")
-
-        every { projectRepository.getProjectById(originalProject.projectId) } returns Result.success(originalProject)
-        every { projectRepository.updateProject(updatedProject, originalProject, any()) } returns Result.success(updatedProject)
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(projectDescription = "Updated Description")
+        every {
+            projectRepository.getProjectById(ProjectsMock.CORRECT_PROJECT.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            projectRepository.updateProject(updatedProject, ProjectsMock.CORRECT_PROJECT, any())
+        } returns updatedProject
 
         // When
         val result = updateProjectUseCase.updateProject(updatedProject)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(updatedProject)
+        assertThat(result).isEqualTo(updatedProject)
     }
 
     @Test
-    fun `updateProject should fail with IOException when no changes detected`() {
+    fun `updateProject should throw IOException when no changes detected`() {
         // Given
-        val exception = EiffelFlowException.IOException(null)
-        val updatedProject = originalProject.copy()
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy()
 
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
 
-        // When
-        val result = updateProjectUseCase.updateProject(updatedProject)
-
-        // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
+        // When / Then
+        assertThrows<EiffelFlowException.IOException> {
+            updateProjectUseCase.updateProject(updatedProject)
+        }
     }
 
     @Test
-    fun `updateProject should fail when project is not found`() {
+    fun `updateProject should throw NotFoundException when project is not found`() {
         // Given
         val exception = EiffelFlowException.NotFoundException("Project not found")
-        val updatedProject = originalProject.copy(projectDescription = "Updated Description")
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(projectDescription = "Updated Description")
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } throws exception
 
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.failure(exception)
-
-        // When
-        val result = updateProjectUseCase.updateProject(updatedProject)
-
-        // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException> {
+            updateProjectUseCase.updateProject(updatedProject)
+        }
     }
 
     @Test
     fun `updateProject should identify projectName changes`() {
         // Given
-        val updatedProject = originalProject.copy(projectName = "Updated Project Name")
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(projectName = "Updated Project Name")
 
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
-        every { projectRepository.updateProject(updatedProject, originalProject, any()) } returns Result.success(updatedProject)
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            projectRepository.updateProject(updatedProject, ProjectsMock.CORRECT_PROJECT, any())
+        } returns updatedProject
 
         // When
         val result = updateProjectUseCase.updateProject(updatedProject)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(updatedProject)
-        verify { projectRepository.updateProject(updatedProject,originalProject,match { it.contains("PROJECT_NAME") })}
+        assertThat(result).isEqualTo(updatedProject)
+        verify {
+            projectRepository.updateProject(
+                updatedProject, ProjectsMock.CORRECT_PROJECT, match { it.contains("PROJECT_NAME") })
+        }
     }
 
     @Test
     fun `updateProject should identify projectDescription changes`() {
         // Given
-        val updatedProject = originalProject.copy(projectDescription = "Updated Description")
-
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
-        every { projectRepository.updateProject(updatedProject, originalProject, any()) } returns Result.success(updatedProject)
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(projectDescription = "Updated Description")
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            projectRepository.updateProject(updatedProject, ProjectsMock.CORRECT_PROJECT, any())
+        } returns
+                updatedProject
 
         // When
         val result = updateProjectUseCase.updateProject(updatedProject)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(updatedProject)
-        verify { projectRepository.updateProject(updatedProject,originalProject,match { it.contains("PROJECT_DESCRIPTION") }) }
+        assertThat(result).isEqualTo(updatedProject)
+        verify {
+            projectRepository.updateProject(
+                project = updatedProject,
+                oldProject = ProjectsMock.CORRECT_PROJECT,
+                changedField = match { it.contains("PROJECT_DESCRIPTION") }
+            )
+        }
     }
 
     @Test
     fun `updateProject should identify adminId changes`() {
         // Given
-        val updatedProject = originalProject.copy(adminId = UUID.randomUUID())
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(adminId = UUID.randomUUID())
 
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
-        every { projectRepository.updateProject(updatedProject, originalProject, any()) } returns Result.success(updatedProject)
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            projectRepository.updateProject(updatedProject, ProjectsMock.CORRECT_PROJECT, any())
+        } returns
+                updatedProject
 
         // When
         val result = updateProjectUseCase.updateProject(updatedProject)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(updatedProject)
-        verify { projectRepository.updateProject(updatedProject, originalProject, match { it.contains("ADMIN_ID") }) }
+        assertThat(result).isEqualTo(updatedProject)
+        verify {
+            projectRepository.updateProject(
+                project = updatedProject,
+                oldProject = ProjectsMock.CORRECT_PROJECT,
+                changedField = match { it.contains("ADMIN_ID") }
+            )
+        }
     }
 
     @Test
     fun `updateProject should identify taskStates changes`() {
         // Given
-        val updatedProject = originalProject.copy(taskStates = listOf(TaskState(name = "Completed")))
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(taskStates = listOf(TaskState(name = "Completed")))
 
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
-        every { projectRepository.updateProject(updatedProject, originalProject, any()) } returns Result.success(updatedProject)
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            projectRepository.updateProject(updatedProject, ProjectsMock.CORRECT_PROJECT, any())
+        } returns updatedProject
 
         // When
         val result = updateProjectUseCase.updateProject(updatedProject)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(updatedProject)
-        verify { projectRepository.updateProject(updatedProject,originalProject,match { it.contains("TASK_STATES") }) }
+        assertThat(result).isEqualTo(updatedProject)
+        verify {
+            projectRepository.updateProject(
+                project = updatedProject,
+                oldProject = ProjectsMock.CORRECT_PROJECT,
+                changedField = match { it.contains("TASK_STATES") }
+            )
+        }
     }
 
     @Test
     fun `updateProject should identify multiple fields updated`() {
         // Given
-        val updatedProject = originalProject.copy(
-            projectName = "Updated Project Name", projectDescription = "Updated Description", adminId = UUID.randomUUID()
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(
+            projectName = "Updated Project Name",
+            projectDescription = "Updated Description",
+            adminId = UUID.randomUUID()
         )
 
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
-        every { projectRepository.updateProject(updatedProject, originalProject, any()) } returns Result.success(updatedProject)
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
+        every {
+            projectRepository.updateProject(updatedProject, ProjectsMock.CORRECT_PROJECT, any())
+        } returns
+                updatedProject
 
         // When
         val result = updateProjectUseCase.updateProject(updatedProject)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(updatedProject)
-        verify { projectRepository.updateProject(updatedProject, originalProject, match {
-                    it.contains("PROJECT_NAME") && it.contains("PROJECT_DESCRIPTION") && it.contains("ADMIN_ID")
-                }
-            )
+        assertThat(result).isEqualTo(updatedProject)
+        verify {
+            projectRepository.updateProject(
+                project = updatedProject,
+                oldProject = ProjectsMock.CORRECT_PROJECT,
+                changedField = match {
+                    it.contains("PROJECT_NAME")
+                            && it.contains("PROJECT_DESCRIPTION")
+                            && it.contains("ADMIN_ID")
+                })
         }
     }
 
     @Test
     fun `updateProject should throw IOException when no fields changed`() {
         // Given
-        val updatedProject = originalProject.copy()
-        every { projectRepository.getProjectById(updatedProject.projectId) } returns Result.success(originalProject)
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy()
+        every {
+            projectRepository.getProjectById(updatedProject.projectId)
+        } returns ProjectsMock.CORRECT_PROJECT
 
-        // When
-        val result = updateProjectUseCase.updateProject(updatedProject)
-
-        // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+        // When / Then
+        assertThrows<EiffelFlowException.IOException> {
+            updateProjectUseCase.updateProject(updatedProject)
+        }
     }
-
-
-
-    companion object {
-        val originalProject = ProjectsMock.CORRECT_PROJECT
-    }
-
 }
