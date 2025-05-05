@@ -9,6 +9,7 @@ import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 class DeleteTaskUseCaseTest {
@@ -26,26 +27,11 @@ class DeleteTaskUseCaseTest {
 
     @Test
     fun `deleteTask should return success when task exists`() {
-        every { taskRepository.deleteTask(taskIdToDelete) } returns Result.success(validTask)
+        every { taskRepository.deleteTask(taskIdToDelete) } returns validTask
 
         val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
 
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(validTask)
-    }
-
-    @Test
-    fun `deleteTask should return failure when task not found`() {
-        val taskIdNotFound = UUID.randomUUID()
-
-        every {
-            taskRepository.deleteTask(taskIdNotFound)
-        } returns Result.failure(EiffelFlowException.NotFoundException("Task not found: $taskIdNotFound"))
-
-        val result = deleteTaskUseCase.deleteTask(taskIdNotFound)
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+        assertThat(result).isEqualTo(validTask)
     }
 
     @Test
@@ -54,11 +40,12 @@ class DeleteTaskUseCaseTest {
 
         every {
             taskRepository.deleteTask(taskIdWithError)
-        } returns Result.failure(EiffelFlowException.IOException(null))
+        } throws EiffelFlowException.IOException("Deletion error")
 
-        val result = deleteTaskUseCase.deleteTask(taskIdWithError)
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            deleteTaskUseCase.deleteTask(taskIdWithError) // must throw
+        }
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(Exception::class.java)
+        assertThat(exception).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 }

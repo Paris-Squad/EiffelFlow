@@ -56,10 +56,9 @@ class AuditRepositoryImpl(
             if (csvLines.isEmpty()) return Result.success(emptyList())
 
             val tasksResult = taskRepository.getTasks()
-            if (tasksResult.isFailure) return Result.failure(tasksResult.exceptionOrNull()!!)
 
             val tasksForProject =
-                tasksResult.getOrThrow().filter { it.projectId == projectId }.map { it.taskId }.toSet()
+                tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
 
             val parsedAuditLogs = csvLines.mapNotNull { line ->
                 try {
@@ -73,7 +72,7 @@ class AuditRepositoryImpl(
                 tasksForProject.contains(log.itemId)
             }
 
-            return if (projectAuditLogs.isEmpty()) {
+             if (projectAuditLogs.isEmpty()) {
                 Result.failure(
                     EiffelFlowException.NotFoundException("No audit logs found for project or related tasks: $projectId")
                 )
