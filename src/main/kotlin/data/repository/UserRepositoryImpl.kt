@@ -18,16 +18,18 @@ class UserRepositoryImpl(
 ) : UserRepository {
     override fun createUser(user: User): User {
         return try {
+            validateAdminPermission()
             val userAsCsv = userCsvParser.serialize(user)
             val users = getUsers()
 
             validateUsernameUniqueness(users, user.username)
-            validateAdminPermission()
 
             fileDataSource.writeLinesToFile(userAsCsv)
             val auditLog = user.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
             auditRepository.createAuditLog(auditLog)
             user
+        } catch (e: EiffelFlowException.AuthorizationException) {
+            throw e
         }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't Create User because ${e.message}")
         }
@@ -41,7 +43,7 @@ class UserRepositoryImpl(
 
     private fun validateAdminPermission() {
         if (SessionManger.isAdmin().not()) {
-            throw EiffelFlowException.AuthorizationException("Only admin can create user")
+            throw EiffelFlowException.AuthorizationException("Only admin can create or update user")
         }
     }
 
@@ -72,6 +74,7 @@ class UserRepositoryImpl(
 
     override fun deleteUser(userId: UUID): User {
         return try {
+            validateAdminPermission()
             val users = getUsers()
             val userToDelete = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
@@ -85,7 +88,9 @@ class UserRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
 
             userToDelete
-        } catch (e: Exception) {
+        } catch (e: EiffelFlowException.AuthorizationException) {
+            throw e
+        }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't Delete User because ${e.message}")
         }
     }

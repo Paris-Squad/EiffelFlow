@@ -117,7 +117,7 @@ class UserRepositoryImplTest {
         every { userMapper.parseCsvLine("user1") } returns existingUserWithSameUsername
 
         // When & Then
-        val exception = assertThrows<EiffelFlowException.IOException> {
+        val exception = assertThrows<EiffelFlowException.AuthorizationException> {
             userRepository.createUser(validUser)
         }
         assertThat(exception.message).contains("Username '${validUser.username}' is already taken")
@@ -130,10 +130,10 @@ class UserRepositoryImplTest {
         every { csvManager.readLinesFromFile() } returns emptyList()
 
         // When/Then
-        val exception = assertThrows<EiffelFlowException.IOException> {
+        val exception = assertThrows<EiffelFlowException.AuthorizationException> {
             userRepository.createUser(user = validUser)
         }
-        assertThat(exception.message).contains("Can't Create User because Only admin can create user")
+        assertThat(exception.message).contains("Only admin can create or update user")
     }
     //endregion
 
@@ -213,6 +213,7 @@ class UserRepositoryImplTest {
     @Test
     fun `deleteUser should return the deleted user on success`() {
         // Given
+        every { SessionManger.isAdmin() } returns true
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns userToDelete
@@ -228,8 +229,22 @@ class UserRepositoryImplTest {
     }
 
     @Test
+    fun `deleteUser should throw Exception when user is not admin`() {
+        // Given
+        every { SessionManger.isAdmin() } returns false
+
+        // When & Then
+        val exception = assertThrows<EiffelFlowException.AuthorizationException> {
+            userRepository.deleteUser(UUID.randomUUID())
+        }
+        assertThat(exception.message).contains("Only admin can create or update user")
+    }
+
+    @Test
     fun `deleteUser should throw Exception when user is not found`() {
         //Given
+        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns validUser
 
@@ -243,6 +258,7 @@ class UserRepositoryImplTest {
     @Test
     fun `deleteUser should throw Exception when file operation fails`() {
         // Given
+        every { SessionManger.isAdmin() } returns true
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns userToDelete
@@ -259,6 +275,7 @@ class UserRepositoryImplTest {
     @Test
     fun `deleteUser should throw Exception when audit log creation fails`() {
         // Given
+        every { SessionManger.isAdmin() } returns true
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns userToDelete
