@@ -6,5 +6,5 @@ import java.util.*
 
 class ViewTaskHistoryUseCase (private val auditRepository: AuditRepository) {
 
-    fun viewTaskHistory(taskId: UUID): Result<List<AuditLog>> = auditRepository.getTaskAuditLogById(taskId)
+    fun viewTaskHistory(taskId: UUID): List<AuditLog> = auditRepository.getTaskAuditLogById(taskId)
 }

@@ -13,6 +13,7 @@ import io.mockk.verify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.justRun
+import io.mockk.mockkObject
 import io.mockk.runs
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -55,21 +56,7 @@ class ProjectRepositoryImplTest {
             projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
         } returns ProjectsMock.CORRECT_PROJECT
 
-        every { auditRepository.createAuditLog(any()) } returns
-                Result.success(
-                    AuditLog(
-                        auditId = UUID.randomUUID(),
-                        itemId = ProjectsMock.CORRECT_PROJECT.projectId,
-                        itemName = ProjectsMock.CORRECT_PROJECT.projectName,
-                        userId = ProjectsMock.CORRECT_PROJECT.adminId,
-                        editorName = "Admin",
-                        actionType = AuditLogAction.CREATE,
-                        auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                        changedField = null,
-                        oldValue = null,
-                        newValue = ProjectsMock.CORRECT_PROJECT.projectName
-                    )
-                )
+        every { auditRepository.createAuditLog(any()) } returns MockAuditLog.AUDIT_LOG
 
         //When
         val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
@@ -144,7 +131,8 @@ class ProjectRepositoryImplTest {
 
     @Test
     fun `updateProject should return success if the project is updated`() {
-        //Given
+        // Given
+        every { sessionManger.isAdmin() } returns true
         every { sessionManger.getUser() } returns UserMock.adminUser
         every { projectMapper.serialize(ProjectsMock.CORRECT_PROJECT) } returns ProjectsMock.CORRECT_CSV_STRING_LINE
         every { projectMapper.serialize(ProjectsMock.updatedProject) } returns ProjectsMock.UPDATED_PROJECT_CSV
@@ -154,8 +142,7 @@ class ProjectRepositoryImplTest {
                 ProjectsMock.CORRECT_CSV_STRING_LINE
             )
         } just runs
-        justRun { auditRepository.createAuditLog(any()) }
-
+        justRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
 
         // When
         val result = projectRepository.updateProject(
@@ -167,6 +154,8 @@ class ProjectRepositoryImplTest {
         // Then
         assertThat(result).isEqualTo(ProjectsMock.updatedProject)
     }
+
+
 
     @Test
     fun `updateProject should throw IOException when fileDataSource throws exception`() {
@@ -216,7 +205,7 @@ class ProjectRepositoryImplTest {
         } just runs
         every {
             auditRepository.createAuditLog(any())
-        } throws  IOException("Audit log failed")
+        } throws IOException("Audit log failed")
 
         // When / Then
         assertThrows<EiffelFlowException.IOException> {
@@ -238,13 +227,13 @@ class ProjectRepositoryImplTest {
             csvStorageManager.readLinesFromFile()
         } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
 
-        every { csvStorageManager.writeLinesToFile( ProjectsMock.CORRECT_CSV_STRING_LINE) } returns Unit
+        every { csvStorageManager.writeLinesToFile(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns Unit
         every {
             projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
         } returns ProjectsMock.CORRECT_PROJECT
         every {
             auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG)
-        } returns Result.success(MockAuditLog.AUDIT_LOG)
+        } returns MockAuditLog.AUDIT_LOG
 
         // When
         val result = projectRepository.deleteProject(ProjectsMock.CORRECT_PROJECT.projectId)
@@ -270,7 +259,7 @@ class ProjectRepositoryImplTest {
 
         every {
             auditRepository.createAuditLog(any())
-        } returns Result.failure(EiffelFlowException.IOException("Failed to create audit log"))
+        } throws EiffelFlowException.IOException("Failed to create audit log")
 
         // When / Then
         assertThrows<EiffelFlowException.IOException> {

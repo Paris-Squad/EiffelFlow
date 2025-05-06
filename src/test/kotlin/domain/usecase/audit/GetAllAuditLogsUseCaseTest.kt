@@ -8,6 +8,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.audit.GetAllAuditLogsUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.MockAuditLog
 
 class GetAllAuditLogsUseCaseTest {
@@ -22,24 +23,25 @@ class GetAllAuditLogsUseCaseTest {
 
     @Test
     fun `should return Result of list with all AuditLogs when logs exist`() {
+        // Given
         every {
             auditRepository.getAuditLogs()
-        } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
-
+        } returns listOf(MockAuditLog.AUDIT_LOG)
+        // When
         val result = getAllAuditLogsUseCase.getAllAuditLogs()
-
-        assertThat(result.getOrNull()).containsExactly(MockAuditLog.AUDIT_LOG)
+        // Then
+        assertThat(result).containsExactly(MockAuditLog.AUDIT_LOG)
     }
 
     @Test
     fun `should return Result of NotFoundException when no logs exist`() {
-        val exception = EiffelFlowException.NotFoundException("Audit logs not found")
+        // Given
         every {
             auditRepository.getAuditLogs()
-        } returns Result.failure(exception)
-
-        val result = getAllAuditLogsUseCase.getAllAuditLogs()
-
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+        } throws EiffelFlowException.NotFoundException("Audit logs not found")
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException>{
+            getAllAuditLogsUseCase.getAllAuditLogs()
+        }
     }
 }

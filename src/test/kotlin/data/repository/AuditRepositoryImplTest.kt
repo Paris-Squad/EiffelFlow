@@ -10,13 +10,15 @@ import org.example.data.repository.AuditRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.MockAuditLog
 import utils.MockAuditLog.AUDIT_LOG
-import java.util.*
+import java.util.UUID
 
 class AuditRepositoryImplTest {
 
@@ -35,80 +37,67 @@ class AuditRepositoryImplTest {
         // Given
         val line = MockAuditLog.FULL_CSV_STRING_LINE
         val auditLog = AUDIT_LOG
+        every { auditCsvParser.serialize(AUDIT_LOG) } returns line
         every { csvStorageManager.writeLinesToFile(line) } just Runs
-
-        // When / then
-            val result = auditRepository.createAuditLog(auditLog)
-            assertThat(result.isSuccess).isTrue()
+        // When
+        val result = auditRepository.createAuditLog(auditLog)
+        // Then
+        assertThat(result).isEqualTo(auditLog)
 
     }
 
     @Test
+
     fun `createAuditLog should return failure when an exception is thrown`() {
         // Given
         val exception = RuntimeException("Failed to write to file")
         every { csvStorageManager.writeLinesToFile(any()) } throws exception
 
         // When / then
-        try {
-            val result = auditRepository.createAuditLog(AUDIT_LOG)
-            assertThat(result.isFailure).isTrue()
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+        assertThrows<RuntimeException> {
+            auditRepository.createAuditLog(AUDIT_LOG)
         }
-
     }
 
-    //region getAuditLogs
-    @Test
-    fun `getAuditLogs should return Result with empty list of AuditLog when CSV file is empty`() {
-        // Given
-        every { csvStorageManager.readLinesFromFile() } returns emptyList()
-
-        // When / Then
-            val result = auditRepository.getAuditLogs()
-            assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
-    }
 
     @Test
-    fun `getAuditLogs should return Result with list of AuditLogs when CSV contains valid lines`() {
+    fun `getAuditLogs should return list of AuditLogs when CSV contains valid lines`() {
         // Given
         every { csvStorageManager.readLinesFromFile() } returns listOf(MockAuditLog.FULL_CSV_STRING_LINE)
         every { auditCsvParser.parseCsvLine(MockAuditLog.FULL_CSV_STRING_LINE) } returns AUDIT_LOG
 
-        // When / Then
-            val result = auditRepository.getAuditLogs()
-            assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(AUDIT_LOG))
+        // When
+        val result = auditRepository.getAuditLogs()
 
+        // Then
+        assertThat(result).containsExactlyElementsIn(listOf(AUDIT_LOG))
     }
-
 
     @Test
-    fun `getAuditLogs should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
-        // Given
-        every { csvStorageManager.readLinesFromFile() } returns listOf("invalid,line")
-        // When / Then
-            val result = auditRepository.getAuditLogs()
-            assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.NotFoundException::class.java
-            )
+    fun `getAuditLogs should skip null returns from parser`() {
+        every { csvStorageManager.readLinesFromFile() } returns listOf("line1", "line2")
+        every { auditCsvParser.parseCsvLine("line1") } returns AUDIT_LOG
+        every { auditCsvParser.parseCsvLine("line2") } throws RuntimeException("invalid format")
 
+        val result = auditRepository.getAuditLogs()
+
+        assertThat(result).isEqualTo(listOf(AUDIT_LOG))
     }
-    //endregion
+
 
     //region getTaskAuditLogById
     @Test
-    fun `getTaskAuditLogById should return Result with empty list of AuditLog when CSV file is empty`() {
+    fun `getTaskAuditLogById should return empty list when CSV file is empty`() {
         // Given
         every { csvStorageManager.readLinesFromFile() } returns emptyList()
 
         // When / Then
         val result = auditRepository.getTaskAuditLogById(UUID.randomUUID())
-        assertThat(result.getOrNull()).isEmpty()
+        assertThat(result).isEqualTo(emptyList<AuditLog>())
     }
 
     @Test
-    fun `getTaskAuditLogById should return Result with list of AuditLogs when CSV contains valid lines`() {
+    fun `getTaskAuditLogById should return list of AuditLogs when CSV contains valid lines`() {
         // Given
         val itemId = AUDIT_LOG.itemId
         val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
@@ -117,38 +106,16 @@ class AuditRepositoryImplTest {
 
         // When / Then
         val result = auditRepository.getTaskAuditLogById(itemId)
-        assertThat(result.getOrNull()).containsExactlyElementsIn(listOf(AUDIT_LOG))
+        assertThat(result).containsExactlyElementsIn(listOf(AUDIT_LOG))
 
 
-    }
-
-    @Test
-    fun `getTaskAuditLogById should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
-        // Given
-        val auditLogWithNewId = AUDIT_LOG.copy(itemId = UUID.randomUUID())
-        val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
-        every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { auditCsvParser.parseCsvLine(csvLines[0]) } returns auditLogWithNewId
-
-        // When / Then
-        val result = auditRepository.getTaskAuditLogById(UUID.randomUUID())
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
     }
 
     //endregion
-    //region getProjectAuditLogById
-    @Test
-    fun `getProjectAuditLogById should return Result with empty list of AuditLog when CSV file is empty`() {
-        // Given
-        every { csvStorageManager.readLinesFromFile() } returns emptyList()
 
-        // When / Then
-        val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
-        assertThat(result.getOrNull()).isEmpty()
-    }
 
     @Test
-    fun `getProjectAuditLogById should return Result with list of AuditLogs when CSV contains valid lines`() {
+    fun `getProjectAuditLogById should return list of AuditLogs when CSV contains valid lines`() {
         // Given
         val projectId = UUID.randomUUID()
         val taskId = UUID.randomUUID()
@@ -173,41 +140,23 @@ class AuditRepositoryImplTest {
         val result = auditRepository.getProjectAuditLogById(projectId)
 
         // Then
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).containsExactly(expectedAuditLog)
-    }
-
-
-    @Test
-    fun `getProjectAuditLogById should return Result of ElementNotFoundException when AuditLog doesn't exists in CSV file`() {
-        // Given
-        val auditLogWithNewId = AUDIT_LOG.copy(itemId = UUID.randomUUID())
-        val csvLines = MockAuditLog.FULL_CSV_STRING_LINE.split("\n")
-        every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { auditCsvParser.parseCsvLine(csvLines[0]) } returns auditLogWithNewId
-        every { taskRepository.getTasks() } returns listOf(validTask, validTask)
-
-        // When / Then
-        val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+        assertThat(result).isEqualTo(listOf(expectedAuditLog))
     }
 
     @Test
-    fun `getProjectAuditLogById should return failure when taskRepository fails`() {
+    fun `getProjectAuditLogById should throw NotFoundException when taskRepository fails`() {
         // Given
         val csvLines = listOf(MockAuditLog.FULL_CSV_STRING_LINE)
         every { csvStorageManager.readLinesFromFile() } returns csvLines
-        every { taskRepository.getTasks() } throws  EiffelFlowException
-                    .NotFoundException("No audit logs found for project or related tasks:${validTask.projectId}")
+        every { taskRepository.getTasks() } throws EiffelFlowException
+            .NotFoundException("No audit logs found for project or related tasks:${validTask.projectId}")
 
 
-        // When
-        val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
+        // When / Then
 
-        // Then
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
-            .contains("No audit logs found for project or related tasks:${validTask.projectId}")
+        assertThrows<EiffelFlowException.NotFoundException> {
+            auditRepository.getProjectAuditLogById(UUID.randomUUID())
+        }
     }
 
     @Test
@@ -229,8 +178,7 @@ class AuditRepositoryImplTest {
         val result = auditRepository.getProjectAuditLogById(projectId)
 
         // Then
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).containsExactly(auditLog)
+        assertThat(result).isEqualTo(listOf(auditLog))
     }
 
     @Test
@@ -248,34 +196,32 @@ class AuditRepositoryImplTest {
         every { taskRepository.getTasks() } returns listOf(task)
         // When
         val result = auditRepository.getProjectAuditLogById(projectId)
+
         // Then
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).containsExactly(auditLog)
+        assertThat(result).isEqualTo(listOf(auditLog))
     }
 
 
     @Test
-    fun `getProjectAuditLogById should return failure when unexpected exception is thrown`() {
+    fun `getProjectAuditLogById should throw when RuntimeException unexpected exception is thrown`() {
         // Given
         every { csvStorageManager.readLinesFromFile() } throws RuntimeException("unexpected")
 
-        // When
-        val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
-
-        // Then
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().contains("unexpected")
+        // When / Then
+        assertThrows<RuntimeException> {
+            auditRepository.getProjectAuditLogById(UUID.randomUUID())
+        }
     }
 
     @Test
-    fun `getProjectAuditLogById should return failure when fileDataSource throws exception`() {
+    fun `getProjectAuditLogById should throw IOException when fileDataSource throws exception`() {
         // Given
-        every { csvStorageManager.readLinesFromFile() } throws RuntimeException("file error")
-        // When
-        val result = auditRepository.getProjectAuditLogById(UUID.randomUUID())
-        // Then
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().contains("file error")
+        every { csvStorageManager.readLinesFromFile() } throws EiffelFlowException.IOException("file error")
+        //
+        // When / Then
+        assertThrows<EiffelFlowException.IOException> {
+            auditRepository.getProjectAuditLogById(UUID.randomUUID())
+        }
     }
 
     //endregion
