@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.example.data.storage.SessionManger
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
@@ -15,8 +16,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.UserMock.adminUser
-import java.io.FileNotFoundException
 
 class RegisterUseCaseTest {
 
@@ -42,41 +43,47 @@ class RegisterUseCaseTest {
 
     @Test
     fun `register with admin caller role should succeed when all validations pass`() {
+        // Given
         val createdUser = User(username = username, password = hashedPassword, role = mateRole)
-
-        every { userRepository.getUsers() } returns Result.success(emptyList())
+        every { userRepository.getUsers() } returns emptyList()
         every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any()) } returns Result.success(createdUser)
+        every { userRepository.createUser(any()) } returns createdUser
 
+        // When
         val result = registerUseCase.register(username, password, mateRole)
 
-        assertEquals(createdUser, result.getOrNull())
+        // Then
+        assertEquals(createdUser, result)
     }
 
     @Test
     fun `register should successfully create user when all validations pass`() {
+        // Given
         val createdUser = User(username = username, password = hashedPassword, role = mateRole)
-
-        every { userRepository.getUsers() } returns Result.success(emptyList())
+        every { userRepository.getUsers() } returns emptyList()
         every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any()) } returns Result.success(createdUser)
+        every { userRepository.createUser(any()) } returns createdUser
 
+        // When
         val result = registerUseCase.register(username, password, mateRole)
 
-        assertEquals(createdUser, result.getOrNull())
+        // Then
+        assertEquals(createdUser, result)
     }
 
     @Test
     fun `register should fail when repository createUser fails`() {
-        val repositoryException = FileNotFoundException("User creation failed")
-
-        every { userRepository.getUsers() } returns Result.success(emptyList())
+        // Given
+        val repositoryException = EiffelFlowException.IOException("User creation failed")
+        every { userRepository.getUsers() } returns emptyList()
         every { hashPasswordUseCase.hashPassword(any()) } returns "hashedPassword"
-        every { userRepository.createUser(any()) } returns Result.failure(repositoryException)
+        every { userRepository.createUser(any()) } throws repositoryException
 
-        val result = registerUseCase.register(username, password, mateRole)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(repositoryException::class.java)
+        // When / Then
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            registerUseCase.register(username, password, mateRole)
+        }
+        assertThat(exception.message).contains("User creation failed")
     }
 
     companion object {
