@@ -8,6 +8,7 @@ import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.example.presentation.presenter.audit.GetProjectAuditLogsPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.MockAuditLog
 import utils.ProjectsMock
 
@@ -24,31 +25,28 @@ class GetProjectAuditLogPresenterTest {
     @Test
     fun `should return Result of list with AuditLogs when project with given id exists`() {
         // Given
+        val expectedAuditLogs = listOf(MockAuditLog.AUDIT_LOG)
         every {
             getProjectAuditUseCase.getProjectAuditLogsById(any())
-        } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
+        } returns expectedAuditLogs
 
-        // When / Then
-        try {
-            val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+        // When
+        val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
+
+        // Then
+        assertThat(result).isEqualTo(expectedAuditLogs)
     }
 
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             getProjectAuditUseCase.getProjectAuditLogsById(any())
-        } returns Result.failure(exception)
+        } throws EiffelFlowException.NotFoundException("Project not found")
 
         // When / Then
-        try {
-            val result = getProjectAuditLogsPresenter.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+        assertThrows<EiffelFlowException.NotFoundException> {
+            getProjectAuditLogsPresenter.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
         }
     }
 
