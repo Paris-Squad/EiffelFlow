@@ -1,0 +1,216 @@
+[33mcommit e10d8a1ede6657cb4cd1a936ec3f873532b014e2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelopment[m[33m)[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:59:41 2025 +0300
+
+    refactor ViewTaskHistoryUseCase.kt replace Result with List<AuditLog>
+    
+    handle ViewTaskHistoryTest.kt remove the Result and try-catch
+    and reformatting with Given When Then template
+
+[33mcommit 87e3d6ac4961659de5d2a9fca2b7e880456fbb7e[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:57:50 2025 +0300
+
+    handle GetProjectAuditLogPresenterTest.kt remove the result and try-catch
+    and reformatting with Given When Then template
+
+[33mcommit 5d1f2116a05a21bf84468b27f2c7fd2b88cc2d78[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:56:54 2025 +0300
+
+    handle GetProjectAuditLogsCLITest.kt remove the result
+
+[33mcommit 25e8fd996c9d9e2b76a0f3865de8be505d50aa0c[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:55:59 2025 +0300
+
+    handle UserRepositoryImplTest.kt remove the result
+    and reformatting with Given When Then template
+
+[33mcommit 2bb14756f88e899ff59551cab56a26e4e47382d3[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:54:57 2025 +0300
+
+    handle TaskRepositoryImplTest.kt remove the result
+    and reformatting with Given When Then template
+
+[33mcommit 24626e14aa472424b88347514bd54c3a974705fb[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:54:01 2025 +0300
+
+    handle ProjectRepositoryImplTest.kt remove the result and try-catch
+    and reformatting with Given When Then template
+
+[33mcommit 00c595ddd9d594d09247dae6ea7feb25946652df[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:50:15 2025 +0300
+
+    refactor GetTaskAuditUseCase.kt replace the result with the List<AuditLog>
+    
+    handle and reformatting GetTaskAuditUseCaseTest.kt
+
+[33mcommit 4191fd6ac18910f3d008e0d76d256e9ced00421a[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:49:34 2025 +0300
+
+    refactor GetProjectAuditUseCase.kt replace the result with the List<AuditLog>
+    
+    handle and reformatting GetProjectAuditUseCaseTest.kt
+
+[33mcommit dce9cd276d53848c3b893b1f97f18f8689e28f6f[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:48:45 2025 +0300
+
+    refactor GetProjectAuditLogsPresenter.kt replace the result with the List<AuditLog>
+    
+    handle and reformatting GetProjectAuditLogsPresenterTest.kt
+
+[33mcommit a9815e68697ec070ae23ba4631a54da5c930ee35[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:47:34 2025 +0300
+
+    refactor GetAllAuditLogsUseCase.kt replace the result with the List<AuditLog>
+    
+    handle and reformatting GetAllAuditLogsUseCaseTest.kt
+
+[33mcommit 3a61d60c871de4dd7e7d29f60a4bf88678b22931[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Tue May 6 10:44:35 2025 +0300
+
+    refactor AuditRepositoryImpl replace all result with values and remove try-catch
+    
+    handle AuditRepositoryImplTest
+    
+    replace util.* with util.UUID in AuditRepository
+
+[33mcommit 52c6ef6750d6a8304085bc9f065b30d2dc6d4512[m[33m ([m[1;31morigin/development[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 601e6c2 63cd78a
+Author: AbdElRahman Raafat Amer <abdelrahman.raafaat@gmail.com>
+Date:   Mon May 5 22:01:14 2025 +0300
+
+    Merge pull request #66 from Paris-Squad/buxfix/refactor-project-repo
+    
+    buxfix/refactor-project-repo
+
+[33mcommit 63cd78ad5f5f4c01ad164e9518dce6a3a304096e[m
+Author: Abdelrahman Raafat <55184522+AbdElrahman-Rafaat-Amer@users.noreply.github.com>
+Date:   Mon May 5 21:58:19 2025 +0300
+
+    replace Result with throw exceptions in All project Presenters/Views & their own test cases
+
+[33mcommit 562a1ddd2b97721e999653ca57298b3f40cf9201[m
+Author: Abdelrahman Raafat <55184522+AbdElrahman-Rafaat-Amer@users.noreply.github.com>
+Date:   Mon May 5 21:18:16 2025 +0300
+
+    replace Result with throw exceptions in All project Use cases & its own test cases
+
+[33mcommit cbb920dfafe4466725de429860d3f78f8e435fcc[m
+Author: Abdelrahman Raafat <55184522+AbdElrahman-Rafaat-Amer@users.noreply.github.com>
+Date:   Mon May 5 20:49:25 2025 +0300
+
+    replace Result with throw exceptions in ProjectRepositoryImpl & it's own test cases
+
+[33mcommit 601e6c2272a754d51d19c09d53eb728a089bde05[m
+Merge: 6cc40a9 99e4088
+Author: Dina Othman <119232440+DinaOthman21@users.noreply.github.com>
+Date:   Mon May 5 19:11:57 2025 +0300
+
+    Merge pull request #65 from Paris-Squad/buxfix/task-repo
+    
+    refactor task repository
+
+[33mcommit 99e4088e40350e7385cf9996ded810abcbe17e7f[m
+Author: dina othman <dinaosman581@gmail.com>
+Date:   Mon May 5 19:10:54 2025 +0300
+
+    update CreateTaskUseCase
+
+[33mcommit 2be85fb8c1a26f9a740cec567964220a5bd6909d[m
+Author: dina othman <dinaosman581@gmail.com>
+Date:   Mon May 5 19:08:49 2025 +0300
+
+    update AuditRepositoryImplTest
+
+[33mcommit 3797ac62aa627ae7e5b85963c62ede41e8194d14[m
+Author: dina othman <dinaosman581@gmail.com>
+Date:   Mon May 5 17:33:07 2025 +0300
+
+    refactor task repository
+
+[33mcommit 6cc40a94989544db2ced8b48492c986f89780b27[m
+Merge: 1e69e04 1d35cfc
+Author: Ali Yasser <128180482+ALiyASSER0@users.noreply.github.com>
+Date:   Mon May 5 13:07:16 2025 +0300
+
+    Merge pull request #63 from Paris-Squad/buxfix/refactor-repos
+    
+    buxfix/refactor-auth-repo
+
+[33mcommit 1d35cfc2d700dfa25398a57a59d9b0db9c71b8da[m
+Author: Mohamed Elhanafy <amohamed8684@gmail.com>
+Date:   Mon May 5 07:34:24 2025 +0300
+
+    Refactor LogoutUseCase and its tests to simplify logout logic and improve exception handling
+
+[33mcommit 8b5fb670ba37d2a262b2f81fb5f532d033ab2d02[m
+Author: Mohamed Elhanafy <amohamed8684@gmail.com>
+Date:   Mon May 5 07:13:24 2025 +0300
+
+    Refactor LoginUseCase to return User and change the corresponding tests
+
+[33mcommit 12e35162e9e60d8d857554284df44f7828151a3f[m
+Author: Mohamed Elhanafy <amohamed8684@gmail.com>
+Date:   Mon May 5 07:08:17 2025 +0300
+
+    Refactor AuthRepositoryImpl and remove runCatching and change the return type from Result and fix the corresponding tests
+
+[33mcommit ccc68fbbe6503d5a5f26518c18c11a18106ab2cd[m
+Author: Mohamed Elhanafy <amohamed8684@gmail.com>
+Date:   Mon May 5 07:07:59 2025 +0300
+
+    Refactor AuthRepositoryImpl and remove runCatching and change the return type from Result and fix the corresponding tests
+
+[33mcommit 1e69e04109d29455c75dab13a24dd36dbc3d6c1a[m[33m ([m[1;32mrefactor/get-project-logs-by-id[m[33m)[m
+Merge: 8fe55f9 c01fccb
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Sat May 3 19:38:02 2025 +0300
+
+    Merge pull request #62 from Paris-Squad/presentation/presenter-project-audit-logs
+    
+    implement presenter to GetProjectAuditLogsPresenter.kt
+
+[33mcommit c01fccbe1d12d220ef5d2093c47e1e1c512478ac[m
+Merge: 1cf9e51 8fe55f9
+Author: Dina Othman <119232440+DinaOthman21@users.noreply.github.com>
+Date:   Sat May 3 16:56:41 2025 +0300
+
+    Merge branch 'development' into presentation/presenter-project-audit-logs
+
+[33mcommit 8fe55f98e9cfb077f3b7e902eab7aaa282ea71a5[m
+Merge: 6f7b90f 3780a82
+Author: Dina Othman <119232440+DinaOthman21@users.noreply.github.com>
+Date:   Sat May 3 16:55:29 2025 +0300
+
+    Merge pull request #61 from Paris-Squad/feature/update-project-cli
+    
+    UpdateProjectCLITest
+
+[33mcommit 1cf9e5130b3371994b7098f9b370e088fe4262d8[m[33m ([m[1;32mpresentation/presenter-project-audit-logs[m[33m)[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Sat May 3 15:29:22 2025 +0300
+
+    handle GetProjectAuditLogsPresenterTest.kt add new tests to cover the private function
+
+[33mcommit 90791f50b01dfd6ec17d8e739abafcec4959853b[m
+Author: Mahmoud Tarek <dev.mahmoudtarek@gmail.com>
+Date:   Sat May 3 15:00:32 2025 +0300
+
+    implement presenter to GetProjectAuditLogsPresenter.kt
+    and handle GetProjectAuditLogsPresenterTest.kt
+
+[33mcommit 3780a82b95cb67852e8a4bbf26011eae377dd61a[m
+Merge: 6857f2f 6f7b90f
+Author: Dina Othman <119232440+DinaOthman21@users.noreply.github.com>
+Date:   Sat May 3 14:10:42 2025 +0300
+
+    Merge branch 'development' into feature
