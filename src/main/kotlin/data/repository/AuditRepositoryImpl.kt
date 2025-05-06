@@ -6,7 +6,7 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
-import java.util.UUID
+import java.util.*
 
 class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
@@ -14,18 +14,7 @@ class AuditRepositoryImpl(
     private val taskRepository: TaskRepository
 ) : AuditRepository {
     override fun createAuditLog(auditLog: AuditLog): AuditLog {
-        val line = listOf(
-            auditLog.auditId.toString(),
-            auditLog.itemId.toString(),
-            auditLog.itemName,
-            auditLog.userId.toString(),
-            auditLog.editorName,
-            auditLog.actionType.name,
-            auditLog.auditTime.toString(),
-            auditLog.changedField,
-            auditLog.oldValue,
-            auditLog.newValue
-        ).joinToString(",")
+        val line = auditCsvParser.serialize(auditLog)
         fileDataSource.writeLinesToFile(line)
         return auditLog
     }
@@ -53,13 +42,13 @@ class AuditRepositoryImpl(
 
         val tasksForProject = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
 
-            val parsedAuditLogs = csvLines.mapNotNull { line ->
-                try {
-                    auditCsvParser.parseCsvLine(line)
-                } catch (e: Exception) {
-                    null
-                }
+        val parsedAuditLogs = csvLines.mapNotNull { line ->
+            try {
+                auditCsvParser.parseCsvLine(line)
+            } catch (e: Exception) {
+                null
             }
+        }
 
         val projectAuditLogs = parsedAuditLogs.filter { log ->
             tasksForProject.contains(log.itemId)
@@ -82,7 +71,7 @@ class AuditRepositoryImpl(
             }
         }
 
-         if (logs.isEmpty()) {
+        if (logs.isEmpty()) {
             throw EiffelFlowException.NotFoundException("Audit logs not found")
         } else {
             return logs

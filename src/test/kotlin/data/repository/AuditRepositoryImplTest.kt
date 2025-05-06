@@ -37,10 +37,11 @@ class AuditRepositoryImplTest {
         // Given
         val line = MockAuditLog.FULL_CSV_STRING_LINE
         val auditLog = AUDIT_LOG
+        every { auditCsvParser.serialize(AUDIT_LOG) } returns line
         every { csvStorageManager.writeLinesToFile(line) } just Runs
-
-        // When / then
+        // When
         val result = auditRepository.createAuditLog(auditLog)
+        // Then
         assertThat(result).isEqualTo(auditLog)
 
     }
