@@ -56,19 +56,7 @@ class ProjectRepositoryImplTest {
             projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
         } returns ProjectsMock.CORRECT_PROJECT
 
-        every { auditRepository.createAuditLog(any()) } returns
-                AuditLog(
-                    auditId = UUID.randomUUID(),
-                    itemId = ProjectsMock.CORRECT_PROJECT.projectId,
-                    itemName = ProjectsMock.CORRECT_PROJECT.projectName,
-                    userId = ProjectsMock.CORRECT_PROJECT.adminId,
-                    editorName = "Admin",
-                    actionType = AuditLogAction.CREATE,
-                    auditTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
-                    changedField = null,
-                    oldValue = null,
-                    newValue = ProjectsMock.CORRECT_PROJECT.projectName
-                )
+        every { auditRepository.createAuditLog(any()) } returns MockAuditLog.AUDIT_LOG
 
         //When
         val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)

@@ -2,11 +2,10 @@ package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
-import java.util.*
+import java.util.UUID
 
 class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
@@ -21,22 +20,14 @@ class AuditRepositoryImpl(
 
     override fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
         val lines = fileDataSource.readLinesFromFile()
-        if (lines.isEmpty()) return emptyList()
 
-        val auditLogs = lines.map { line ->
+        return lines.map { line ->
             auditCsvParser.parseCsvLine(line)
         }.filter { it.itemId == taskId }
-
-        if (auditLogs.isEmpty()) {
-            throw EiffelFlowException.NotFoundException("Audit logs not found for item ID: $taskId")
-        } else {
-            return auditLogs
-        }
     }
 
     override fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
         val csvLines = fileDataSource.readLinesFromFile()
-        if (csvLines.isEmpty()) return emptyList()
 
         val tasksResult = taskRepository.getTasks()
 
@@ -50,31 +41,21 @@ class AuditRepositoryImpl(
             }
         }
 
-        val projectAuditLogs = parsedAuditLogs.filter { log ->
+         return parsedAuditLogs.filter { log ->
             tasksForProject.contains(log.itemId)
         }
 
-        if (projectAuditLogs.isEmpty()) {
-            throw EiffelFlowException.NotFoundException("No audit logs found for project or related tasks: $projectId")
-        } else return projectAuditLogs
     }
 
     override fun getAuditLogs(): List<AuditLog> {
         val lines = fileDataSource.readLinesFromFile()
-        if (lines.isEmpty()) throw EiffelFlowException.NotFoundException("Audit logs not found")
 
-        val logs = lines.mapNotNull { line ->
+        return lines.mapNotNull { line ->
             try {
                 auditCsvParser.parseCsvLine(line)
             } catch (e: Exception) {
                 null
             }
-        }
-
-        if (logs.isEmpty()) {
-            throw EiffelFlowException.NotFoundException("Audit logs not found")
-        } else {
-            return logs
         }
     }
 

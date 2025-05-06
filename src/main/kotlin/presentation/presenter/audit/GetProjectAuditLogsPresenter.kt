@@ -13,12 +13,7 @@ class GetProjectAuditLogsPresenter(
     }
 
     fun getProjectAuditLogsById(auditId: UUID): List<AuditLog> {
-        val projectAuditLogs = getProjectAuditUseCase.getProjectAuditLogsById(auditId)
-
-        if (projectAuditLogs.isEmpty())
-            throw EiffelFlowException.NotFoundException(ERROR_MESSAGE_NO_LOGS_FOUND)
-        else
-            return projectAuditLogs
+       return getProjectAuditUseCase.getProjectAuditLogsById(auditId)
     }
 }
 

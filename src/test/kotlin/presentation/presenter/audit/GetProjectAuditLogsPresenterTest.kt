@@ -38,18 +38,6 @@ class GetProjectAuditLogsPresenterTest {
     }
 
     @Test
-    fun `should return NotFoundException when audit logs are empty`() {
-        // Given
-        val emptyLogs = emptyList<AuditLog>()
-        every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns emptyLogs
-
-        // When / Then
-        assertThrows<EiffelFlowException.NotFoundException> {
-            presenter.getProjectAuditLogsById(projectId)
-        }
-    }
-
-    @Test
     fun `should return failure when use case throws generic exception`() {
         // Given
         every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } throws
