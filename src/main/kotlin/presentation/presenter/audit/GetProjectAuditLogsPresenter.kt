@@ -12,20 +12,13 @@ class GetProjectAuditLogsPresenter(
         private const val ERROR_MESSAGE_NO_LOGS_FOUND = "No audit records were found for this project"
     }
 
-    fun getProjectAuditLogsById(auditId: UUID): Result<List<AuditLog>> {
-        return getProjectAuditUseCase
-            .getProjectAuditLogsById(auditId).fold(
-                onFailure = { error -> Result.failure(error) },
+    fun getProjectAuditLogsById(auditId: UUID): List<AuditLog> {
+        val projectAuditLogs = getProjectAuditUseCase.getProjectAuditLogsById(auditId)
 
-                onSuccess = { logs -> handleAuditLogsSuccess(logs) }
-            )
-    }
-
-    private fun handleAuditLogsSuccess(logs: List<AuditLog>): Result<List<AuditLog>> {
-        return if (logs.isEmpty())
-            Result.failure(EiffelFlowException.NotFoundException(ERROR_MESSAGE_NO_LOGS_FOUND))
+        if (projectAuditLogs.isEmpty())
+            throw EiffelFlowException.NotFoundException(ERROR_MESSAGE_NO_LOGS_FOUND)
         else
-            Result.success(logs)
+            return projectAuditLogs
     }
 }
 
