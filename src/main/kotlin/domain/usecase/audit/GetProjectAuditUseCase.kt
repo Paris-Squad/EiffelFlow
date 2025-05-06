@@ -7,6 +7,6 @@ import java.util.UUID
 class GetProjectAuditUseCase(
     private val auditRepository: AuditRepository
 ) {
-    fun getProjectAuditLogsById(projectId: UUID): Result<List<AuditLog>> =
+    fun getProjectAuditLogsById(projectId: UUID): List<AuditLog> =
         auditRepository.getProjectAuditLogById(projectId)
 }
