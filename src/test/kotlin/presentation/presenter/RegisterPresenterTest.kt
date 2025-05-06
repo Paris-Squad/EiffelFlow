@@ -1,6 +1,5 @@
 package presentation.presenter
 
-
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockk
@@ -9,6 +8,7 @@ import org.example.domain.usecase.auth.RegisterUseCase
 import org.example.presentation.presenter.RegisterPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.UserMock
 
 class RegisterPresenterTest {
@@ -23,38 +23,30 @@ class RegisterPresenterTest {
     }
 
     @Test
-    fun `should return success when registration is successful`() {
-        try {
+    fun `should return user when registration is successful`() {
 
-        every { registerUseCase.register(user.validUser.username, user.validUser.password, user.validUser.role
-        ) }returns Result.success(user.validUser)
+        every { registerUseCase.register(
+            user.validUser.username,
+            user.validUser.password,
+            user.validUser.role)
+        }returns user.validUser
 
         val result = registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
 
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(user)
+        assertThat(result).isEqualTo(user.validUser)
 
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not implement yet")
-        }
     }
 
     @Test
-    fun `should return failure when registration fails`() {
-        try {
-
+    fun `should throw exception when registration fails`() {
         val exception = EiffelFlowException.AuthorizationException("Not allowed")
+        every {
+            registerUseCase.register(user.validUser.username, user.validUser.password, user.validUser.role)
+        } throws exception
 
-        every { registerUseCase.register(user.validUser.username, user.validUser.password, user.validUser.role
-        ) } returns Result.failure(exception)
-
-        val result = registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not implement yet")
+        val thrown = assertThrows<EiffelFlowException.AuthorizationException> {
+            registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
         }
+        assertThat(thrown.message).contains("Not allowed")
     }
 }
