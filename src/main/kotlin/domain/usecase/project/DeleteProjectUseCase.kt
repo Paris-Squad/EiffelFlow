@@ -6,6 +6,6 @@ import java.util.UUID
 
 class DeleteProjectUseCase(private val projectRepository: ProjectRepository) {
 
-    fun deleteProject(projectId: UUID):Project = projectRepository.deleteProject(projectId)
+    suspend fun deleteProject(projectId: UUID):Project = projectRepository.deleteProject(projectId)
 
 }

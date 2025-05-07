@@ -4,9 +4,10 @@ import io.mockk.mockk
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.usecase.project.CreateProjectUseCase
 import org.junit.jupiter.api.BeforeEach
-import io.mockk.verify
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
+import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,28 +25,32 @@ class CreateProjectUseCaseTest {
 
     @Test
     fun `should return Created Project when project is created successfully`() {
-        //Given
-        every {
-            projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
-        } returns ProjectsMock.CORRECT_PROJECT
+        runTest {
+            //Given
+            coEvery {
+                projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
+            } returns ProjectsMock.CORRECT_PROJECT
 
-        //When
-        val result = createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
+            //When
+            val result = createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
 
-        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-        verify(exactly = 1) { projectRepository.createProject(ProjectsMock.CORRECT_PROJECT) }
+            assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
+            coVerify(exactly = 1) { projectRepository.createProject(ProjectsMock.CORRECT_PROJECT) }
+        }
     }
 
     @Test
     fun `should throw IOException when creating project fails`() {
-        //Given
-        every {
-            projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
-        } throws EiffelFlowException.IOException("Failed to create project")
+        runTest {
+            //Given
+            coEvery {
+                projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
+            } throws EiffelFlowException.IOException("Failed to create project")
 
-        //When / Then
-        assertThrows<EiffelFlowException.IOException> {
-            createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
+            //When / Then
+            assertThrows<EiffelFlowException.IOException> {
+                createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
+            }
         }
     }
 }
