@@ -2,10 +2,17 @@ package data.mongorepository
 
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import org.example.domain.model.User
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
-import java.util.UUID
+import java.util.*
 
-class MongoUserRepositoryImpl: UserRepository {
+class MongoUserRepositoryImpl(
+    private val database: MongoDatabase,
+    private val auditRepository: AuditRepository
+) : UserRepository {
+
+    private val usersCollection = database.getCollection<User>(collectionName = COLLECTION_NAME)
+
     override suspend fun createUser(user: User): User {
         TODO("Not yet implemented")
     }
@@ -26,4 +33,7 @@ class MongoUserRepositoryImpl: UserRepository {
         TODO("Not yet implemented")
     }
 
+    companion object {
+        private const val COLLECTION_NAME = "users"
+    }
 }

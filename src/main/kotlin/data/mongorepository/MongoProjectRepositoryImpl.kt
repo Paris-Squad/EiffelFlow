@@ -1,10 +1,18 @@
 package data.mongorepository
 
+import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import org.example.domain.model.Project
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
-class MongoProjectRepositoryImpl : ProjectRepository {
+class MongoProjectRepositoryImpl(
+    private val database: MongoDatabase,
+    private val auditRepository: AuditRepository
+) : ProjectRepository {
+
+    private val projectsCollection = database.getCollection<Project>(collectionName = COLLECTION_NAME)
+
     override suspend fun createProject(project: Project): Project {
         TODO("Not yet implemented")
     }
@@ -27,5 +35,9 @@ class MongoProjectRepositoryImpl : ProjectRepository {
 
     override suspend fun getProjects(): List<Project> {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+        private const val COLLECTION_NAME = "projects"
     }
 }
