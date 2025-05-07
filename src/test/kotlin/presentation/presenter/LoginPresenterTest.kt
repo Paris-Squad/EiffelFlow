@@ -1,7 +1,7 @@
 package presentation.presenter
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
@@ -22,38 +22,44 @@ class LoginPresenterTest {
 
     @Test
     fun `should return success when login is successful`() {
-        try {
-            every {
-                loginUseCase.login(user.validUser.username, user.validUser.password)
-            } returns user.validUser
+        coEvery {
+            loginUseCase.login(user.validUser.username, user.validUser.password)
+        } returns user.validUser
 
-            val result = loginPresenter.onLoginClicked(user.validUser.username, user.validUser.password)
+        val result = loginPresenter.onLoginClicked(user.validUser.username, user.validUser.password)
 
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isEqualTo("Login successful")
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not implement yet")
-        }
+        assertThat(result).isEqualTo("Login successful")
     }
 
     @Test
-    fun `should return failure when login fails`() {
-        try {
-            val exception = EiffelFlowException.AuthorizationException("Invalid username or password")
+    fun `should return default login failed message when exception message is null`() {
+        // Given
+        val exception = EiffelFlowException.AuthorizationException(null)
+        coEvery {
+            loginUseCase.login(user.validUser.username, user.validUser.password)
+        } throws exception
 
-            every {
-                loginUseCase.login(user.validUser.username, user.validUser.password)
-            } throws exception
+        // When
+        val result = loginPresenter.onLoginClicked(user.validUser.username, user.validUser.password)
 
-            val result = loginPresenter.onLoginClicked(user.validUser.username, user.validUser.password)
+        // Then
+        assertThat(result).isEqualTo("Login failed")
+    }
 
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isEqualTo(exception)
+    @Test
+    fun `should return exception message when login fails with message`() {
+        // Given
+        val exception = EiffelFlowException.AuthorizationException("Invalid credentials")
+        coEvery {
+            loginUseCase.login(user.validUser.username, user.validUser.password)
+        } throws exception
 
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not implement yet")
-        }
+        // When
+        val result = loginPresenter.onLoginClicked(user.validUser.username, user.validUser.password)
+
+        // Then
+        assertThat(result).isEqualTo("Invalid credentials")
     }
 
 }
+

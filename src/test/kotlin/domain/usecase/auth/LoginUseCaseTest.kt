@@ -1,8 +1,9 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.example.data.repository.AuthRepositoryImpl
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
@@ -22,24 +23,35 @@ class LoginUseCaseTest {
 
     @Test
     fun `login should return User when credentials are correct`() {
-        val username = UserMock.validUser.username
-        val password = UserMock.validUser.password
+        runTest {
+            // Given
+            val username = UserMock.validUser.username
+            val password = UserMock.validUser.password
 
-        every { authRepositoryImpl.loginUser(username, password) } returns UserMock.validUser
+            coEvery { authRepositoryImpl.loginUser(username, password) } returns UserMock.validUser
 
-        val result = loginUseCase.login(username, password)
+            // When
+            val result = loginUseCase.login(username, password)
 
-        assertThat(result).isEqualTo(UserMock.validUser)
+            // Then
+            assertThat(result).isEqualTo(UserMock.validUser)
+        }
     }
 
     @Test
     fun `login should threw AuthenticationException when authentication fails`() {
-        val username = UserMock.validUser.username
-        val password = "wrong password"
-        val exception = EiffelFlowException.AuthenticationException(emptySet())
+        runTest {
+            // Given
+            val username = UserMock.validUser.username
+            val password = "wrong password"
+            val exception = EiffelFlowException.AuthenticationException(emptySet())
 
-        every { authRepositoryImpl.loginUser(username, password) } throws exception
+            coEvery { authRepositoryImpl.loginUser(username, password) } throws exception
 
-        assertThrows<EiffelFlowException.AuthenticationException> { loginUseCase.login(username, password) }
+            // When / Then
+            assertThrows<EiffelFlowException.AuthenticationException> { loginUseCase.login(username, password) }
+        }
     }
 }
+
+
