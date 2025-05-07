@@ -3,7 +3,6 @@ package presentation.presenter.project
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.presentation.presenter.project.GetProjectPresenter
@@ -25,7 +24,6 @@ class GetProjectPresenterTest {
 
     @Test
     fun `should return list of Projects when Projects are found`() {
-        runTest {
             // Given
             coEvery {
                 getProjectUseCase.getProjects()
@@ -36,14 +34,12 @@ class GetProjectPresenterTest {
 
             // Then
             assertThat(result).containsExactlyElementsIn(listOf(ProjectsMock.CORRECT_PROJECT))
-        }
     }
 
     @Throws(EiffelFlowException.NotFoundException::class)
 
     @Test
     fun `should throw NotFoundException when no projects founded`() {
-        runTest {
             // Given
             coEvery {
                 getProjectUseCase.getProjects()
@@ -53,12 +49,10 @@ class GetProjectPresenterTest {
             assertThrows<EiffelFlowException.NotFoundException> {
                 getProjectPresenter.getProjects()
             }
-        }
     }
 
     @Test
     fun `should return Project when project with given id exists`() {
-        runTest {
             // Given
             val projectId = ProjectsMock.CORRECT_PROJECT.projectId
             coEvery {
@@ -70,13 +64,11 @@ class GetProjectPresenterTest {
 
             // Then
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-        }
     }
 
     @Throws(EiffelFlowException.NotFoundException::class)
     @Test
     fun `should throw NotFoundException when project with given id does not exist`() {
-        runTest {
             // Given
             val exception = EiffelFlowException.NotFoundException("Project not found")
             coEvery {
@@ -87,6 +79,5 @@ class GetProjectPresenterTest {
             assertThrows<EiffelFlowException.NotFoundException> {
                 getProjectPresenter.getProjectById(UUID.randomUUID())
             }
-        }
     }
 }

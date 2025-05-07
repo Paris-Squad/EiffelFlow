@@ -5,7 +5,6 @@ import org.example.presentation.presenter.project.UpdateProjectPresenter
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,7 +23,6 @@ class UpdateProjectPresenterTest {
 
     @Test
     fun `should return the updated Project when project is successfully updated`() {
-        runTest {
             // Given
             coEvery {
                 updateProjectUseCase.updateProject(ProjectsMock.CORRECT_PROJECT)
@@ -35,12 +33,10 @@ class UpdateProjectPresenterTest {
 
             // Then
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-        }
     }
 
     @Test
     fun `should throw IOException when project update fails`() {
-        runTest {
             // Given
             coEvery {
                 updateProjectUseCase.updateProject(ProjectsMock.CORRECT_PROJECT)
@@ -50,12 +46,10 @@ class UpdateProjectPresenterTest {
             assertThrows<EiffelFlowException.IOException> {
                 updateProjectPresenter.updateProject(ProjectsMock.CORRECT_PROJECT)
             }
-        }
     }
 
     @Test
     fun `should throw NotFoundException when project to be updated is not found`() {
-        runTest {
             // Given
             coEvery {
                 updateProjectUseCase.updateProject(ProjectsMock.CORRECT_PROJECT)
@@ -65,12 +59,10 @@ class UpdateProjectPresenterTest {
             assertThrows<EiffelFlowException.NotFoundException> {
                 updateProjectPresenter.updateProject(ProjectsMock.CORRECT_PROJECT)
             }
-        }
     }
 
     @Test
     fun `should throw IOException when project data is invalid`() {
-        runTest {
             // Given
             val invalidProject = ProjectsMock.CORRECT_PROJECT.copy(projectName = "")
             coEvery {
@@ -81,12 +73,10 @@ class UpdateProjectPresenterTest {
             assertThrows<EiffelFlowException.IOException> {
                 updateProjectPresenter.updateProject(invalidProject)
             }
-        }
     }
 
     @Test
     fun `should return updated project when multiple fields of project are updated`() {
-        runTest {
             // Given
             val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(
                 projectName = "Updated Project Name",
@@ -99,6 +89,5 @@ class UpdateProjectPresenterTest {
 
             // Then
             assertThat(result).isEqualTo(updatedProject)
-        }
         }
 }

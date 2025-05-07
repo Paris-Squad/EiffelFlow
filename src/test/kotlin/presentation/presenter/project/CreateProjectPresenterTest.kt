@@ -5,7 +5,6 @@ import org.example.presentation.presenter.project.CreateProjectPresenter
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,7 +23,6 @@ class CreateProjectPresenterTest {
 
     @Test
     fun `should return the created Project when project is successfully created`() {
-        runTest {
             //Given
             coEvery {
                 createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
@@ -35,12 +33,11 @@ class CreateProjectPresenterTest {
 
             //Then
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-        }
+
     }
 
     @Test
     fun `should throw IOException when project creation fails `() {
-        runTest {
             //Given
             coEvery {
                 createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
@@ -50,7 +47,6 @@ class CreateProjectPresenterTest {
             assertThrows<EiffelFlowException.IOException> {
                 createProjectPresenter.createProject(ProjectsMock.CORRECT_PROJECT)
             }
-        }
     }
 
 }

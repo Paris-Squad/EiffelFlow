@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.DeleteProjectUseCase
 import org.example.presentation.presenter.project.DeleteProjectPresenter
@@ -26,7 +25,6 @@ class DeleteProjectPresenterTest {
 
     @Test
     fun `should return the deleted project when the deleteProject return success`() {
-        runTest {
             // Given
             val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
             coEvery {
@@ -39,12 +37,10 @@ class DeleteProjectPresenterTest {
             // Then
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
             coVerify(exactly = 1) { deleteProjectUseCase.deleteProject(any()) }
-        }
     }
 
     @Test
     fun `should throw IOException when deleteProject returns failure`() {
-        runTest {
             // Given
             val differentProjectId = UUID.randomUUID()
             coEvery {
@@ -55,6 +51,5 @@ class DeleteProjectPresenterTest {
             assertThrows<EiffelFlowException.IOException> {
                 deleteProjectPresenter.deleteProject(differentProjectId)
             }
-        }
     }
 }
