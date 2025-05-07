@@ -9,19 +9,18 @@ import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
-import java.io.FileNotFoundException
 import java.util.UUID
-import kotlin.Result
 
 class UserRepositoryImpl(
     private val userCsvParser: UserCsvParser,
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : UserRepository {
-    override fun createUser(user: User): Result<User> {
-        return runCatching {
+    override suspend fun createUser(user: User): User {
+        return try {
+            validateAdminPermission()
             val userAsCsv = userCsvParser.serialize(user)
-            val users = getUsers().getOrThrow()
+            val users = getUsers()
 
             validateUsernameUniqueness(users, user.username)
             validateAdminPermission()
@@ -30,11 +29,10 @@ class UserRepositoryImpl(
             val auditLog = user.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
             auditRepository.createAuditLog(auditLog)
             user
-        }.recoverCatching {
-            when (it) {
-                is EiffelFlowException -> throw it
-                else -> throw EiffelFlowException.IOException(it.message)
-            }
+        } catch (e: EiffelFlowException.AuthorizationException) {
+            throw e
+        } catch (e: Exception) {
+            throw EiffelFlowException.IOException("Can't Create User because ${e.message}")
         }
     }
 
@@ -46,13 +44,13 @@ class UserRepositoryImpl(
 
     private fun validateAdminPermission() {
         if (SessionManger.isAdmin().not()) {
-            throw EiffelFlowException.AuthorizationException("Only admin can create user")
+            throw EiffelFlowException.AuthorizationException("Only admin can create or update user")
         }
     }
 
-    override fun updateUser(user: User): Result<User> {
-        return runCatching {
-            val users = getUsers().getOrThrow()
+    override suspend fun updateUser(user: User): User {
+        return try {
+            val users = getUsers()
             val existingUser = users.find { it.userId == user.userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID ${user.userId} not found")
 
@@ -70,17 +68,15 @@ class UserRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
 
             user
-        }.recoverCatching {
-            when (it) {
-                is EiffelFlowException -> throw it
-                else -> throw EiffelFlowException.IOException(it.message)
-            }
+        } catch (e: Exception) {
+            throw EiffelFlowException.IOException("Can't Update User because ${e.message}")
         }
     }
 
-    override fun deleteUser(userId: UUID): Result<User> {
-        return runCatching {
-            val users = getUsers().getOrThrow()
+    override suspend fun deleteUser(userId: UUID): User {
+        return try {
+            validateAdminPermission()
+            val users = getUsers()
             val userToDelete = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
 
@@ -93,40 +89,33 @@ class UserRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
 
             userToDelete
-        }.recoverCatching {
-            when (it) {
-                is EiffelFlowException -> throw it
-                else -> throw EiffelFlowException.IOException(it.message)
-            }
+        } catch (e: EiffelFlowException.AuthorizationException) {
+            throw e
+        } catch (e: Exception) {
+            throw EiffelFlowException.IOException("Can't Delete User because ${e.message}")
         }
     }
 
-    override fun getUserById(userId: UUID): Result<User> {
-        return runCatching {
+    override suspend fun getUserById(userId: UUID): User {
+        return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
 
             val user = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
             user
-        }.recoverCatching { it ->
-            when (it) {
-                is EiffelFlowException -> throw it
-                else -> throw EiffelFlowException.IOException(it.message)
-            }
+        } catch (e: Exception) {
+            throw EiffelFlowException.IOException("Can't get User because ${e.message}")
         }
     }
 
-    override fun getUsers(): Result<List<User>> {
-        return runCatching {
+    override suspend fun getUsers(): List<User> {
+        return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
             users
-        }.recoverCatching { e ->
-            when (e) {
-                is FileNotFoundException -> emptyList()
-                else -> throw EiffelFlowException.IOException(e.message)
-            }
+        } catch (e: Exception) {
+            throw EiffelFlowException.IOException("Can't get Users because ${e.message}")
         }
     }
 

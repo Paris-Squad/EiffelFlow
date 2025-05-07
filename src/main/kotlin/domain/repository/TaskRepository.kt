@@ -6,13 +6,13 @@ import java.util.UUID
 
 interface TaskRepository {
 
-    fun createTask(task: Task): Result<Task>
+    suspend fun createTask(task: Task): Task
 
-    fun updateTask(task: Task, oldTask: Task, changedField: String): Result<Task>
+    suspend fun updateTask(task: Task, oldTask: Task, changedField: String): Task
 
-    fun deleteTask(taskId: UUID): Result<Task>
+    suspend fun deleteTask(taskId: UUID): Task
 
-    fun getTaskById(taskId: UUID): Result<Task>
+    suspend fun getTaskById(taskId: UUID): Task
 
-    fun getTasks(): Result<List<Task>>
+    suspend fun getTasks(): List<Task>
 }

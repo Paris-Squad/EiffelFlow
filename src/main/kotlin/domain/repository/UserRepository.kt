@@ -4,9 +4,9 @@ import org.example.domain.model.User
 import java.util.UUID
 
 interface UserRepository {
-    fun createUser(user: User): Result<User>
-    fun updateUser(user: User): Result<User>
-    fun deleteUser(userId: UUID): Result<User>
-    fun getUserById(userId: UUID): Result<User>
-    fun getUsers(): Result<List<User>>
+    suspend fun createUser(user: User): User
+    suspend fun updateUser(user: User): User
+    suspend fun deleteUser(userId: UUID): User
+    suspend fun getUserById(userId: UUID): User
+    suspend fun getUsers(): List<User>
 }
