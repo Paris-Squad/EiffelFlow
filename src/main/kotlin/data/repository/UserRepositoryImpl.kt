@@ -16,7 +16,7 @@ class UserRepositoryImpl(
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : UserRepository {
-    override fun createUser(user: User): User {
+    override suspend fun createUser(user: User): User {
         return try {
             validateAdminPermission()
             val userAsCsv = userCsvParser.serialize(user)
@@ -47,7 +47,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override fun updateUser(user: User): User {
+    override suspend fun updateUser(user: User): User {
         return try {
             val users = getUsers()
             val existingUser = users.find { it.userId == user.userId }
@@ -72,7 +72,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override fun deleteUser(userId: UUID): User {
+    override suspend fun deleteUser(userId: UUID): User {
         return try {
             validateAdminPermission()
             val users = getUsers()
@@ -95,7 +95,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override fun getUserById(userId: UUID): User {
+    override suspend fun getUserById(userId: UUID): User {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
@@ -108,7 +108,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override fun getUsers(): List<User> {
+    override suspend fun getUsers(): List<User> {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }

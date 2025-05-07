@@ -2,8 +2,9 @@ package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
 import domain.usecase.task.TaskMock.validTask
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.DeleteTaskUseCase
@@ -27,25 +28,29 @@ class DeleteTaskUseCaseTest {
 
     @Test
     fun `deleteTask should return success when task exists`() {
-        every { taskRepository.deleteTask(taskIdToDelete) } returns validTask
+        runTest {
+            coEvery { taskRepository.deleteTask(taskIdToDelete) } returns validTask
 
-        val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
+            val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
 
-        assertThat(result).isEqualTo(validTask)
+            assertThat(result).isEqualTo(validTask)
+        }
     }
 
     @Test
     fun `deleteTask should return failure when there is an error during deletion`() {
-        val taskIdWithError = UUID.randomUUID()
+        runTest {
+            val taskIdWithError = UUID.randomUUID()
 
-        every {
-            taskRepository.deleteTask(taskIdWithError)
-        } throws EiffelFlowException.IOException("Deletion error")
+            coEvery {
+                taskRepository.deleteTask(taskIdWithError)
+            } throws EiffelFlowException.IOException("Deletion error")
 
-        val exception = assertThrows<EiffelFlowException.IOException> {
-            deleteTaskUseCase.deleteTask(taskIdWithError) // must throw
+            val exception = assertThrows<EiffelFlowException.IOException> {
+                deleteTaskUseCase.deleteTask(taskIdWithError) // must throw
+            }
+
+            assertThat(exception).isInstanceOf(EiffelFlowException.IOException::class.java)
         }
-
-        assertThat(exception).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 }
