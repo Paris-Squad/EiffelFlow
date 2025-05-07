@@ -5,7 +5,7 @@ import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
-import java.util.UUID
+import java.util.*
 
 class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
@@ -19,32 +19,31 @@ class AuditRepositoryImpl(
     }
 
     override fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        val lines = fileDataSource.readLinesFromFile()
-
-        return lines.map { line ->
-            auditCsvParser.parseCsvLine(line)
-        }.filter { it.itemId == taskId }
+        return getAuditLogs().filter { it.itemId == taskId }
     }
 
     override fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
-        val csvLines = fileDataSource.readLinesFromFile()
+        val auditLogs = getAuditLogs()
 
+        val auditLogsForProjectTasks = getAuditProjectTasks(projectId, auditLogs)
+
+        val auditLogsForProject = auditLogs.filter { it.itemId == projectId }
+
+        val allAuditLogsForProject =
+            (auditLogsForProject + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
+
+        return allAuditLogsForProject
+
+    }
+
+    private fun getAuditProjectTasks(
+        projectId: UUID, auditLogs: List<AuditLog>
+    ): List<AuditLog> {
         val tasksResult = taskRepository.getTasks()
+        val projectTaskIds = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
 
-        val tasksForProject = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
-
-        val parsedAuditLogs = csvLines.mapNotNull { line ->
-            try {
-                auditCsvParser.parseCsvLine(line)
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-         return parsedAuditLogs.filter { log ->
-            tasksForProject.contains(log.itemId)
-        }
-
+        val auditLogsForProjectTasks = auditLogs.filter { projectTaskIds.contains(it.itemId) }
+        return auditLogsForProjectTasks
     }
 
     override fun getAuditLogs(): List<AuditLog> {

@@ -6,6 +6,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.AuditRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import utils.MockAuditLog
 import utils.MockAuditLog.AUDIT_LOG
-import java.util.UUID
+import java.util.*
 
 class AuditRepositoryImplTest {
 
@@ -223,6 +224,32 @@ class AuditRepositoryImplTest {
             auditRepository.getProjectAuditLogById(UUID.randomUUID())
         }
     }
+
+    @Test
+    fun `getProjectAuditLogById should return logs sorted by auditTime descending`() {
+        val projectId = UUID.randomUUID()
+        val taskId1 = UUID.randomUUID()
+        val taskId2 = UUID.randomUUID()
+
+        val log1 = AUDIT_LOG.copy(itemId = taskId1, auditTime = LocalDateTime.parse("2023-01-01T10:00"))
+        val log2 = AUDIT_LOG.copy(itemId = taskId2, auditTime = LocalDateTime.parse("2023-01-01T12:00"))
+
+        val csvLines = listOf("logLine1", "logLine2")
+
+        every { csvStorageManager.readLinesFromFile() } returns csvLines
+        every { auditCsvParser.parseCsvLine("logLine1") } returns log1
+        every { auditCsvParser.parseCsvLine("logLine2") } returns log2
+        every { taskRepository.getTasks() } returns listOf(
+            validTask.copy(taskId = taskId1, projectId = projectId),
+            validTask.copy(taskId = taskId2, projectId = projectId)
+        )
+
+        val result = auditRepository.getProjectAuditLogById(projectId)
+
+        assertThat(result).containsExactly(log2, log1) // descending order
+    }
+
+
 
     //endregion
 }
