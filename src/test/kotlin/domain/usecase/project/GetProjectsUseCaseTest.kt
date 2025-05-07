@@ -1,4 +1,3 @@
-/*
 package domain.usecase.project
 
 import com.google.common.truth.Truth.assertThat
@@ -90,5 +89,3 @@ class GetProjectsUseCaseTest {
         }
     }
 }
-
-*/

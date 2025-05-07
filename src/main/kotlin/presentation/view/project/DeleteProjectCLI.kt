@@ -1,4 +1,3 @@
-/*
 package org.example.presentation.view.project
 
 import org.example.domain.model.Project
@@ -24,4 +23,4 @@ class DeleteProjectCLI(private val deleteProjectPresenter: DeleteProjectPresente
         println("the task state is: ${project.taskStates}")
 
     }
-}*/
+}
