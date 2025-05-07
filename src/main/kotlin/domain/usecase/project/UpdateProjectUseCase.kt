@@ -7,7 +7,7 @@ import org.example.domain.repository.ProjectRepository
 class UpdateProjectUseCase(private val repository: ProjectRepository) {
 
     @Throws(EiffelFlowException::class)
-    fun updateProject(updatedProject: Project): Project {
+    suspend fun updateProject(updatedProject: Project): Project {
 
         val project = repository.getProjectById(updatedProject.projectId)
 

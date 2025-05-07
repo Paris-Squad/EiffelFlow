@@ -20,7 +20,7 @@ class ProjectRepositoryImpl(
 ) : ProjectRepository {
 
     @Throws(EiffelFlowException::class)
-    override fun createProject(project: Project): Project {
+    override suspend fun createProject(project: Project): Project {
 
         if (SessionManger.isAdmin().not()) {
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
@@ -42,7 +42,7 @@ class ProjectRepositoryImpl(
     }
 
     @Throws(EiffelFlowException::class)
-    override fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
+    override suspend fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
         if (SessionManger.isAdmin().not()) {
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to update project")
         }
@@ -68,7 +68,7 @@ class ProjectRepositoryImpl(
     }
 
     @Throws(EiffelFlowException::class)
-    override fun deleteProject(projectId: UUID): Project {
+    override suspend fun deleteProject(projectId: UUID): Project {
         if (SessionManger.isAdmin().not()) {
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to delete project")
         }
@@ -102,7 +102,7 @@ class ProjectRepositoryImpl(
     }
 
     @Throws(EiffelFlowException::class)
-    override fun getProjects(): List<Project> {
+    override suspend fun getProjects(): List<Project> {
         return try {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
@@ -112,7 +112,7 @@ class ProjectRepositoryImpl(
     }
 
     @Throws(EiffelFlowException::class)
-    override fun getProjectById(projectId: UUID): Project {
+    override suspend fun getProjectById(projectId: UUID): Project {
         return try {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
