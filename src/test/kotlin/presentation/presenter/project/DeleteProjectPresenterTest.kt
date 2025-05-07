@@ -2,74 +2,71 @@
 package presentation.presenter.project
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.DeleteProjectUseCase
 import org.example.presentation.presenter.project.DeleteProjectPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
 import java.util.UUID
 
 class DeleteProjectPresenterTest {
 
-    private val deleteProjectUseCase : DeleteProjectUseCase = mockk()
+    private val deleteProjectUseCase: DeleteProjectUseCase = mockk()
     private lateinit var deleteProjectPresenter: DeleteProjectPresenter
 
     @BeforeEach
-    fun setUp(){
+    fun setUp() {
         deleteProjectPresenter = DeleteProjectPresenter(deleteProjectUseCase)
     }
 
     @Test
-    fun `should return the deleted project when the deleteProject return success`(){
-        try {
+    fun `should return the deleted project when the deleteProject return success`() {
             // Given
             val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
-            every { deleteProjectUseCase.deleteProject(any()) } returns Result.success(project)
+            coEvery {
+                deleteProjectUseCase.deleteProject(any())
+            } returns ProjectsMock.CORRECT_PROJECT
 
             // When
             val result = deleteProjectPresenter.deleteProject(projectId)
 
             // Then
-            assertThat(result.isSuccess).isTrue()
-            verify(exactly = 1) { deleteProjectUseCase.deleteProject(any()) }
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
-        }
+            assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
+            coVerify(exactly = 1) { deleteProjectUseCase.deleteProject(any()) }
     }
 
     @Test
-    fun `should return IOException exception when deleteProject returns failure`(){
-        try {
-            // Given
-            val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
-            every { deleteProjectUseCase.deleteProject(any()) } returns
-                    Result.failure(
-                        EiffelFlowException.IOException("unable to find correct project")
-                    )
+    fun `should throw IOException when deleteProject returns failure`() {
+        // Given
+        val differentProjectId = UUID.randomUUID()
+        coEvery {
+            deleteProjectUseCase.deleteProject(any())
+        } throws EiffelFlowException.IOException("unable to find correct project")
 
-            // When
-            val result = deleteProjectPresenter.deleteProject(differentProjectId)
-
-            // Then
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isInstanceOf(
-                EiffelFlowException.IOException::class.java
-            )
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not yet implemented")
+        //When / Then
+        assertThrows<EiffelFlowException.IOException> {
+            deleteProjectPresenter.deleteProject(differentProjectId)
         }
     }
 
+        @Test
+        fun `should throw RuntimeException when unexpected exception occurs during delete`() {
+            // Given
+            val projectId = UUID.randomUUID()
+            coEvery { deleteProjectUseCase.deleteProject(projectId) } throws IllegalStateException("Something went wrong")
 
+            // When
+            val exception = assertThrows<RuntimeException> {
+                deleteProjectPresenter.deleteProject(projectId)
+            }
 
-    companion object{
-        val project = ProjectsMock.CORRECT_PROJECT
-    }
+            // Then
+            assertThat(exception.message).isEqualTo("An error occurred while deleting the project: Something went wrong")
+        }
 
 }*/

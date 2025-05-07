@@ -30,7 +30,7 @@ class EditTaskUseCaseTest {
     @Test
     fun `editTask should successfully update task when changes are detected`() {
         every { taskRepository.getTaskById(inProgressTask.taskId) } returns validTask
-        every { taskRepository.updateTask(inProgressTask, validTask, any()) } returns inProgressTask
+        every { taskRepository.updateTask(inProgressTask, validTask,  any()) } returns inProgressTask
 
 
         val result = editTaskUseCase.editTask(inProgressTask)
@@ -38,31 +38,30 @@ class EditTaskUseCaseTest {
         assertThat(result).isEqualTo(inProgressTask)
         verify {
             taskRepository.updateTask(
-                inProgressTask, validTask, match { it.contains("STATE") })
+                inProgressTask, validTask,  match { it.contains("STATE") })
         }
     }
 
     @Test
     fun `editTask should fail with IOException when no changes detected`() {
-
         every { taskRepository.getTaskById(validTask.taskId) } returns validTask
 
-
-        val thrown = assertThrows<EiffelFlowException.IOException> {
+        val exception = assertThrows<EiffelFlowException.IOException> {
             editTaskUseCase.editTask(validTask)
         }
 
-        assertThat(thrown.message).contains("No changes detected")
+        assertThat(exception.message).isEqualTo("No changes detected")
     }
 
     @Test
     fun `editTask should fail when task is not found`() {
-        val exception = EiffelFlowException.NotFoundException("Task not found")
-        every { taskRepository.getTaskById(validTask.taskId) } throws exception
+        every { taskRepository.getTaskById(validTask.taskId) } throws EiffelFlowException.NotFoundException("Task not found")
 
-        assertThrows<EiffelFlowException.NotFoundException> {
+        val exception = assertThrows<EiffelFlowException.NotFoundException> {
             editTaskUseCase.editTask(validTask)
         }
+
+        assertThat(exception.message).isEqualTo("Task not found")
     }
 
     @Test
@@ -71,8 +70,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(title = "Updated Title")
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
-
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
 
         val result = editTaskUseCase.editTask(updatedTask)
 
@@ -82,7 +80,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-
+                
                 match { it.contains("TITLE") }
             )
         }
@@ -94,7 +92,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(description = "Updated description")
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
 
 
         val result = editTaskUseCase.editTask(updatedTask)
@@ -105,7 +103,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-
+                
                 match { it.contains("DESCRIPTION") })
         }
     }
@@ -116,8 +114,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(assignedId = UUID.randomUUID())
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
-
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
 
         val result = editTaskUseCase.editTask(updatedTask)
 
@@ -127,7 +124,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-
+                
                 match { it.contains("ASSIGNEE") }
             )
         }
@@ -139,7 +136,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(role = RoleType.ADMIN)
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
 
 
         val result = editTaskUseCase.editTask(updatedTask)
@@ -150,7 +147,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-
+                
                 match { it.contains("ROLE") }
             )
         }
@@ -162,18 +159,18 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(projectId = UUID.randomUUID())
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
+
 
         val result = editTaskUseCase.editTask(updatedTask)
 
         assertThat(result).isEqualTo(updatedTask)
 
-
         verify {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-
+                
                 match { it.contains("PROJECT") }
             )
         }
@@ -185,7 +182,7 @@ class EditTaskUseCaseTest {
         val updatedTask = originalTask.copy(state = TaskState(name = "in progress"))
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
 
 
         val result = editTaskUseCase.editTask(updatedTask)
@@ -196,7 +193,7 @@ class EditTaskUseCaseTest {
             taskRepository.updateTask(
                 updatedTask,
                 originalTask,
-
+                
                 match { it.contains("STATE") }
             )
         }
@@ -206,13 +203,15 @@ class EditTaskUseCaseTest {
     @Test
     fun `editTask  should threw IOException when no fields changed`() {
         val originalTask = validTask
-        val updatedTask = validTask.copy()
+        val updatedTask = validTask.copy() // No changes
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
 
-        assertThrows<EiffelFlowException.IOException> {
-            editTaskUseCase.editTask(validTask)
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            editTaskUseCase.editTask(updatedTask)
         }
+
+        assertThat(exception.message).isEqualTo("No changes detected")
     }
 
     @Test
@@ -223,7 +222,7 @@ class EditTaskUseCaseTest {
         )
 
         every { taskRepository.getTaskById(updatedTask.taskId) } returns originalTask
-        every { taskRepository.updateTask(updatedTask, originalTask, any()) } returns updatedTask
+        every { taskRepository.updateTask(updatedTask, originalTask,  any()) } returns updatedTask
 
 
         val result = editTaskUseCase.editTask(updatedTask)
@@ -232,7 +231,7 @@ class EditTaskUseCaseTest {
 
         verify {
             taskRepository.updateTask(
-                updatedTask, originalTask, match {
+                updatedTask, originalTask,  match {
                     it.contains("TITLE") &&
                             it.contains("DESCRIPTION") &&
                             it.contains("ASSIGNEE")

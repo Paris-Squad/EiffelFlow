@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import utils.TaskMock.validTask
+import java.io.IOException
 
 
 class CreateTaskUseCaseTest {
@@ -21,7 +22,6 @@ class CreateTaskUseCaseTest {
     fun setUp() {
         createTaskUseCase = CreateTaskUseCase(taskRepository)
     }
-
 
     @Test
     fun `createTask should return success when repository returns success`() {
@@ -35,15 +35,14 @@ class CreateTaskUseCaseTest {
 
     @Test
     fun `createTask should return failure when repository returns failure`() {
-        val exception = EiffelFlowException.IOException("Failed to create task")
-        every { taskRepository.createTask(validTask) } throws exception
+        val exception = IOException("Failed to create task")
+        every { taskRepository.createTask(validTask) } throws EiffelFlowException.IOException("Can't create task. ${exception.message}")
 
-
-        assertThrows<EiffelFlowException.IOException> {
+        val thrownException = assertThrows<EiffelFlowException.IOException> {
             createTaskUseCase.createTask(validTask)
         }
 
-
+        assertThat(thrownException.message).contains("Can't create task")
     }
 
 }

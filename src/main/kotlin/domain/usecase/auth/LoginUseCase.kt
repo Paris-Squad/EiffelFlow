@@ -5,6 +5,6 @@ import org.example.domain.repository.AuthRepository
 
 class LoginUseCase(private val authRepository: AuthRepository) {
 
-    fun login(userName: String, password: String): User =
+    suspend fun login(userName: String, password: String): User =
         authRepository.loginUser(userName, password)
 }

@@ -11,6 +11,7 @@ import org.example.domain.model.Project
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
+import kotlin.jvm.Throws
 
 class ProjectRepositoryImpl(
     private val projectCsvParser: ProjectCsvParser,
@@ -18,8 +19,13 @@ class ProjectRepositoryImpl(
     private val auditRepository: AuditRepository
 ) : ProjectRepository {
 
-    override fun createProject(project: Project): Project {
-        if (SessionManger.isAdmin().not()) throw EiffelFlowException.AuthorizationException("Not Allowed")
+    @Throws(EiffelFlowException::class)
+    override suspend fun createProject(project: Project): Project {
+
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
+        }
+
         return try {
             val csvLine = projectCsvParser.serialize(project)
             fileDataSource.writeLinesToFile(csvLine + "\n")
@@ -30,13 +36,17 @@ class ProjectRepositoryImpl(
             )
             auditRepository.createAuditLog(auditLog)
             project
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't create project. ${e.message}")
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException("Can't create project. ${throwable.message}")
         }
     }
 
-    override fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
-        if (SessionManger.isAdmin().not()) throw EiffelFlowException.AuthorizationException("Not Allowed")
+    @Throws(EiffelFlowException::class)
+    override suspend fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to update project")
+        }
+
         return try {
             val projectCsv = projectCsvParser.serialize(project)
             val oldProjectCsv = projectCsvParser.serialize(oldProject)
@@ -52,13 +62,16 @@ class ProjectRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
 
             project
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't update project. ${e.message}")
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException("Can't update project. ${throwable.message}")
         }
     }
 
-    override fun deleteProject(projectId: UUID): Project {
-        if (SessionManger.isAdmin().not()) throw EiffelFlowException.AuthorizationException("Not Allowed")
+    @Throws(EiffelFlowException::class)
+    override suspend fun deleteProject(projectId: UUID): Project {
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to delete project")
+        }
 
         return try {
             val lines = fileDataSource.readLinesFromFile().toMutableList()
@@ -66,7 +79,9 @@ class ProjectRepositoryImpl(
             val removedLine = lines.find { line ->
                 val project = projectCsvParser.parseCsvLine(line)
                 project.projectId == projectId
-            } ?: throw EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId.")
+            } ?: throw EiffelFlowException.IOException(
+                "Can't delete project. Project not found with ID: $projectId."
+            )
 
             lines.remove(removedLine)
             fileDataSource.writeLinesToFile(lines.joinToString("\n"))
@@ -79,31 +94,32 @@ class ProjectRepositoryImpl(
             )
             auditRepository.createAuditLog(auditLog)
             deletedProject
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't delete project. Project not found with ID: $projectId, ${e.message}")
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException(
+                "Can't delete project. Project not found with ID: $projectId, ${throwable.message}"
+            )
         }
     }
 
-    override fun getProjects(): List<Project> {
+    @Throws(EiffelFlowException::class)
+    override suspend fun getProjects(): List<Project> {
         return try {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException(e.message)
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.NotFoundException("No projects found, ${throwable.message}")
         }
     }
 
-    override fun getProjectById(projectId: UUID): Project {
+    @Throws(EiffelFlowException::class)
+    override suspend fun getProjectById(projectId: UUID): Project {
         return try {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
                 .firstOrNull { it.projectId == projectId }
                 ?: throw EiffelFlowException.NotFoundException("Project not found")
-        } catch (e: Exception) {
-            when (e) {
-                is EiffelFlowException.NotFoundException -> throw e
-                else -> throw EiffelFlowException.IOException(e.message)
-            }
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.NotFoundException("Project not found, ${throwable.message}")
         }
     }
 

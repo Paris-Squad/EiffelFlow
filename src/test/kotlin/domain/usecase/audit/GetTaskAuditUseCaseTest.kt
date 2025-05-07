@@ -8,6 +8,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.MockAuditLog
 import utils.TaskMock
 
@@ -26,29 +27,26 @@ class GetTaskAuditUseCaseTest {
         // Given
         every {
             auditRepository.getTaskAuditLogById(any())
-        } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
+        } returns listOf(MockAuditLog.AUDIT_LOG)
 
         // When
         val result = getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
 
         // Then
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).containsExactly(MockAuditLog.AUDIT_LOG)
+        assertThat(result).containsExactly(MockAuditLog.AUDIT_LOG)
     }
 
     @Test
     fun `should return Result of ElementNotFoundException when task with given id does not exist`() {
         // Given
-        val exception = EiffelFlowException.NotFoundException("Task not found")
         every {
             auditRepository.getTaskAuditLogById(any())
-        } returns Result.failure(exception)
+        } throws EiffelFlowException.NotFoundException("Task not found")
 
-        // When
-        val result = getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException>{
+            getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
+        }
 
-        // Then
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
     }
 }

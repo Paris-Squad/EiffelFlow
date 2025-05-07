@@ -2,7 +2,6 @@ package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
@@ -13,97 +12,50 @@ class AuditRepositoryImpl(
     private val fileDataSource: FileDataSource,
     private val taskRepository: TaskRepository
 ) : AuditRepository {
-    override fun createAuditLog(auditLog: AuditLog): Result<AuditLog> {
-        return try {
-            val line = listOf(
-                auditLog.auditId.toString(),
-                auditLog.itemId.toString(),
-                auditLog.itemName,
-                auditLog.userId.toString(),
-                auditLog.editorName,
-                auditLog.actionType.name,
-                auditLog.auditTime.toString(),
-                auditLog.changedField,
-                auditLog.oldValue,
-                auditLog.newValue
-            ).joinToString(",")
-
-            fileDataSource.writeLinesToFile(line)
-            Result.success(auditLog)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override fun createAuditLog(auditLog: AuditLog): AuditLog {
+        val line = auditCsvParser.serialize(auditLog)
+        fileDataSource.writeLinesToFile(line)
+        return auditLog
     }
 
-    override fun getTaskAuditLogById(taskId: UUID): Result<List<AuditLog>> {
+    override fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
+        return getAuditLogs().filter { it.itemId == taskId }
+    }
+
+    override fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
+        val auditLogs = getAuditLogs()
+
+        val auditLogsForProjectTasks = getAuditProjectTasks(projectId, auditLogs)
+
+        val auditLogsForProject = auditLogs.filter { it.itemId == projectId }
+
+        val allAuditLogsForProject =
+            (auditLogsForProject + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
+
+        return allAuditLogsForProject
+
+    }
+
+    private fun getAuditProjectTasks(
+        projectId: UUID, auditLogs: List<AuditLog>
+    ): List<AuditLog> {
+        val tasksResult = taskRepository.getTasks()
+        val projectTaskIds = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
+
+        val auditLogsForProjectTasks = auditLogs.filter { projectTaskIds.contains(it.itemId) }
+        return auditLogsForProjectTasks
+    }
+
+    override fun getAuditLogs(): List<AuditLog> {
         val lines = fileDataSource.readLinesFromFile()
-        if (lines.isEmpty()) return Result.success(emptyList())
 
-        val auditLogs = lines.map { line ->
-            auditCsvParser.parseCsvLine(line)
-        }.filter { it.itemId == taskId }
-
-        return if (auditLogs.isEmpty()) {
-            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found for item ID: $taskId"))
-        } else {
-            Result.success(auditLogs)
-        }
-    }
-
-    override fun getProjectAuditLogById(projectId: UUID): Result<List<AuditLog>> {
-        return try {
-            val csvLines = fileDataSource.readLinesFromFile()
-            if (csvLines.isEmpty()) return Result.success(emptyList())
-
-            val tasksResult = taskRepository.getTasks()
-            if (tasksResult.isFailure) return Result.failure(tasksResult.exceptionOrNull()!!)
-
-            val tasksForProject =
-                tasksResult.getOrThrow().filter { it.projectId == projectId }.map { it.taskId }.toSet()
-
-            val parsedAuditLogs = csvLines.mapNotNull { line ->
-                try {
-                    auditCsvParser.parseCsvLine(line)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            val projectAuditLogs = parsedAuditLogs.filter { log ->
-                tasksForProject.contains(log.itemId)
-            }
-
-            return if (projectAuditLogs.isEmpty()) {
-                Result.failure(
-                    EiffelFlowException.NotFoundException("No audit logs found for project or related tasks: $projectId")
-                )
-            } else {
-                Result.success(projectAuditLogs)
-            }
-
-        } catch (exception: Exception) {
-            return Result.failure(exception)
-        }
-    }
-
-    override fun getAuditLogs(): Result<List<AuditLog>> {
-        val lines = fileDataSource.readLinesFromFile()
-        if (lines.isEmpty()) return Result.failure(EiffelFlowException.NotFoundException("Audit logs not found"))
-
-        val logs = lines.mapNotNull { line ->
+        return lines.mapNotNull { line ->
             try {
                 auditCsvParser.parseCsvLine(line)
             } catch (e: Exception) {
                 null
             }
         }
-
-        return if (logs.isEmpty()) {
-            Result.failure(EiffelFlowException.NotFoundException("Audit logs not found"))
-        } else {
-            Result.success(logs)
-        }
-
     }
 
     companion object {

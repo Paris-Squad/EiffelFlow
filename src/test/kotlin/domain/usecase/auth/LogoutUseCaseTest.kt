@@ -1,6 +1,7 @@
 package domain.usecase.auth
 
 import io.mockk.*
+import kotlinx.coroutines.test.runTest
 import org.example.domain.repository.AuthRepository
 import org.example.domain.usecase.auth.LogoutUseCase
 import org.junit.jupiter.api.BeforeEach
@@ -19,19 +20,27 @@ class LogoutUseCaseTest {
 
     @Test
     fun `logout should remove user when clearLogin succeed`() {
-        every { authRepository.clearLogin() } just runs
+        runTest {
+            // Given
+            coEvery { authRepository.clearLogin() } just runs
 
-        logoutUseCase.logout()
+            logoutUseCase.logout()
 
-        verify(exactly = 1) { authRepository.clearLogin() }
+            // then
+            coVerify(exactly = 1) { authRepository.clearLogin() }
+        }
     }
 
     @Test
     fun `logout should return failure when clearLogin fails`() {
-        val exception = IOException("Failed to clear login")
-        every { authRepository.clearLogin() } throws exception
+        runTest {
+            // Given
+            val exception = IOException("Failed to clear login")
+            coEvery { authRepository.clearLogin() } throws exception
 
-        assertThrows<IOException> { logoutUseCase.logout() }
-        verify(exactly = 1) { authRepository.clearLogin() }
+            // When / Then
+            assertThrows<IOException> { logoutUseCase.logout() }
+            coVerify(exactly = 1) { authRepository.clearLogin() }
+        }
     }
 }

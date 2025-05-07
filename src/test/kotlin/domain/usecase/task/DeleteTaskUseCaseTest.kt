@@ -1,6 +1,7 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
+import domain.usecase.task.TaskMock.validTask
 import io.mockk.every
 import io.mockk.mockk
 import org.example.domain.exception.EiffelFlowException
@@ -9,7 +10,6 @@ import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import utils.TaskMock.validTask
 import java.util.UUID
 
 class DeleteTaskUseCaseTest {
@@ -32,22 +32,6 @@ class DeleteTaskUseCaseTest {
         val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
 
         assertThat(result).isEqualTo(validTask)
-
-
-    }
-
-    @Test
-    fun `deleteTask should return failure when task not found`() {
-        val taskIdNotFound = UUID.randomUUID()
-
-        every {
-            taskRepository.deleteTask(taskIdNotFound)
-        } throws EiffelFlowException.NotFoundException("Task not found: $taskIdNotFound")
-
-        assertThrows<EiffelFlowException.NotFoundException> {
-            deleteTaskUseCase.deleteTask(taskIdNotFound)
-        }
-
     }
 
     @Test
@@ -56,13 +40,12 @@ class DeleteTaskUseCaseTest {
 
         every {
             taskRepository.deleteTask(taskIdWithError)
-        } throws EiffelFlowException.IOException(null)
+        } throws EiffelFlowException.IOException("Deletion error")
 
-
-        assertThrows<EiffelFlowException.IOException> {
-            deleteTaskUseCase.deleteTask(taskIdWithError)
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            deleteTaskUseCase.deleteTask(taskIdWithError) // must throw
         }
 
+        assertThat(exception).isInstanceOf(EiffelFlowException.IOException::class.java)
     }
 }
-

@@ -4,5 +4,5 @@ import org.example.domain.model.Project
 import org.example.domain.repository.ProjectRepository
 
 class CreateProjectUseCase(private val repository: ProjectRepository) {
-    fun createProject(project : Project) : Project = repository.createProject(project)
+    suspend fun createProject(project : Project) : Project = repository.createProject(project)
 }

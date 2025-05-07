@@ -7,10 +7,10 @@ class GetProjectCLI(
     private val presenter: GetProjectPresenter
 ) {
     fun displayProject(projectId: UUID) {
-        TODO("Not yet implemented")
+        presenter.getProjectById(projectId)
     }
 
     fun displayProjects() {
-        TODO("Not yet implemented")
+        presenter.getProjects()
     }
 }

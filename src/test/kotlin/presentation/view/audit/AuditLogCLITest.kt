@@ -25,7 +25,7 @@ class GetProjectAuditLogsCLITest {
         // Given
         every {
             getProjectAuditLogsPresenter.getProjectAuditLogsById(any())
-        } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
+        } returns listOf(MockAuditLog.AUDIT_LOG)
 
         // When / Then
         try {
@@ -41,7 +41,7 @@ class GetProjectAuditLogsCLITest {
         val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             getProjectAuditLogsPresenter.getProjectAuditLogsById(any())
-        } returns Result.failure(exception)
+        } throws  exception
 
         // When / Then
         try {

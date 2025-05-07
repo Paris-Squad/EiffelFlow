@@ -8,6 +8,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.MockAuditLog
 import utils.ProjectsMock
 
@@ -26,14 +27,13 @@ class GetProjectAuditUseCaseTest {
         // Given
         every {
             auditRepository.getProjectAuditLogById(any())
-        } returns Result.success(listOf(MockAuditLog.AUDIT_LOG))
+        } returns listOf(MockAuditLog.AUDIT_LOG)
 
         // When
         val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
 
         // Then
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).containsExactly(MockAuditLog.AUDIT_LOG)
+        assertThat(result).isEqualTo(listOf(MockAuditLog.AUDIT_LOG))
     }
 
     @Test
@@ -42,14 +42,12 @@ class GetProjectAuditUseCaseTest {
         val exception = EiffelFlowException.NotFoundException("Project not found")
         every {
             auditRepository.getProjectAuditLogById(any())
-        } returns Result.failure(exception)
+        } throws exception
 
-        // When
-        val result = getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
-
-        // Then
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isEqualTo(exception)
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException> {
+            getProjectAuditUseCase.getProjectAuditLogsById(ProjectsMock.CORRECT_PROJECT.projectId)
+        }
     }
 
 }

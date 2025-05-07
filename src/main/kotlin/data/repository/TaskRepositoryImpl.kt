@@ -16,7 +16,7 @@ class TaskRepositoryImpl(
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : TaskRepository {
-    override suspend fun createTask(task: Task): Task {
+    override fun createTask(task: Task): Task {
         return try {
             val csvLine = taskCsvParser.serialize(task)
             fileDataSource.writeLinesToFile(csvLine)
@@ -35,7 +35,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun updateTask(task: Task, oldTask: Task, changedField: String): Task {
+    override fun updateTask(task: Task, oldTask: Task, changedField: String): Task {
         return try {
             val taskCsv = taskCsvParser.serialize(task)
             val oldTaskCsv = taskCsvParser.serialize(oldTask)
@@ -49,14 +49,13 @@ class TaskRepositoryImpl(
                 newValue = task.toString()
             )
             auditRepository.createAuditLog(auditLog)
-
             task
         }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't update task. ${e.message}")
         }
     }
 
-    override suspend fun deleteTask(taskId: UUID): Task {
+    override fun deleteTask(taskId: UUID): Task {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val taskLine = lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
@@ -79,7 +78,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun getTaskById(taskId: UUID): Task {
+    override fun getTaskById(taskId: UUID): Task {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
@@ -90,7 +89,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override suspend fun getTasks(): List<Task> {
+    override fun getTasks(): List<Task> {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             if (lines.isEmpty()) {

@@ -16,14 +16,13 @@ class UserRepositoryImpl(
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : UserRepository {
-    override suspend fun createUser(user: User): User {
+    override fun createUser(user: User): User {
         return try {
             validateAdminPermission()
             val userAsCsv = userCsvParser.serialize(user)
             val users = getUsers()
 
             validateUsernameUniqueness(users, user.username)
-            validateAdminPermission()
 
             fileDataSource.writeLinesToFile(userAsCsv)
             val auditLog = user.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
@@ -31,7 +30,7 @@ class UserRepositoryImpl(
             user
         } catch (e: EiffelFlowException.AuthorizationException) {
             throw e
-        } catch (e: Exception) {
+        }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't Create User because ${e.message}")
         }
     }
@@ -48,7 +47,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun updateUser(user: User): User {
+    override fun updateUser(user: User): User {
         return try {
             val users = getUsers()
             val existingUser = users.find { it.userId == user.userId }
@@ -73,7 +72,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun deleteUser(userId: UUID): User {
+    override fun deleteUser(userId: UUID): User {
         return try {
             validateAdminPermission()
             val users = getUsers()
@@ -91,12 +90,12 @@ class UserRepositoryImpl(
             userToDelete
         } catch (e: EiffelFlowException.AuthorizationException) {
             throw e
-        } catch (e: Exception) {
+        }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't Delete User because ${e.message}")
         }
     }
 
-    override suspend fun getUserById(userId: UUID): User {
+    override fun getUserById(userId: UUID): User {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
@@ -109,7 +108,7 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun getUsers(): List<User> {
+    override fun getUsers(): List<User> {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }

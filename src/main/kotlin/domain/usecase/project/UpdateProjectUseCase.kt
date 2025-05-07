@@ -6,21 +6,20 @@ import org.example.domain.repository.ProjectRepository
 
 /*
 class UpdateProjectUseCase(private val repository: ProjectRepository) {
-    fun updateProject(updatedProject: Project): Result<Project> {
 
-        val projectResult = repository.getProjectById(updatedProject.projectId)
-        if (projectResult.isFailure) return projectResult
+    @Throws(EiffelFlowException::class)
+    suspend fun updateProject(updatedProject: Project): Project {
 
-        val originalProject = projectResult.getOrThrow()
+        val project = repository.getProjectById(updatedProject.projectId)
 
-        if (originalProject == updatedProject) {
-            return Result.failure(EiffelFlowException.IOException("No changes detected"))
+        if (project == updatedProject) {
+            throw EiffelFlowException.IOException("No changes detected")
         }
 
-        val changedField = detectChangedField(originalProject, updatedProject)
+        val changedField = detectChangedField(project, updatedProject)
         return repository.updateProject(
             project = updatedProject,
-            oldProject = originalProject,
+            oldProject = project,
             changedField = changedField
         )
     }

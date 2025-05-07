@@ -7,6 +7,6 @@ import java.util.UUID
 class GetTaskAuditUseCase(
     private val auditRepository: AuditRepository
 ) {
-    fun getTaskAuditLogsById(taskId: UUID): Result<List<AuditLog>> =
+    fun getTaskAuditLogsById(taskId: UUID): List<AuditLog> =
         auditRepository.getTaskAuditLogById(taskId)
 }

@@ -3,8 +3,8 @@ package org.example.domain.repository
 import org.example.domain.model.User
 
 interface AuthRepository {
-    fun saveUserLogin(user: User): User
-    fun isUserLoggedIn(): Boolean
-    fun clearLogin()
-    fun loginUser(username: String, password: String): User
+    suspend fun saveUserLogin(user: User): User
+    suspend fun isUserLoggedIn(): Boolean
+    suspend fun clearLogin()
+    suspend fun loginUser(username: String, password: String): User
 }

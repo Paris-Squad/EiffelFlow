@@ -17,6 +17,8 @@ import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
 import org.example.data.storage.parser.TaskCsvParser
 import org.example.domain.exception.EiffelFlowException
+import org.junit.jupiter.api.assertThrows
+import utils.MockAuditLog
 
 import utils.UserMock
 
@@ -44,95 +46,80 @@ class TaskRepositoryImplTest {
     fun `createTask should return the created task`() {
         // Given
         every { sessionManger.getUser() } returns UserMock.adminUser
-        every {
-            taskMapper.serialize(TaskMock.validTask)
-        } returns TaskMock.ValidTaskCSV
-        every {
-            fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV)
-        } just runs
-        every {
-            auditRepository.createAuditLog(any())
-        } returns Result.success(TaskMock.validAuditLog)
+        every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
+        every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
+        every { auditRepository.createAuditLog(any()) } returns TaskMock.validAuditLog
 
         // When
         val result = taskRepository.createTask(TaskMock.validTask)
 
         // Then
-        assertThat(result.getOrNull()).isEqualTo(TaskMock.validTask)
+        assertThat(result).isEqualTo(TaskMock.validTask)
     }
 
     @Test
     fun `createTask should return failure when task creation fails`() {
         //Given
         every { sessionManger.getUser() } returns UserMock.adminUser
-        every {
-            taskMapper.serialize(TaskMock.validTask)
-        } throws IOException("Error")
+        every { taskMapper.serialize(TaskMock.validTask) } throws IOException("Error")
         every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
-
-        //When
-        val result = taskRepository.createTask(TaskMock.validTask)
-
-        //Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+        // When / Then
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            taskRepository.createTask(TaskMock.validTask)
+        }
+        assertThat(exception.message).contains("Can't create task")
     }
 
     @Test
     fun `createTask should return failure when audit creation fails`() {
-        //Given
+        // Given
         every { sessionManger.getUser() } returns UserMock.adminUser
-        every {
-            taskMapper.serialize(TaskMock.validTask)
-        } returns TaskMock.ValidTaskCSV
-        every {
-            fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV)
-        } just runs
-        every {
-            auditRepository.createAuditLog(any())
-        } throws IOException("Audit failed")
-
-        //When
-        val result = taskRepository.createTask(TaskMock.validTask)
-
-        //Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+        every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
+        every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
+        every { auditRepository.createAuditLog(any()) } throws IOException("Audit failed")
+        // When / Then
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            taskRepository.createTask(TaskMock.validTask)
+        }
+        assertThat(exception.message).contains("Can't create task")
     }
     //endregion
 
     //region updateTask
     @Test
     fun `updateTask should return success if the task is updated`() {
-        //Given
-        every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
-        every { taskMapper.serialize(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
-        every {
-            fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV)
-        } just runs
-
-        justRun { auditRepository.createAuditLog(any()) }
-
-        //When
-        val result = taskRepository.updateTask(TaskMock.inProgressTask, TaskMock.validTask, changedField)
-
-        //Then
-        assertThat(result.getOrNull()).isEqualTo(TaskMock.inProgressTask)
-    }
-
-    @Test
-    fun `updateTask should return failure when exception is thrown from the fileDataSource`() {
-        //Given
-        val exception = IOException("Error")
+        // Given
         every { sessionManger.getUser() } returns UserMock.validUser
         every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
         every { taskMapper.serialize(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
-        every { fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV) } throws exception
+        every { fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV) } just runs
+        justRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
 
-        //When
-        val result = taskRepository.updateTask(TaskMock.validTask, TaskMock.inProgressTask, changedField)
+        // When
+        val result = taskRepository.updateTask(TaskMock.inProgressTask, TaskMock.validTask, changedField)
 
-        //Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+        // Then
+        assertThat(result).isEqualTo(TaskMock.inProgressTask)
     }
+
+    @Test
+    fun `updateTask should throw IOException when an exception occurs during update`() {
+        // Given
+        val exceptionMessage = "File update failed"
+
+        every { sessionManger.getUser() } returns UserMock.validUser
+        every { taskMapper.serialize(any()) } throws Exception(exceptionMessage)
+        every { fileDataSource.updateLinesToFile(any(), any()) } throws Exception(exceptionMessage)
+
+        // When
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            taskRepository.updateTask(TaskMock.inProgressTask, TaskMock.validTask, changedField)
+        }
+
+        // Then
+        assertThat(exception.message).isEqualTo("Can't update task. $exceptionMessage")
+    }
+
     //endregion
 
     //region deleteTask
@@ -147,82 +134,125 @@ class TaskRepositoryImplTest {
         val result = taskRepository.deleteTask(TaskMock.validTask.taskId)
 
         //Then
-        assertThat(result.getOrNull()).isEqualTo(TaskMock.validTask)
+        assertThat(result).isEqualTo(TaskMock.validTask)
     }
 
     @Test
     fun `deleteTask should return failure when task not found`() {
+        // Given
         val nonExistentTaskId = UUID.randomUUID()
-        val lines = listOf(TaskMock.ValidTaskCSV)
-
-        every { fileDataSource.readLinesFromFile() } returns lines
+        every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
         every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
-
-        val result = taskRepository.deleteTask(nonExistentTaskId)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+        // When / Then
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            taskRepository.deleteTask(nonExistentTaskId)
+        }
+        assertThat(exception.message).contains("Can't delete task")
+        assertThat(exception.message).contains("Task not found")
     }
 
     @Test
     fun `deleteTask should return failure when exception is thrown`() {
+        // Given
         val taskId = TaskMock.validTask.taskId
-        val exception = IOException("Error deleting task")
 
         every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
         every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
-        every { fileDataSource.deleteLineFromFile(any()) } throws exception
-
-        val result = taskRepository.deleteTask(taskId)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+        every { fileDataSource.deleteLineFromFile(any()) } throws IOException("Error deleting task")
+        // When / Then
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            taskRepository.deleteTask(taskId)
+        }
+        assertThat(exception.message).contains("Can't delete task")
     }
     //endregion
 
     //region getTasks
     @Test
     fun `getTasks should return list of tasks`() {
+        // Given
         val csvLines = listOf(TaskMock.ValidTaskCSV)
         val taskList = listOf(TaskMock.validTask)
 
         every { fileDataSource.readLinesFromFile() } returns csvLines
         every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
-
+        // When
         val result = taskRepository.getTasks()
-
-        assertThat(result.getOrNull()).isEqualTo(taskList)
+        // Then
+        assertThat(result).isEqualTo(taskList)
     }
 
     @Test
     fun `getTasks should return failure when no tasks found`() {
+        // Given
         every { fileDataSource.readLinesFromFile() } returns emptyList()
+        // When / Then
+        val exception = assertThrows<EiffelFlowException.NotFoundException> {
+            taskRepository.getTasks()
+        }
+        assertThat(exception.message).contains("No tasks found")
+    }
 
-        val result = taskRepository.getTasks()
+    @Test
+    fun `getTasks should throw IOException when an unexpected error occurs while fetching tasks`() {
+        // Given
+        val exceptionMessage = "An unexpected error occurred"
+        every { fileDataSource.readLinesFromFile() } throws Exception(exceptionMessage)
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.IOException::class.java)
+        // When
+        val exception = assertThrows<EiffelFlowException.IOException> {
+            taskRepository.getTasks()
+        }
+
+        // Then
+        assertThat(exception.message).isEqualTo("Can't get tasks because $exceptionMessage")
     }
     //endregion
-    
+
     //region getTaskById
     @Test
     fun `getTaskById should return task when found`() {
+        // Given
         every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
         every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
-
+        // When
         val result = taskRepository.getTaskById(TaskMock.validTask.taskId)
-
-        assertThat(result.getOrNull()).isEqualTo(TaskMock.validTask)
+        // Then
+        assertThat(result).isEqualTo(TaskMock.validTask)
     }
 
     @Test
     fun `getTaskById should return failure when task not found`() {
+        // Given
         val nonExistentTaskId = UUID.randomUUID()
-
+        // When
         every { fileDataSource.readLinesFromFile() } returns listOf(TaskMock.ValidTaskCSV)
         every { taskMapper.parseCsvLine(TaskMock.ValidTaskCSV) } returns TaskMock.validTask
+        // Then
+        val exception = assertThrows<EiffelFlowException.NotFoundException> {
+            taskRepository.getTaskById(nonExistentTaskId)
+        }
 
-        val result = taskRepository.getTaskById(nonExistentTaskId)
+        assertThat(exception.message).contains("Task not found")
+    }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException.NotFoundException::class.java)
+    @Test
+    fun `getTaskById should throw NotFoundException when task is not found in the file`() {
+        // Given
+        val taskId = UUID.randomUUID()
+        val lines = listOf("task1,csv,line", "task2,csv,line")
+        val exceptionMessage = "Task not found"
+
+        every { fileDataSource.readLinesFromFile() } returns lines
+        every { taskMapper.parseCsvLine(any()) } returns TaskMock.validTask.copy(taskId = UUID.randomUUID())
+
+        // When
+        val exception = assertThrows<EiffelFlowException.NotFoundException> {
+            taskRepository.getTaskById(taskId)
+        }
+
+        // Then
+        assertThat(exception.message).isEqualTo("Can't get task with ID: $taskId because $exceptionMessage")
     }
     //endregion
 }

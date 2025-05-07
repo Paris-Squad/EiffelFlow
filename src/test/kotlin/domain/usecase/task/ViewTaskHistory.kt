@@ -8,6 +8,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.task.ViewTaskHistoryUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import utils.TaskMock.validAuditLog
 import java.util.*
 
@@ -27,35 +28,34 @@ class ViewTaskHistoryTest {
 
     @Test
     fun `viewTaskHistory should return audit logs for a valid task`() {
-        every { auditRepository.getTaskAuditLogById(taskId) } returns Result.success(listOf(validAuditLog))
+        // Given
+        every { auditRepository.getTaskAuditLogById(taskId) } returns listOf(validAuditLog)
 
+        // When
         val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
 
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isEqualTo(listOf(validAuditLog))
+        // Then
+        assertThat(result).isEqualTo(listOf(validAuditLog))
     }
 
     @Test
     fun `viewTaskHistory should fail when task is not found`() {
-
+        // Given
         val exception = EiffelFlowException.NotFoundException("History not found")
-        every { auditRepository.getTaskAuditLogById(taskId) } returns Result.failure(exception)
-
-        val result =viewTaskHistoryUseCase.viewTaskHistory(taskId)
-
-        assertThat(result.exceptionOrNull()).isInstanceOf(EiffelFlowException::class.java)
-
-
+        every { auditRepository.getTaskAuditLogById(taskId) } throws exception
+        // When / Then
+        assertThrows<EiffelFlowException.NotFoundException> {
+            viewTaskHistoryUseCase.viewTaskHistory(taskId)
+        }
     }
 
     @Test
     fun `viewTaskHistory should return failure when there is an error during retrieval`() {
-        val exception = EiffelFlowException.IOException(null)
-        every { auditRepository.getTaskAuditLogById(taskId) } returns Result.failure(exception)
-
-        val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(exception::class.java)
+        // Given
+        every { auditRepository.getTaskAuditLogById(taskId) } throws EiffelFlowException.IOException(null)
+        // When / Then
+        assertThrows<EiffelFlowException> {
+            viewTaskHistoryUseCase.viewTaskHistory(taskId)
+        }
     }
 }
