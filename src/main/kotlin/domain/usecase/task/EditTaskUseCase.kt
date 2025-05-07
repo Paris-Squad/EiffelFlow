@@ -5,17 +5,16 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 
 class EditTaskUseCase(private val taskRepository: TaskRepository) {
-    fun editTask(request: Task): Task {
+    suspend fun editTask(request: Task): Task {
         val taskResult = taskRepository.getTaskById(request.taskId)
 
-        val originalTask = taskResult
-        if (originalTask == request) throw EiffelFlowException.IOException("No changes detected")
+        if (taskResult == request) throw EiffelFlowException.IOException("No changes detected")
 
-        val changedField = detectChangedField(originalTask, request)
+        val changedField = detectChangedField(taskResult, request)
 
         return taskRepository.updateTask(
             task = request,
-            oldTask = originalTask,
+            oldTask = taskResult,
             changedField = changedField
         )
     }

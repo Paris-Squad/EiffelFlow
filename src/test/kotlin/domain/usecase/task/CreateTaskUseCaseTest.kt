@@ -1,8 +1,9 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.CreateTaskUseCase
@@ -25,24 +26,27 @@ class CreateTaskUseCaseTest {
 
     @Test
     fun `createTask should return success when repository returns success`() {
-        every { taskRepository.createTask(validTask) } returns validTask
+        runTest {
+            coEvery { taskRepository.createTask(validTask) } returns validTask
 
-        val result = createTaskUseCase.createTask(validTask)
+            val result = createTaskUseCase.createTask(validTask)
 
-        assertThat(result).isEqualTo(validTask)
+            assertThat(result).isEqualTo(validTask)
+        }
     }
 
 
     @Test
     fun `createTask should return failure when repository returns failure`() {
-        val exception = IOException("Failed to create task")
-        every { taskRepository.createTask(validTask) } throws EiffelFlowException.IOException("Can't create task. ${exception.message}")
+        runTest {
+            val exception = IOException("Failed to create task")
+            coEvery { taskRepository.createTask(validTask) } throws EiffelFlowException.IOException("Can't create task. ${exception.message}")
 
-        val thrownException = assertThrows<EiffelFlowException.IOException> {
-            createTaskUseCase.createTask(validTask)
+            val thrownException = assertThrows<EiffelFlowException.IOException> {
+                createTaskUseCase.createTask(validTask)
+            }
+
+            assertThat(thrownException.message).contains("Can't create task")
         }
-
-        assertThat(thrownException.message).contains("Can't create task")
     }
-
 }

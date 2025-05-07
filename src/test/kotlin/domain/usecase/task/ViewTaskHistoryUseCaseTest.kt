@@ -12,7 +12,8 @@ import org.junit.jupiter.api.assertThrows
 import utils.TaskMock.validAuditLog
 import java.util.*
 
-class ViewTaskHistoryTest {
+class ViewTaskHistoryUseCaseTest {
+
 
     private lateinit var auditRepository: AuditRepository
     private lateinit var viewTaskHistoryUseCase: ViewTaskHistoryUseCase

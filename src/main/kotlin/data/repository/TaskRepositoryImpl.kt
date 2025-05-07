@@ -16,7 +16,7 @@ class TaskRepositoryImpl(
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
 ) : TaskRepository {
-    override fun createTask(task: Task): Task {
+    override suspend fun createTask(task: Task): Task {
         return try {
             val csvLine = taskCsvParser.serialize(task)
             fileDataSource.writeLinesToFile(csvLine)
@@ -35,7 +35,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun updateTask(task: Task, oldTask: Task, changedField: String): Task {
+    override suspend fun updateTask(task: Task, oldTask: Task, changedField: String): Task {
         return try {
             val taskCsv = taskCsvParser.serialize(task)
             val oldTaskCsv = taskCsvParser.serialize(oldTask)
@@ -55,7 +55,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun deleteTask(taskId: UUID): Task {
+    override suspend fun deleteTask(taskId: UUID): Task {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val taskLine = lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
@@ -78,7 +78,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun getTaskById(taskId: UUID): Task {
+    override suspend fun getTaskById(taskId: UUID): Task {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
@@ -89,7 +89,7 @@ class TaskRepositoryImpl(
         }
     }
 
-    override fun getTasks(): List<Task> {
+    override suspend fun getTasks(): List<Task> {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             if (lines.isEmpty()) {

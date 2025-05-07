@@ -6,5 +6,5 @@ import java.util.*
 
 class DeleteTaskUseCase(private val taskRepository: TaskRepository) {
 
-    fun deleteTask(taskId: UUID): Task = taskRepository.deleteTask(taskId)
+    suspend fun deleteTask(taskId: UUID): Task = taskRepository.deleteTask(taskId)
 }
