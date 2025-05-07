@@ -41,15 +41,31 @@ class DeleteProjectPresenterTest {
 
     @Test
     fun `should throw IOException when deleteProject returns failure`() {
-            // Given
-            val differentProjectId = UUID.randomUUID()
-            coEvery {
-                deleteProjectUseCase.deleteProject(any())
-            } throws EiffelFlowException.IOException("unable to find correct project")
+        // Given
+        val differentProjectId = UUID.randomUUID()
+        coEvery {
+            deleteProjectUseCase.deleteProject(any())
+        } throws EiffelFlowException.IOException("unable to find correct project")
 
-            //When / Then
-            assertThrows<EiffelFlowException.IOException> {
-                deleteProjectPresenter.deleteProject(differentProjectId)
-            }
+        //When / Then
+        assertThrows<EiffelFlowException.IOException> {
+            deleteProjectPresenter.deleteProject(differentProjectId)
+        }
     }
+
+        @Test
+        fun `should throw RuntimeException when unexpected exception occurs during delete`() {
+            // Given
+            val projectId = UUID.randomUUID()
+            coEvery { deleteProjectUseCase.deleteProject(projectId) } throws IllegalStateException("Something went wrong")
+
+            // When
+            val exception = assertThrows<RuntimeException> {
+                deleteProjectPresenter.deleteProject(projectId)
+            }
+
+            // Then
+            assertThat(exception.message).isEqualTo("An error occurred while deleting the project: Something went wrong")
+        }
+
 }

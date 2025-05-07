@@ -49,4 +49,16 @@ class CreateProjectPresenterTest {
             }
     }
 
+    @Test
+    fun `should throw Exception when unexpected exception occurs`() {
+        // Given
+        coEvery { createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT) } throws IllegalStateException("Unexpected failure")
+
+        // When & Then
+        val exception = assertThrows<RuntimeException> {
+            createProjectPresenter.createProject(ProjectsMock.CORRECT_PROJECT)
+        }
+        assertThat(exception.message).isEqualTo("An error occurred while creating the project: Unexpected failure")
+    }
+
 }

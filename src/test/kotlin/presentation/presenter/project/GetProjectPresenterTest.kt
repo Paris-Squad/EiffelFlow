@@ -37,7 +37,6 @@ class GetProjectPresenterTest {
     }
 
     @Throws(EiffelFlowException.NotFoundException::class)
-
     @Test
     fun `should throw NotFoundException when no projects founded`() {
             // Given
@@ -49,6 +48,20 @@ class GetProjectPresenterTest {
             assertThrows<EiffelFlowException.NotFoundException> {
                 getProjectPresenter.getProjects()
             }
+    }
+
+    @Test
+    fun `should throw Exception when getProjects fails with unknown exception`() {
+        // Given
+        coEvery { getProjectUseCase.getProjects() } throws IllegalStateException("Something went wrong")
+
+        // When
+        val exception = assertThrows<RuntimeException> {
+            getProjectPresenter.getProjects()
+        }
+
+        // Then
+        assertThat(exception.message).isEqualTo("An error occurred while retrieving the projects: Something went wrong")
     }
 
     @Test
@@ -80,4 +93,20 @@ class GetProjectPresenterTest {
                 getProjectPresenter.getProjectById(UUID.randomUUID())
             }
     }
+
+    @Test
+    fun `should throw RuntimeException when getProjectById fails with unknown exception`() {
+        // Given
+        val projectId = UUID.randomUUID()
+        coEvery { getProjectUseCase.getProjectById(projectId) } throws IllegalStateException("Something went wrong")
+
+        // When
+        val exception = assertThrows<RuntimeException> {
+            getProjectPresenter.getProjectById(projectId)
+        }
+
+        // Then
+        assertThat(exception.message).isEqualTo("An error occurred while retrieving the project: Something went wrong")
+    }
+
 }

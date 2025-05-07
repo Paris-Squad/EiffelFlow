@@ -90,4 +90,18 @@ class UpdateProjectPresenterTest {
             // Then
             assertThat(result).isEqualTo(updatedProject)
         }
+
+    @Test
+    fun `should throw RuntimeException when updateProject fails with unknown exception`() {
+        // Given
+        coEvery { updateProjectUseCase.updateProject(ProjectsMock.CORRECT_PROJECT) } throws IllegalStateException("Something went wrong")
+
+        // When
+        val exception = assertThrows<RuntimeException> {
+            updateProjectPresenter.updateProject(ProjectsMock.CORRECT_PROJECT)
+        }
+
+        // Then
+        assertThat(exception.message).isEqualTo("An error occurred while updating the project: Something went wrong")
+    }
 }
