@@ -5,7 +5,7 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.TaskRepository
 
 class EditTaskUseCase(private val taskRepository: TaskRepository) {
-    fun editTask(request: Task): Task {
+    suspend fun editTask(request: Task): Task {
         val taskResult = taskRepository.getTaskById(request.taskId)
 
         val originalTask = taskResult

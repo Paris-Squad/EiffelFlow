@@ -1,8 +1,9 @@
 package domain.usecase.audit
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
@@ -24,28 +25,32 @@ class GetTaskAuditUseCaseTest {
 
     @Test
     fun `should return Result of list with AuditLogs when task with given id exists`() {
-        // Given
-        every {
-            auditRepository.getTaskAuditLogById(any())
-        } returns listOf(MockAuditLog.AUDIT_LOG)
+        runTest {
+            // Given
+            coEvery {
+                auditRepository.getTaskAuditLogById(any())
+            } returns listOf(MockAuditLog.AUDIT_LOG)
 
-        // When
-        val result = getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
+            // When
+            val result = getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
 
-        // Then
-        assertThat(result).containsExactly(MockAuditLog.AUDIT_LOG)
+            // Then
+            assertThat(result).containsExactly(MockAuditLog.AUDIT_LOG)
+        }
     }
 
     @Test
     fun `should return Result of ElementNotFoundException when task with given id does not exist`() {
-        // Given
-        every {
-            auditRepository.getTaskAuditLogById(any())
-        } throws EiffelFlowException.NotFoundException("Task not found")
+        runTest {
+            // Given
+            coEvery {
+                auditRepository.getTaskAuditLogById(any())
+            } throws EiffelFlowException.NotFoundException("Task not found")
 
-        // When / Then
-        assertThrows<EiffelFlowException.NotFoundException>{
-            getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
+            // When / Then
+            assertThrows<EiffelFlowException.NotFoundException>{
+                getTaskAuditUseCase.getTaskAuditLogsById(TaskMock.mockTaskId)
+            }
         }
 
     }

@@ -1,10 +1,12 @@
 package domain.usecase.auth
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import kotlinx.coroutines.test.runTest
 import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
@@ -43,47 +45,53 @@ class RegisterUseCaseTest {
 
     @Test
     fun `register with admin caller role should succeed when all validations pass`() {
-        // Given
-        val createdUser = User(username = username, password = hashedPassword, role = mateRole)
-        every { userRepository.getUsers() } returns emptyList()
-        every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any()) } returns createdUser
+        runTest {
+            // Given
+            val createdUser = User(username = username, password = hashedPassword, role = mateRole)
+            coEvery { userRepository.getUsers() } returns emptyList()
+            every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
+            coEvery { userRepository.createUser(any()) } returns createdUser
 
-        // When
-        val result = registerUseCase.register(username, password, mateRole)
+            // When
+            val result = registerUseCase.register(username, password, mateRole)
 
-        // Then
-        assertEquals(createdUser, result)
+            // Then
+            assertEquals(createdUser, result)
+        }
     }
 
     @Test
     fun `register should successfully create user when all validations pass`() {
-        // Given
-        val createdUser = User(username = username, password = hashedPassword, role = mateRole)
-        every { userRepository.getUsers() } returns emptyList()
-        every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
-        every { userRepository.createUser(any()) } returns createdUser
+        runTest {
+            // Given
+            val createdUser = User(username = username, password = hashedPassword, role = mateRole)
+            coEvery { userRepository.getUsers() } returns emptyList()
+            every { hashPasswordUseCase.hashPassword(password) } returns hashedPassword
+            coEvery { userRepository.createUser(any()) } returns createdUser
 
-        // When
-        val result = registerUseCase.register(username, password, mateRole)
+            // When
+            val result = registerUseCase.register(username, password, mateRole)
 
-        // Then
-        assertEquals(createdUser, result)
+            // Then
+            assertEquals(createdUser, result)
+        }
     }
 
     @Test
     fun `register should fail when repository createUser fails`() {
-        // Given
-        val repositoryException = EiffelFlowException.IOException("User creation failed")
-        every { userRepository.getUsers() } returns emptyList()
-        every { hashPasswordUseCase.hashPassword(any()) } returns "hashedPassword"
-        every { userRepository.createUser(any()) } throws repositoryException
+        runTest {
+            // Given
+            val repositoryException = EiffelFlowException.IOException("User creation failed")
+            coEvery { userRepository.getUsers() } returns emptyList()
+            every { hashPasswordUseCase.hashPassword(any()) } returns "hashedPassword"
+            coEvery { userRepository.createUser(any()) } throws repositoryException
 
-        // When / Then
-        val exception = assertThrows<EiffelFlowException.IOException> {
-            registerUseCase.register(username, password, mateRole)
+            // When / Then
+            val exception = assertThrows<EiffelFlowException.IOException> {
+                registerUseCase.register(username, password, mateRole)
+            }
+            assertThat(exception.message).contains("User creation failed")
         }
-        assertThat(exception.message).contains("User creation failed")
     }
 
     companion object {
