@@ -1,15 +1,18 @@
 package data.mongorepository
 
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import org.example.data.MongoCollections
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
+import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
 class MongoAuditRepositoryImpl(
     private val database: MongoDatabase,
+    private val taskRepository: TaskRepository
 ) : AuditRepository {
 
-    private val auditLogsCollection = database.getCollection<AuditLog>(collectionName = COLLECTION_NAME)
+    private val auditLogsCollection = database.getCollection<AuditLog>(collectionName = MongoCollections.AUDIT_LOGS)
 
 
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
@@ -26,9 +29,5 @@ class MongoAuditRepositoryImpl(
 
     override suspend fun getAuditLogs(): List<AuditLog> {
         TODO("Not yet implemented")
-    }
-
-    companion object {
-        private const val COLLECTION_NAME = "audit_logs"
     }
 }

@@ -1,6 +1,7 @@
 package data.mongorepository
 
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import org.example.data.MongoCollections
 import org.example.domain.model.Project
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
@@ -11,7 +12,7 @@ class MongoProjectRepositoryImpl(
     private val auditRepository: AuditRepository
 ) : ProjectRepository {
 
-    private val projectsCollection = database.getCollection<Project>(collectionName = COLLECTION_NAME)
+    private val projectsCollection = database.getCollection<Project>(collectionName = MongoCollections.PROJECTS)
 
     override suspend fun createProject(project: Project): Project {
         TODO("Not yet implemented")
@@ -35,9 +36,5 @@ class MongoProjectRepositoryImpl(
 
     override suspend fun getProjects(): List<Project> {
         TODO("Not yet implemented")
-    }
-
-    companion object {
-        private const val COLLECTION_NAME = "projects"
     }
 }
