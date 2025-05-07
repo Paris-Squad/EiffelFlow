@@ -1,8 +1,9 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.example.domain.usecase.task.ViewTaskHistoryUseCase
@@ -28,34 +29,40 @@ class ViewTaskHistoryTest {
 
     @Test
     fun `viewTaskHistory should return audit logs for a valid task`() {
-        // Given
-        every { auditRepository.getTaskAuditLogById(taskId) } returns listOf(validAuditLog)
+        runTest {
+            // Given
+            coEvery { auditRepository.getTaskAuditLogById(taskId) } returns listOf(validAuditLog)
 
-        // When
-        val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
+            // When
+            val result = viewTaskHistoryUseCase.viewTaskHistory(taskId)
 
-        // Then
-        assertThat(result).isEqualTo(listOf(validAuditLog))
+            // Then
+            assertThat(result).isEqualTo(listOf(validAuditLog))
+        }
     }
 
     @Test
     fun `viewTaskHistory should fail when task is not found`() {
-        // Given
-        val exception = EiffelFlowException.NotFoundException("History not found")
-        every { auditRepository.getTaskAuditLogById(taskId) } throws exception
-        // When / Then
-        assertThrows<EiffelFlowException.NotFoundException> {
-            viewTaskHistoryUseCase.viewTaskHistory(taskId)
+        runTest {
+            // Given
+            val exception = EiffelFlowException.NotFoundException("History not found")
+            coEvery { auditRepository.getTaskAuditLogById(taskId) } throws exception
+            // When / Then
+            assertThrows<EiffelFlowException.NotFoundException> {
+                viewTaskHistoryUseCase.viewTaskHistory(taskId)
+            }
         }
     }
 
     @Test
     fun `viewTaskHistory should return failure when there is an error during retrieval`() {
-        // Given
-        every { auditRepository.getTaskAuditLogById(taskId) } throws EiffelFlowException.IOException(null)
-        // When / Then
-        assertThrows<EiffelFlowException> {
-            viewTaskHistoryUseCase.viewTaskHistory(taskId)
+        runTest {
+            // Given
+            coEvery { auditRepository.getTaskAuditLogById(taskId) } throws EiffelFlowException.IOException(null)
+            // When / Then
+            assertThrows<EiffelFlowException> {
+                viewTaskHistoryUseCase.viewTaskHistory(taskId)
+            }
         }
     }
 }

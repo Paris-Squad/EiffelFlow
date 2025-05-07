@@ -5,11 +5,11 @@ import java.util.*
 
 interface AuditRepository {
 
-    fun createAuditLog(auditLog: AuditLog): AuditLog
+    suspend fun createAuditLog(auditLog: AuditLog): AuditLog
 
-    fun getTaskAuditLogById(taskId: UUID): List<AuditLog>
+    suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog>
 
-    fun getProjectAuditLogById(projectId: UUID): List<AuditLog>
+    suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog>
 
-    fun getAuditLogs(): List<AuditLog>
+    suspend fun getAuditLogs(): List<AuditLog>
 }

@@ -6,6 +6,6 @@ import org.example.domain.repository.AuditRepository
 class GetAllAuditLogsUseCase(
     private val auditRepository: AuditRepository
 ) {
-    fun getAllAuditLogs(): List<AuditLog> =
+    suspend fun getAllAuditLogs(): List<AuditLog> =
          auditRepository.getAuditLogs()
 }

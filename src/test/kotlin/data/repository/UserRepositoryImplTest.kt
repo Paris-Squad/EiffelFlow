@@ -2,6 +2,7 @@ package data.repository
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Runs
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -61,7 +62,7 @@ class UserRepositoryImplTest {
             every { userMapper.serialize(validUser) } returns userCsv
             every { csvManager.readLinesFromFile() } returns emptyList()
             every { csvManager.writeLinesToFile(userCsv) } returns Unit
-            every { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
+            coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
             val result = userRepository.createUser(user = validUser)
@@ -97,7 +98,7 @@ class UserRepositoryImplTest {
             every { userMapper.serialize(validUser) } returns userCsv
             every { csvManager.readLinesFromFile() } returns emptyList()
             every { csvManager.writeLinesToFile(userCsv) } just Runs
-            every { auditRepository.createAuditLog(any()) } throws customException
+            coEvery { auditRepository.createAuditLog(any()) } throws customException
 
             // When & Then
             val exception = assertThrows<EiffelFlowException.IOException> {
@@ -160,7 +161,7 @@ class UserRepositoryImplTest {
             every { userMapper.serialize(existingUser) } returns oldUserCsv
             every { userMapper.serialize(updateUser) } returns newUserCsv
             every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
-            every { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
+            coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
             val result = userRepository.updateUser(updateUser)
@@ -214,7 +215,7 @@ class UserRepositoryImplTest {
             every { userMapper.serialize(existingUser) } returns oldUserCsv
             every { userMapper.serialize(updateUser) } returns newUserCsv
             every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
-            every { auditRepository.createAuditLog(any()) } throws customException
+            coEvery { auditRepository.createAuditLog(any()) } throws customException
 
             // When & Then
             val exception = assertThrows<EiffelFlowException.IOException> {
@@ -237,7 +238,7 @@ class UserRepositoryImplTest {
             every { userMapper.parseCsvLine(any()) } returns userToDelete
             every { userMapper.serialize(userToDelete) } returns userCsv
             every { csvManager.deleteLineFromFile(userCsv) } returns Unit
-            every { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
+            coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
             val result = userRepository.deleteUser(userToDelete.userId)
@@ -305,7 +306,7 @@ class UserRepositoryImplTest {
             every { userMapper.parseCsvLine(any()) } returns userToDelete
             every { userMapper.serialize(userToDelete) } returns userCsv
             every { csvManager.deleteLineFromFile(userCsv) } returns Unit
-            every { auditRepository.createAuditLog(any()) } throws customException
+            coEvery { auditRepository.createAuditLog(any()) } throws customException
 
             // When & Then
             val exception = assertThrows<EiffelFlowException.IOException> {

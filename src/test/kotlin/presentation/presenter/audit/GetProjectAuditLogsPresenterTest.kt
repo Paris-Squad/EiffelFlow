@@ -1,10 +1,8 @@
 package presentation.presenter.audit
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
-import org.example.domain.exception.EiffelFlowException
-import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.example.presentation.presenter.audit.GetProjectAuditLogsPresenter
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +26,7 @@ class GetProjectAuditLogsPresenterTest {
     fun `should return audit logs when logs are present`() {
         // Given
         val logs = listOf(MockAuditLog.AUDIT_LOG, MockAuditLog.AUDIT_LOG)
-        every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns logs
+        coEvery { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } returns logs
 
         // When
         val result = presenter.getProjectAuditLogsById(projectId)
@@ -40,7 +38,7 @@ class GetProjectAuditLogsPresenterTest {
     @Test
     fun `should return failure when use case throws generic exception`() {
         // Given
-        every { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } throws
+        coEvery { getProjectAuditUseCase.getProjectAuditLogsById(projectId) } throws
                 Exception("Something went wrong")
 
         // When / Then

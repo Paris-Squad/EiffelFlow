@@ -2,6 +2,8 @@ package data.repository
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.coVerify
 import io.mockk.mockk
 import org.example.data.repository.ProjectRepositoryImpl
 import org.example.domain.repository.AuditRepository
@@ -11,7 +13,6 @@ import java.util.UUID
 import io.mockk.verify
 import io.mockk.every
 import io.mockk.just
-import io.mockk.justRun
 import io.mockk.runs
 import kotlinx.coroutines.test.runTest
 import org.example.data.storage.FileDataSource
@@ -53,14 +54,14 @@ class ProjectRepositoryImplTest {
                 projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
             } returns ProjectsMock.CORRECT_PROJECT
 
-            every { auditRepository.createAuditLog(any()) } returns MockAuditLog.AUDIT_LOG
+            coEvery { auditRepository.createAuditLog(any()) } returns MockAuditLog.AUDIT_LOG
 
             //When
             val result = projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
 
             //Then
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-            verify(exactly = 1) { auditRepository.createAuditLog(any()) }
+            coVerify(exactly = 1) { auditRepository.createAuditLog(any()) }
         }
     }
 
@@ -78,7 +79,7 @@ class ProjectRepositoryImplTest {
                 projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
             }
 
-            verify(exactly = 0) { auditRepository.createAuditLog(any()) }
+            coVerify(exactly = 0) { auditRepository.createAuditLog(any()) }
         }
     }
 
@@ -103,7 +104,7 @@ class ProjectRepositoryImplTest {
             coEvery {
                 projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
             } returns ProjectsMock.CORRECT_PROJECT
-            every {
+            coEvery {
                 auditRepository.createAuditLog(any())
             } throws EiffelFlowException.IOException("Failed to create audit log")
 
@@ -111,7 +112,7 @@ class ProjectRepositoryImplTest {
             assertThrows<EiffelFlowException.IOException> {
                 projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
             }
-            verify(exactly = 1) { auditRepository.createAuditLog(any()) }
+            coVerify(exactly = 1) { auditRepository.createAuditLog(any()) }
         }
     }
     //endregion
@@ -148,7 +149,7 @@ class ProjectRepositoryImplTest {
                     ProjectsMock.CORRECT_CSV_STRING_LINE
                 )
             } just runs
-            justRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
+            coJustRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
 
             // When
             val result = projectRepository.updateProject(
@@ -213,7 +214,7 @@ class ProjectRepositoryImplTest {
                     ProjectsMock.CORRECT_CSV_STRING_LINE
                 )
             } just runs
-            every {
+            coEvery {
                 auditRepository.createAuditLog(any())
             } throws IOException("Audit log failed")
 
@@ -243,7 +244,7 @@ class ProjectRepositoryImplTest {
             every {
                 projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
-            every {
+            coEvery {
                 auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG)
             } returns MockAuditLog.AUDIT_LOG
 
@@ -254,7 +255,7 @@ class ProjectRepositoryImplTest {
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
             verify { csvStorageManager.readLinesFromFile() }
             verify { csvStorageManager.writeLinesToFile(any()) }
-            verify(exactly = 1) { auditRepository.createAuditLog(any()) }
+            coVerify(exactly = 1) { auditRepository.createAuditLog(any()) }
         }
     }
 
@@ -271,7 +272,7 @@ class ProjectRepositoryImplTest {
                 projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
 
-            every {
+            coEvery {
                 auditRepository.createAuditLog(any())
             } throws EiffelFlowException.IOException("Failed to create audit log")
 
@@ -292,7 +293,7 @@ class ProjectRepositoryImplTest {
             every {
                 projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
-            every {
+            coEvery {
                 auditRepository.createAuditLog(any())
             } throws EiffelFlowException.IOException("Failed to create audit log")
 

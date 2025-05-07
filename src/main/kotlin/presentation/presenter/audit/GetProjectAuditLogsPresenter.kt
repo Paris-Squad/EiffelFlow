@@ -1,5 +1,6 @@
 package org.example.presentation.presenter.audit
 
+import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
@@ -8,12 +9,18 @@ import java.util.UUID
 class GetProjectAuditLogsPresenter(
     private val getProjectAuditUseCase: GetProjectAuditUseCase
 ) {
-    companion object {
-        private const val ERROR_MESSAGE_NO_LOGS_FOUND = "No audit records were found for this project"
+
+     fun getProjectAuditLogsById(auditId: UUID): List<AuditLog> {
+         return try {
+             runBlocking {
+                 getProjectAuditUseCase.getProjectAuditLogsById(auditId)
+             }
+         } catch (e: EiffelFlowException) {
+             throw e
+         } catch (e: Exception) {
+             throw RuntimeException("An error occurred while get the project AuditLogs: ${e.message}", e)
+         }
     }
 
-    fun getProjectAuditLogsById(auditId: UUID): List<AuditLog> {
-       return getProjectAuditUseCase.getProjectAuditLogsById(auditId)
-    }
 }
 

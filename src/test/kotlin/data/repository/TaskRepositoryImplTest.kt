@@ -1,9 +1,10 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.coEvery
+import io.mockk.coJustRun
 import io.mockk.every
 import io.mockk.just
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.test.runTest
@@ -50,7 +51,7 @@ class TaskRepositoryImplTest {
             every { sessionManger.getUser() } returns UserMock.adminUser
             every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
             every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
-            every { auditRepository.createAuditLog(any()) } returns TaskMock.validAuditLog
+            coEvery { auditRepository.createAuditLog(any()) } returns TaskMock.validAuditLog
 
             // When
             val result = taskRepository.createTask(TaskMock.validTask)
@@ -82,7 +83,7 @@ class TaskRepositoryImplTest {
             every { sessionManger.getUser() } returns UserMock.adminUser
             every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
             every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
-            every { auditRepository.createAuditLog(any()) } throws IOException("Audit failed")
+            coEvery { auditRepository.createAuditLog(any()) } throws IOException("Audit failed")
             // When / Then
             val exception = assertThrows<EiffelFlowException.IOException> {
                 taskRepository.createTask(TaskMock.validTask)
@@ -101,7 +102,7 @@ class TaskRepositoryImplTest {
             every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
             every { taskMapper.serialize(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
             every { fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV) } just runs
-            justRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
+            coJustRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
 
             // When
             val result = taskRepository.updateTask(TaskMock.inProgressTask, TaskMock.validTask, changedField)

@@ -7,7 +7,7 @@ import org.example.domain.repository.UserRepository
 class RegisterUseCase(
     private val userRepository: UserRepository, private val hashPasswordUseCase: HashPasswordUseCase
 ) {
-    fun register(username: String, password: String, userRole: RoleType): User {
+    suspend fun register(username: String, password: String, userRole: RoleType): User {
         val hashedPassword = hashPasswordUseCase.hashPassword(password)
         return userRepository.createUser(user = User(username = username, password = hashedPassword, role = userRole))
     }

@@ -1,7 +1,7 @@
 package presentation.presenter.audit
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.mockk
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
@@ -26,7 +26,7 @@ class GetProjectAuditLogPresenterTest {
     fun `should return Result of list with AuditLogs when project with given id exists`() {
         // Given
         val expectedAuditLogs = listOf(MockAuditLog.AUDIT_LOG)
-        every {
+        coEvery {
             getProjectAuditUseCase.getProjectAuditLogsById(any())
         } returns expectedAuditLogs
 
@@ -40,7 +40,7 @@ class GetProjectAuditLogPresenterTest {
     @Test
     fun `should return Result of ElementNotFoundException when project with given id does not exist`() {
         // Given
-        every {
+        coEvery {
             getProjectAuditUseCase.getProjectAuditLogsById(any())
         } throws EiffelFlowException.NotFoundException("Project not found")
 
