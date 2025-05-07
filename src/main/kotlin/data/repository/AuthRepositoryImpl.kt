@@ -13,7 +13,7 @@ class AuthRepositoryImpl(
     private val fileDataSource: FileDataSource, private val userCsvParser: UserCsvParser
 ) : AuthRepository {
 
-    override fun loginUser(username: String, password: String): User {
+    override suspend fun loginUser(username: String, password: String): User {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { userCsvParser.parseCsvLine(it) }
@@ -36,7 +36,7 @@ class AuthRepositoryImpl(
 
     }
 
-    override fun saveUserLogin(user: User): User {
+    override suspend fun saveUserLogin(user: User): User {
         return try {
             val userCsv = userCsvParser.serialize(user)
             fileDataSource.writeLinesToFile(userCsv)
@@ -47,7 +47,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override fun isUserLoggedIn(): Boolean {
+    override suspend fun isUserLoggedIn(): Boolean {
         return try {
             val lines = fileDataSource.readLinesFromFile()
             if (lines.any { it.isNotBlank() }) {
@@ -64,7 +64,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override fun clearLogin() {
+    override suspend fun clearLogin() {
         return try {
             fileDataSource.clearFile()
             SessionManger.logout()

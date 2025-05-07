@@ -1,7 +1,7 @@
 package presentation.presenter
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -22,30 +22,42 @@ class LogoutPresenterTest {
     }
 
     @Test
-    fun`should return success when logout is successful`(){
-        try {
-            every { logoutUseCase.logout() } just runs
-            val result = logoutPresenter.logout()
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isEqualTo(Unit)
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not implement yet")
-        }
+    fun `should return success when logout is successful`() {
+        // Given
+        coEvery { logoutUseCase.logout() } just runs
+
+        // When
+        val result = logoutPresenter.logout()
+
+        // Then
+        assertThat(result).isEqualTo("Logout successful")
     }
+
     @Test
-    fun`should return failure when logout is fails`(){
-        try {
-            val exception = EiffelFlowException.AuthorizationException("failed logout ")
+    fun `should return failure when logout fails with AuthorizationException message`() {
+        // Given
+        val exception = EiffelFlowException.AuthorizationException("failed logout")
+        coEvery { logoutUseCase.logout() } throws exception
 
-            every { logoutUseCase.logout() } throws exception
+        // When
+        val result = logoutPresenter.logout()
 
-            val result = logoutPresenter.logout()
-
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isEqualTo(exception)
-
-        } catch (e: NotImplementedError) {
-            assertThat(e.message).contains("Not implement yet")
-        }
+        // Then
+        assertThat(result).isEqualTo("failed logout")
     }
+
+    @Test
+    fun `should return failure message when logout fails with null message`() {
+        // Given
+        val exception = EiffelFlowException.AuthorizationException(null)
+        coEvery { logoutUseCase.logout() } throws exception
+
+        // When
+        val result = logoutPresenter.logout()
+
+        // Then
+        assertThat(result).isEqualTo("Logout failed")
+    }
+
+
 }
