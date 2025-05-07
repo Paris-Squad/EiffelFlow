@@ -246,7 +246,7 @@ class AuditRepositoryImplTest {
 
         val result = auditRepository.getProjectAuditLogById(projectId)
 
-        assertThat(result).containsExactly(log2, log1) // descending order
+        assertThat(result).containsExactly(log2, log1)
     }
 
 
