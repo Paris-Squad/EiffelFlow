@@ -6,14 +6,18 @@ import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import org.example.data.MongoCollections
+import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.mapper.toAuditLog
+import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
+import org.example.domain.utils.getChangedFieldNames
 import java.util.UUID
 
 class MongoUserRepositoryImpl(
-    private val database: MongoDatabase,
+    database: MongoDatabase,
     private val auditRepository: AuditRepository
 ) : UserRepository {
 
@@ -26,6 +30,7 @@ class MongoUserRepositoryImpl(
                 throw EiffelFlowException.IOException("User with userId ${user.userId} already exists")
             }
             usersCollection.insertOne(user)
+            logAction(user, AuditLogAction.CREATE)
             return user
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't create User because ${exception.message}")
@@ -39,10 +44,20 @@ class MongoUserRepositoryImpl(
                 Updates.set(User::password.name, user.password),
                 Updates.set(User::role.name, user.role),
             )
+
             val options = FindOneAndUpdateOptions().upsert(false)
             val query = eq("userId", user.userId)
-            val updatedUser = usersCollection.findOneAndUpdate(query, updates, options)
-            return updatedUser ?: throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
+            val oldUser = usersCollection.findOneAndUpdate(query, updates, options)
+
+            return oldUser?.let {
+                logAction(
+                    user = user,
+                    actionType = AuditLogAction.UPDATE,
+                    changedField = oldUser.getChangedFieldNames(user).toString(),
+                    oldValue = oldUser.toString(),
+                )
+                user
+            } ?: throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't update User with id ${user.userId} because ${exception.message}")
         }
@@ -52,7 +67,16 @@ class MongoUserRepositoryImpl(
         try {
             val query = eq("userId", userId)
             val deletedUser = usersCollection.findOneAndDelete(query)
-            return deletedUser ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
+
+            return deletedUser?.let {
+                logAction(
+                    user = deletedUser,
+                    actionType = AuditLogAction.DELETE,
+                    oldValue = deletedUser.toString()
+                )
+                deletedUser
+            } ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
+
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't delete User with id $userId because ${exception.message}")
         }
@@ -77,5 +101,20 @@ class MongoUserRepositoryImpl(
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't get Users because ${exception.message}")
         }
+    }
+
+    private suspend fun logAction(
+        user: User,
+        actionType: AuditLogAction,
+        changedField: String? = null,
+        oldValue: String? = null
+    ) {
+        val auditLog = user.toAuditLog(
+            editor = SessionManger.getUser(),
+            actionType = actionType,
+            changedField = changedField,
+            oldValue = oldValue,
+        )
+        auditRepository.createAuditLog(auditLog)
     }
 }
