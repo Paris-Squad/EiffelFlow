@@ -13,7 +13,7 @@ import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
-import org.example.domain.utils.getChangedFieldNames
+import org.example.domain.utils.getFieldChanges
 import java.util.UUID
 
 class MongoUserRepositoryImpl(
@@ -50,11 +50,16 @@ class MongoUserRepositoryImpl(
             val oldUser = usersCollection.findOneAndUpdate(query, updates, options)
 
             return oldUser?.let {
+                val fieldChanges = oldUser.getFieldChanges(user)
+                val changedFieldsNames = fieldChanges.map { it.fieldName }
+                val oldValues = fieldChanges.map { it.oldValue }
+                val newValues = fieldChanges.map { it.newValue }
                 logAction(
                     user = user,
                     actionType = AuditLogAction.UPDATE,
-                    changedField = oldUser.getChangedFieldNames(user).toString(),
-                    oldValue = oldUser.toString(),
+                    changedField = changedFieldsNames.toString(),
+                    oldValue = oldValues.toString(),
+                    newValue = newValues.toString(),
                 )
                 user
             } ?: throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
@@ -71,8 +76,7 @@ class MongoUserRepositoryImpl(
             return deletedUser?.let {
                 logAction(
                     user = deletedUser,
-                    actionType = AuditLogAction.DELETE,
-                    oldValue = deletedUser.toString()
+                    actionType = AuditLogAction.DELETE
                 )
                 deletedUser
             } ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
@@ -107,13 +111,15 @@ class MongoUserRepositoryImpl(
         user: User,
         actionType: AuditLogAction,
         changedField: String? = null,
-        oldValue: String? = null
+        oldValue: String? = null,
+        newValue: String = user.toString()
     ) {
         val auditLog = user.toAuditLog(
             editor = SessionManger.getUser(),
             actionType = actionType,
             changedField = changedField,
             oldValue = oldValue,
+            newValue = newValue,
         )
         auditRepository.createAuditLog(auditLog)
     }

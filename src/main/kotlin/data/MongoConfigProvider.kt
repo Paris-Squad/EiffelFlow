@@ -5,14 +5,19 @@ import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import org.bson.UuidRepresentation
 import org.bson.codecs.UuidCodec
-import org.bson.codecs.configuration.CodecRegistries
+import org.bson.codecs.configuration.CodecRegistries.fromCodecs
+import org.bson.codecs.configuration.CodecRegistries.fromRegistries
+import org.example.domain.utils.KotlinxLocalDateTimeCodec
 
 class MongoConfigProvider {
     fun getDatabase(): MongoDatabase {
-        val codecRegistry = CodecRegistries.fromRegistries(
-            CodecRegistries.fromCodecs(UuidCodec(UuidRepresentation.STANDARD)),
-            MongoClientSettings.getDefaultCodecRegistry()
+        val defaultRegistry = MongoClientSettings.getDefaultCodecRegistry()
+        val customRegistry = fromCodecs(KotlinxLocalDateTimeCodec())
+        val uuidRegistry = fromCodecs(
+            UuidCodec(UuidRepresentation.STANDARD)
         )
+        val codecRegistry = fromRegistries(uuidRegistry, customRegistry, defaultRegistry)
+
         return MongoClient.create(CONNECTION_STRING_URI_PLACEHOLDER)
             .getDatabase(DATABASE_NAME)
             .withCodecRegistry(codecRegistry)
