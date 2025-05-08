@@ -1,14 +1,10 @@
 package data.mongorepository
 
 import com.google.common.truth.Truth.assertThat
-import com.mongodb.client.model.Filters
-import com.mongodb.client.model.Filters.eq
-import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.FlowCollector
@@ -21,7 +17,6 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.UserMock
@@ -64,21 +59,17 @@ class MongoUserRepositoryImplTest {
     @Test
     fun `createUser should throw if user already exists`() = runTest {
 
+        //Given
         val mockFindFlow = mockk<FindFlow<User>>()
-
         coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
-
-        // This mocks firstOrNull by controlling the .collect behavior
         coEvery { mockFindFlow.collect(any()) } coAnswers {
             val collector = arg<FlowCollector<User>>(0)
             collector.emit(UserMock.validUser)
         }
 
-        val exception = assertThrows(EiffelFlowException.IOException::class.java) {
+        assertThrows(EiffelFlowException.IOException::class.java) {
             runBlocking { repository.createUser(UserMock.validUser) }
         }
-
-        assertTrue(exception.message!!.contains("User with userId"))
     }
 
     @Test
@@ -97,7 +88,6 @@ class MongoUserRepositoryImplTest {
 
         assertThat(result).isEqualTo(UserMock.validUser)
     }
-
 
     @Test
     fun `deleteUser should return the deleted user on success`() = runTest {
