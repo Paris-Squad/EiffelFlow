@@ -5,6 +5,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import org.example.data.MongoCollections
 import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
@@ -97,11 +98,7 @@ class MongoUserRepositoryImpl(
 
     override suspend fun getUsers(): List<User> {
         try {
-            val users = mutableListOf<User>()
-            usersCollection.find().collect { user ->
-                users.add(user)
-            }
-            return users
+            return  usersCollection.find().toList()
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't get Users because ${exception.message}")
         }
