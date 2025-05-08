@@ -28,7 +28,7 @@ class MongoAuditRepositoryImplTest {
         every {
             mongoDatabase.getCollection<AuditLog>(any())
         } returns auditLogCollection
-        repository = MongoAuditRepositoryImpl(database = mongoDatabase)
+        repository = MongoAuditRepositoryImpl(database = mongoDatabase, taskRepositoryProvider = mockk())
     }
 
     @Test
