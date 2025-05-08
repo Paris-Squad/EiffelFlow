@@ -101,6 +101,26 @@ class CreateTaskCLITest {
             printer.displayLn("Please enter valid number between 1 and 4")
         }
     }
+    @Test
+    fun `should print error  when project input is invalid`() {
+        // Given
+        every { inputReader.readString() } returnsMany listOf(
+            "Valid Title", "Valid Description", "4", "-1", "1"
+        )
+        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT,CORRECT_PROJECT)
+        coEvery { createTaskUseCase.createTask(any()) } returns validTask
+
+
+        // When
+        createTaskCli.createTaskInput()
+
+
+        // Then
+        verify {
+            printer.displayLn("Please enter valid number of project")
+        }
+    }
+
 
     @Test
     fun `should print error when EiffelFlowException occurs`() {
