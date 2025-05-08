@@ -9,9 +9,10 @@ import java.util.UUID
 
 class MongoAuditRepositoryImpl(
     private val database: MongoDatabase,
-    private val taskRepository: TaskRepository
+    private val taskRepositoryProvider: Lazy<TaskRepository>
 ) : AuditRepository {
 
+    private val taskRepository: TaskRepository by taskRepositoryProvider
     private val auditLogsCollection = database.getCollection<AuditLog>(collectionName = MongoCollections.AUDIT_LOGS)
 
 
