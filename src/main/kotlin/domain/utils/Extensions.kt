@@ -2,6 +2,7 @@ package org.example.domain.utils
 
 import org.example.domain.model.FieldChange
 import org.example.domain.model.Project
+import org.example.domain.model.Task
 import org.example.domain.model.User
 
 fun User.getFieldChanges(updatedUser: User): Set<FieldChange> {
@@ -33,6 +34,32 @@ fun Project.getFieldChanges(updatedUser: Project): Set<FieldChange> {
     }
     if (this.taskStates != updatedUser.taskStates) {
         changedFields.add(FieldChange("taskStates", this.taskStates.toString(), updatedUser.taskStates.toString()))
+    }
+    return changedFields
+}
+
+fun Task.getFieldChanges(updatedUser: Task): Set<FieldChange> {
+    val changedFields = mutableSetOf<FieldChange>()
+    if (this.title != updatedUser.title) {
+        changedFields.add(FieldChange("title", this.title, updatedUser.title))
+    }
+    if (this.description != updatedUser.description) {
+        changedFields.add(FieldChange("description", this.description, updatedUser.description))
+    }
+    if (this.creatorId != updatedUser.creatorId) {
+        changedFields.add(FieldChange("creatorId", this.creatorId.toString(), updatedUser.creatorId.toString()))
+    }
+    if (this.projectId != updatedUser.projectId) {
+        changedFields.add(FieldChange("projectId", this.projectId.toString(), updatedUser.projectId.toString()))
+    }
+    if (this.assignedId != updatedUser.assignedId) {
+        changedFields.add(FieldChange("assignedId", this.assignedId.toString(), updatedUser.assignedId.toString()))
+    }
+    if (this.state != updatedUser.state) {
+        changedFields.add(FieldChange("state", this.state.toString(), updatedUser.state.toString()))
+    }
+    if (this.role != updatedUser.role) {
+        changedFields.add(FieldChange("role", this.role.toString(), updatedUser.role.toString()))
     }
     return changedFields
 }
