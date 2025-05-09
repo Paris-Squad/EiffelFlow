@@ -7,8 +7,8 @@ import io.mockk.runs
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LogoutUseCase
-import org.example.presentation.presenter.auth.LogoutCLI
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.auth.LogoutCLI
+import org.example.presentation.io.Printer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 

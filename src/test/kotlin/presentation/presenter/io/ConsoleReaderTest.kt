@@ -1,7 +1,7 @@
 package presentation.presenter.io
 
 
-import org.example.presentation.presenter.io.ConsoleReader
+import org.example.presentation.io.ConsoleReader
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

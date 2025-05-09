@@ -1,12 +1,12 @@
-package org.example.presentation.presenter.audit
+package org.example.presentation.audit
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.*
 

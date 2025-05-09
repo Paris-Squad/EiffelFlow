@@ -1,34 +1,32 @@
-package org.example.presentation.presenter.project
+package org.example.presentation.project
 
 import kotlinx.coroutines.runBlocking
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
-import org.example.domain.usecase.project.CreateProjectUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.domain.usecase.project.UpdateProjectUseCase
+import org.example.presentation.BaseCli
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import java.util.UUID
-import kotlin.text.isNullOrBlank
 
-class CreateProjectCLI(
-    private val createProjectUseCase: CreateProjectUseCase ,
+class UpdateProjectCLI(
+    private val updateProjectUseCase: UpdateProjectUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
-
-    fun createProjectInput() {
-        try {
+) : BaseCli(printer){
+    fun updateProjectInput(){
+        return tryStartCli {
             printer.displayLn("Enter project name:")
             val name = inputReader.readString()
             if (name.isNullOrBlank()) {
                 printer.displayLn("Project name cannot be empty.")
-                return
+                return@tryStartCli
             }
 
             printer.displayLn("Enter project description:")
             val description = inputReader.readString()
             if (description.isNullOrBlank()) {
                 printer.displayLn("Project description cannot be empty.")
-                return
+                return@tryStartCli
             }
 
             printer.displayLn("Enter admin ID:")
@@ -37,7 +35,7 @@ class CreateProjectCLI(
                 UUID.fromString(adminIdInput)
             } catch (e: IllegalArgumentException) {
                 printer.displayLn("Invalid admin ID format.")
-                return
+                return@tryStartCli
             }
 
             val project = Project(
@@ -46,19 +44,18 @@ class CreateProjectCLI(
                 adminId = adminId
             )
 
-            val createdProject = createProject(project)
-            printer.displayLn("Project created successfully: $createdProject")
+            val createdProject = updateProject(project)
+            printer.displayLn("Project updated successfully: $createdProject")
 
-        } catch (e: EiffelFlowException) {
-            printer.displayLn("Failed to create the project: ${e.message}")
-        } catch (e: Exception) {
-            printer.displayLn("An error occurred while creating the project: ${e.message}")
         }
     }
 
-    fun createProject(project: Project): Project {
+
+
+
+    fun updateProject(project: Project): Project {
         return runBlocking {
-            createProjectUseCase.createProject(project)
-        }
+                updateProjectUseCase.updateProject(project)
+            }
     }
 }

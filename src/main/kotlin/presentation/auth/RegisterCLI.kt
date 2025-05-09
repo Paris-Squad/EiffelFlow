@@ -1,12 +1,12 @@
-package org.example.presentation.presenter.auth
+package org.example.presentation.auth
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import org.example.domain.usecase.auth.RegisterUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 
 class RegisterCLI(
     private val registerUseCase: RegisterUseCase,

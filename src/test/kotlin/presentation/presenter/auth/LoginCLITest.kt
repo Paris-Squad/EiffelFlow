@@ -6,9 +6,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
-import org.example.presentation.presenter.auth.LoginCLI
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.auth.LoginCLI
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.UserMock
