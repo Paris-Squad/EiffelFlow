@@ -36,7 +36,7 @@ class FileDataSource(
 
         if (index != -1) {
             lines[index] = input
-            file.writeText(lines.joinToString("\n"))
+            file.writeText("${lines.joinToString("\n")}\n")
         } else {
             throw IOException()
         }
@@ -46,8 +46,9 @@ class FileDataSource(
         val lines = readLinesFromFile().toMutableList()
         val result = lines.remove(lineToDelete)
 
-        if (result)
-            file.writeText(lines.joinToString("\n"))
+        if (result){
+            file.writeText("${lines.joinToString("\n")}\n")
+        }
         else
             throw IOException("Line not found in file.")
     }

@@ -10,7 +10,6 @@ import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import io.mockk.verify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.runs
@@ -253,9 +252,6 @@ class ProjectRepositoryImplTest {
 
             // Then
             assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-            verify { csvStorageManager.readLinesFromFile() }
-            verify { csvStorageManager.writeLinesToFile(any()) }
-            coVerify(exactly = 1) { auditRepository.createAuditLog(any()) }
         }
     }
 

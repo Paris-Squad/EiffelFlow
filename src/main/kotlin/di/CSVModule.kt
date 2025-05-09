@@ -1,29 +1,20 @@
 package org.example.di
 
-import org.example.data.repository.AuditRepositoryImpl
-import org.example.data.repository.AuthRepositoryImpl
-import org.example.data.repository.ProjectRepositoryImpl
-import org.example.data.repository.TaskRepositoryImpl
-import org.example.data.repository.UserRepositoryImpl
+import org.example.data.repository.*
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
 import org.example.data.storage.parser.ProjectCsvParser
 import org.example.data.storage.parser.TaskCsvParser
 import org.example.data.storage.parser.UserCsvParser
-import org.example.domain.repository.AuditRepository
-import org.example.domain.repository.AuthRepository
-import org.example.domain.repository.ProjectRepository
-import org.example.domain.repository.TaskRepository
-import org.example.domain.repository.UserRepository
+import org.example.domain.repository.*
 import org.koin.dsl.module
 import java.io.File
 
-val csvModule = module{
+val csvModule = module {
     single<AuditRepository> {
         AuditRepositoryImpl(
             auditCsvParser = get<AuditCsvParser>(),
             fileDataSource = FileDataSource(File(AuditRepositoryImpl.FILE_NAME)),
-//            taskRepository = get()
             taskRepositoryProvider = lazy { get() }
         )
     }
@@ -38,7 +29,8 @@ val csvModule = module{
         TaskRepositoryImpl(
             taskCsvParser = get<TaskCsvParser>(),
             fileDataSource = FileDataSource(File(TaskRepositoryImpl.FILE_NAME)),
-            auditRepository = get())
+            auditRepository = get()
+        )
     }
     single<UserRepository> {
         UserRepositoryImpl(
@@ -48,6 +40,10 @@ val csvModule = module{
         )
     }
     single<AuthRepository> {
-        AuthRepositoryImpl(FileDataSource(File(AuthRepositoryImpl.FILE_NAME)) , get())
+        AuthRepositoryImpl(
+            authFileDataSource = FileDataSource(File(AuthRepositoryImpl.FILE_NAME)),
+            usersFileDataSource =FileDataSource(File(UserRepositoryImpl.FILE_NAME)),
+            userCsvParser = get()
+        )
     }
 }
