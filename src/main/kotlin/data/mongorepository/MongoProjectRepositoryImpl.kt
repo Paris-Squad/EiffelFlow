@@ -24,7 +24,7 @@ class MongoProjectRepositoryImpl(
     private val projectsCollection = database.getCollection<Project>(collectionName = MongoCollections.PROJECTS)
 
     override suspend fun createProject(project: Project): Project {
-        require(SessionManger.isAdmin()) { 
+        require(SessionManger.isAdmin()) {
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
         }
         try {
@@ -33,9 +33,9 @@ class MongoProjectRepositoryImpl(
                 throw EiffelFlowException.IOException("Project with projectId ${project.projectId} already exists")
             }
             projectsCollection.insertOne(project)
-            
+
             logAction(project, AuditLogAction.CREATE)
-            
+
             return project
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't create Project because ${exception.message}")
@@ -63,20 +63,22 @@ class MongoProjectRepositoryImpl(
             val query = eq("projectId", project.projectId)
             val oldUser = projectsCollection.findOneAndUpdate(query, updates, options)
 
-            return oldUser?.let {
-                val fieldChanges = oldProject.getFieldChanges(project)
-                val changedFieldsNames = fieldChanges.map { it.fieldName }
-                val oldValues = fieldChanges.map { it.oldValue }
-                val newValues = fieldChanges.map { it.newValue }
-                logAction(
-                    project = project,
-                    actionType = AuditLogAction.UPDATE,
-                    changedField = changedFieldsNames.toString(),
-                    oldValue = oldValues.toString(),
-                    newValue = newValues.toString(),
-                )
-                project
-            } ?: throw EiffelFlowException.NotFoundException("Project with id ${project.projectId} not found")
+            if (oldUser == null) {
+                throw EiffelFlowException.NotFoundException("Project with id ${project.projectId} not found")
+            }
+
+            val fieldChanges = oldProject.getFieldChanges(project)
+            val changedFieldsNames = fieldChanges.map { it.fieldName }
+            val oldValues = fieldChanges.map { it.oldValue }
+            val newValues = fieldChanges.map { it.newValue }
+            logAction(
+                project = project,
+                actionType = AuditLogAction.UPDATE,
+                changedField = changedFieldsNames.toString(),
+                oldValue = oldValues.toString(),
+                newValue = newValues.toString(),
+            )
+            return project
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't update Project with id ${project.projectId} because ${exception.message}")
         }
@@ -90,13 +92,14 @@ class MongoProjectRepositoryImpl(
             val query = eq("projectId", projectId)
             val deletedProject = projectsCollection.findOneAndDelete(query)
 
-            return deletedProject?.let {
-                logAction(
-                    project = deletedProject,
-                    actionType = AuditLogAction.DELETE
-                )
-                deletedProject
-            } ?: throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
+            if (deletedProject == null) {
+                throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
+            }
+            logAction(
+                project = deletedProject,
+                actionType = AuditLogAction.DELETE
+            )
+            return deletedProject
 
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't delete Project with id $projectId because ${exception.message}")

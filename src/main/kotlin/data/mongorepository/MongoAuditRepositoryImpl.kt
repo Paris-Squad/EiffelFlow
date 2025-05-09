@@ -1,6 +1,7 @@
 package data.mongorepository
 
 import com.mongodb.client.model.Filters.eq
+import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
@@ -33,27 +34,32 @@ class MongoAuditRepositoryImpl(
     }
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        return findAuditLogsByItemId(taskId)
-    }
-
-    override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
-        val projectLogs = findAuditLogsByItemId(projectId)
-        val auditLogsForProjectTasks = getAuditProjectTasks(projectId, getAuditLogs())
-
-        return (projectLogs + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
-    }
-
-    private suspend fun findAuditLogsByItemId(itemId: UUID): List<AuditLog> {
-        return try {
-            auditLogsCollection.find(eq("itemId", itemId))
-                .toList()
+        try {
+            return findAuditLogsByItemId(taskId).toList()
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Unexpected error fetching audit logs ${exception.message}")
         }
     }
 
+    override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
+        try {
+            val projectLogs = findAuditLogsByItemId(projectId).toList()
+            val auditLogsForProjectTasks = getAuditProjectTasks(projectId, getAuditLogs())
+
+            return (projectLogs + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
+        } catch (exception: Throwable) {
+            throw EiffelFlowException.IOException("Unexpected error fetching audit logs ${exception.message}")
+        }
+    }
+
+    private fun findAuditLogsByItemId(itemId: UUID): FindFlow<AuditLog> {
+        return auditLogsCollection
+            .find(eq("itemId", itemId))
+    }
+
     private suspend fun getAuditProjectTasks(
-        projectId: UUID, auditLogs: List<AuditLog>
+        projectId: UUID,
+        auditLogs: List<AuditLog>
     ): List<AuditLog> {
         val tasksResult = taskRepository.getTasks()
         val projectTaskIds = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
