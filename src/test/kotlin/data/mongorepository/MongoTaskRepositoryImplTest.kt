@@ -32,7 +32,7 @@ class MongoTaskRepositoryImplTest {
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private lateinit var tasksCollection: MongoCollection<Task>
     private lateinit var auditRepository: AuditRepository
-    private lateinit var userRepository: TaskRepository
+    private lateinit var taskRepository: TaskRepository
 
     @BeforeEach
     fun setup() {
@@ -46,7 +46,7 @@ class MongoTaskRepositoryImplTest {
 
         every { sessionManger.getUser() } returns UserMock.adminUser
 
-        userRepository = MongoTaskRepositoryImpl(mockDatabase, auditRepository)
+        taskRepository = MongoTaskRepositoryImpl(mockDatabase, auditRepository)
     }
 
     //region createTask
@@ -67,7 +67,7 @@ class MongoTaskRepositoryImplTest {
         } returns mockk()
 
         //When
-        val result = userRepository.createTask(TaskMock.validTask)
+        val result = taskRepository.createTask(TaskMock.validTask)
 
         //Then
         assertThat(result).isEqualTo(TaskMock.validTask)
@@ -88,7 +88,7 @@ class MongoTaskRepositoryImplTest {
 
         //When /Then
         assertThrows(EiffelFlowException.IOException::class.java) {
-            runBlocking { userRepository.createTask(TaskMock.validTask) }
+            runBlocking { taskRepository.createTask(TaskMock.validTask) }
         }
     }
 
@@ -110,7 +110,7 @@ class MongoTaskRepositoryImplTest {
 
         //When then
         assertThrows<EiffelFlowException.IOException> {
-            userRepository.createTask(TaskMock.validTask)
+            taskRepository.createTask(TaskMock.validTask)
         }
 
     }
@@ -131,7 +131,7 @@ class MongoTaskRepositoryImplTest {
         } returns mockk()
 
         assertThrows<EiffelFlowException.IOException> {
-            userRepository.createTask(TaskMock.validTask)
+            taskRepository.createTask(TaskMock.validTask)
         }
     }
     //endregion
@@ -149,7 +149,7 @@ class MongoTaskRepositoryImplTest {
         } returns TaskMock.validTask
 
         // When
-        val result = userRepository.updateTask(
+        val result = taskRepository.updateTask(
             task = TaskMock.inProgressTask,
             oldTask = TaskMock.validTask,
             changedField = "name"
@@ -172,7 +172,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.updateTask(
+                taskRepository.updateTask(
                     task = TaskMock.inProgressTask,
                     oldTask = TaskMock.validTask,
                     changedField = "description"
@@ -195,7 +195,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.updateTask(
+                taskRepository.updateTask(
                     task = TaskMock.inProgressTask,
                     oldTask = TaskMock.validTask,
                     changedField = "state"
@@ -214,7 +214,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.updateTask(
+                taskRepository.updateTask(
                     task = TaskMock.inProgressTask,
                     oldTask = TaskMock.validTask,
                     changedField = "role"
@@ -238,7 +238,7 @@ class MongoTaskRepositoryImplTest {
         } returns mockk<AuditLog>()
 
         // When
-        val result = userRepository.deleteTask(TaskMock.inProgressTask.taskId)
+        val result = taskRepository.deleteTask(TaskMock.inProgressTask.taskId)
 
         // Then
         assertThat(result).isEqualTo(TaskMock.inProgressTask)
@@ -257,7 +257,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.deleteTask(UUID.randomUUID())
+                taskRepository.deleteTask(UUID.randomUUID())
             }
         }
     }
@@ -275,7 +275,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.deleteTask(TaskMock.validTask.taskId)
+                taskRepository.deleteTask(TaskMock.validTask.taskId)
             }
         }
     }
@@ -290,7 +290,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.deleteTask(TaskMock.validTask.taskId)
+                taskRepository.deleteTask(TaskMock.validTask.taskId)
             }
         }
     }
@@ -316,7 +316,7 @@ class MongoTaskRepositoryImplTest {
             } returns mockFindFlow
 
             //When
-            val result = userRepository.getTaskById(TaskMock.validTask.taskId)
+            val result = taskRepository.getTaskById(TaskMock.validTask.taskId)
 
             //Then
             assertThat(result).isEqualTo(TaskMock.validTask)
@@ -341,7 +341,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.getTaskById(UUID.randomUUID())
+                taskRepository.getTaskById(UUID.randomUUID())
             }
         }
     }
@@ -356,7 +356,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.getTaskById(TaskMock.validTask.taskId)
+                taskRepository.getTaskById(TaskMock.validTask.taskId)
             }
         }
     }
@@ -364,7 +364,7 @@ class MongoTaskRepositoryImplTest {
 
     // region getTasks
     @Test
-    fun `getTasks should return list of users`() {
+    fun `getTasks should return list of tasks`() {
         runTest {
             // Given
             val mockFindFlow = mockk<FindFlow<Task>>()
@@ -380,7 +380,7 @@ class MongoTaskRepositoryImplTest {
             } returns mockFindFlow
 
             //When
-            val result = userRepository.getTasks()
+            val result = taskRepository.getTasks()
 
             //Then
             assertThat(result).containsExactlyElementsIn(listOf(TaskMock.validTask))
@@ -388,7 +388,7 @@ class MongoTaskRepositoryImplTest {
     }
 
     @Test
-    fun `getTasks should return empty list of users when DB is empty`() {
+    fun `getTasks should return empty list of tasks when DB is empty`() {
         runTest {
             // Given
             val mockFindFlow = mockk<FindFlow<Task>>()
@@ -402,7 +402,7 @@ class MongoTaskRepositoryImplTest {
             } returns mockFindFlow
 
             //When
-            val result = userRepository.getTasks()
+            val result = taskRepository.getTasks()
 
             //Then
             assertThat(result).containsExactlyElementsIn(emptyList<Task>())
@@ -419,7 +419,7 @@ class MongoTaskRepositoryImplTest {
 
             // When & Then
             assertThrows<EiffelFlowException.IOException> {
-                userRepository.getTasks()
+                taskRepository.getTasks()
             }
         }
     }
