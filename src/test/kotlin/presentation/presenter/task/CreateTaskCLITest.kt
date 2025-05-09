@@ -55,6 +55,73 @@ class CreateTaskCLITest {
     }
 
     @Test
+    fun `should print error when user select project not found`() {
+        runTest {
+            //Given
+            val projects = listOf(CORRECT_PROJECT)
+            every {
+                inputReader.readString()
+            } returnsMany listOf("valid title", "Valid Description", "1", null, "1")
+            coEvery { getProjectUseCase.getProjects() } returns projects
+            coEvery { createTaskUseCase.createTask(any()) } returns validTask
+
+            //When
+            createTaskCli.start()
+
+            // Then
+            verify {
+                printer.displayLn("Please enter a valid number between 1 and ${projects.size}")
+            }
+
+        }
+    }
+
+    @Test
+    fun `should print error when getting projects failed`() {
+        runTest {
+            //Given
+            val exception = EiffelFlowException.IOException("Failed to get projects")
+            every {
+                inputReader.readString()
+            } returnsMany listOf("valid title", "Valid Description", "1", "1")
+            coEvery {
+                getProjectUseCase.getProjects()
+            } throws IOException("Unexpected Error")
+            //When
+            createTaskCli.start()
+
+            // Then
+            verify {
+                printer.displayLn("An error occurred: Unexpected Error")
+            }
+
+        }
+    }
+
+    @Test
+    fun `should print error when getting projects failed2`() {
+        runTest {
+            //Given
+            val exception = EiffelFlowException.IOException("Failed to get projects")
+            every {
+                inputReader.readString()
+            } returnsMany listOf("valid title", "Valid Description", "1", "1")
+            coEvery {
+                getProjectUseCase.getProjects()
+            } throws EiffelFlowException.IOException("Task creation failed")
+
+            //When
+            createTaskCli.start()
+
+            // Then
+            verify {
+                printer.displayLn("An error occurred: Task creation failed")
+            }
+
+        }
+    }
+
+    @Test
     fun `should not create task when projects are empty`() {
         runTest {
             //Given
