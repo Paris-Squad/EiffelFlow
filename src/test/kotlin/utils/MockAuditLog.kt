@@ -19,6 +19,12 @@ object MockAuditLog {
         newValue = "NewTitle"
     )
 
+    val AUDIT_LOGS = listOf(
+        AUDIT_LOG,
+        AUDIT_LOG.copy(auditId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5749")),
+        AUDIT_LOG.copy(auditId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5750")),
+    )
+
     const val FULL_CSV_STRING_LINE =
         "02ad4499-5d4c-4450-8fd1-8294f1bb5748,02ad4499-5d4c-4450-8fd1-8294f1bb5740,Task,02ad4499-5d4c-4450-8fd1-8294f1bb5741,User1,CREATE,1999-08-07T22:22:22,Title,OldTitle,NewTitle"
     const val CSV_STRING_LINE_WITH_NEW_VALUE_NULL =

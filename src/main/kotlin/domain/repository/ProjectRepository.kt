@@ -7,7 +7,7 @@ interface ProjectRepository {
 
     suspend fun createProject(project: Project): Project
 
-    suspend fun updateProject(project: Project ,oldProject: Project ,changedField: String): Project
+    suspend fun updateProject(project: Project, oldProject: Project, changedField: String): Project
 
     suspend fun deleteProject(projectId: UUID): Project
 
