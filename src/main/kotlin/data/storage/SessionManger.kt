@@ -6,7 +6,12 @@ import org.example.domain.model.User
 
 object SessionManger {
 
-    private var user: User? = null
+    private var user: User? =
+        User(
+        username="Admin",
+        password="Admin@478",
+        role =  RoleType.ADMIN
+        )
 
     @Throws(EiffelFlowException.AuthorizationException::class)
     fun getUser(): User{
