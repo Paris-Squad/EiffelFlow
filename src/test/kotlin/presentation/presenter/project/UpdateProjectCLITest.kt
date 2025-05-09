@@ -1,7 +1,5 @@
 package presentation.presenter.project
 
-import org.example.domain.usecase.project.UpdateProjectUseCase
-import org.example.presentation.project.UpdateProjectCLI
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
@@ -9,13 +7,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
+import org.example.domain.usecase.project.UpdateProjectUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
+import org.example.presentation.project.UpdateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
-import java.util.UUID
+import java.util.*
 
 class UpdateProjectCLITest {
 
@@ -26,7 +25,12 @@ class UpdateProjectCLITest {
 
     @BeforeEach
     fun setup() {
-        updateProjectCli = UpdateProjectCLI(updateProjectUseCase = updateProjectUseCase, inputReader = inputReader, printer = printer)
+        updateProjectCli =
+            UpdateProjectCLI(
+                updateProjectUseCase = updateProjectUseCase,
+                inputReader = inputReader,
+                printer = printer
+            )
     }
 
     @Test
@@ -46,7 +50,7 @@ class UpdateProjectCLITest {
         val expectedProject = Project(
             projectName = "Project1",
             projectDescription = "Desc",
-            adminId =  adminId
+            adminId = adminId
         )
 
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc", adminId.toString())
@@ -73,11 +77,13 @@ class UpdateProjectCLITest {
             )
         } throws IllegalStateException("Unexpected failure")
 
-        val exception = assertThrows<RuntimeException> {
-            updateProjectCli.updateProjectInput()
-        }
+        //When
+        updateProjectCli.updateProjectInput()
 
-        assertThat(exception.message).isEqualTo("An error occurred while updating the project: Unexpected failure")
+        // Then
+        verify {
+            printer.displayLn("An error occurred: Unexpected failure")
+        }
     }
 
     @Test
@@ -88,28 +94,39 @@ class UpdateProjectCLITest {
 
         coEvery {
             updateProjectUseCase.updateProject(
-                match { it.projectName == "Project1" && it.projectDescription == "Description" && it.adminId == adminId }
-            ) } throws EiffelFlowException.IOException("Simulated IO error")
+                match {
+                    it.projectName == "Project1" &&
+                            it.projectDescription == "Description" &&
+                            it.adminId == adminId
+                }
+            )
+        } throws EiffelFlowException.IOException("Simulated IO error")
 
-        assertThrows<EiffelFlowException.IOException> { updateProjectCli.updateProjectInput() }
+        //When
+        updateProjectCli.updateProjectInput()
+
+        // Then
+        verify {
+            printer.displayLn("An error occurred: Simulated IO error")
+        }
     }
 
 
     @Test
     fun `should return updated project when multiple fields of project are updated`() {
-            // Given
-            val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(
-                projectName = "Updated Project Name",
-                projectDescription = "Updated Description"
-            )
-            coEvery { updateProjectUseCase.updateProject(updatedProject) } returns updatedProject
+        // Given
+        val updatedProject = ProjectsMock.CORRECT_PROJECT.copy(
+            projectName = "Updated Project Name",
+            projectDescription = "Updated Description"
+        )
+        coEvery { updateProjectUseCase.updateProject(updatedProject) } returns updatedProject
 
-            // When
-            val result = updateProjectCli.updateProject(updatedProject)
+        // When
+        val result = updateProjectCli.updateProject(updatedProject)
 
-            // Then
-            assertThat(result).isEqualTo(updatedProject)
-        }
+        // Then
+        assertThat(result).isEqualTo(updatedProject)
+    }
 
     @Test
     fun `should print error when project name is empty`() {
@@ -155,6 +172,5 @@ class UpdateProjectCLITest {
 
         verify { printer.displayLn("Invalid admin ID format.") }
     }
-
 
 }
