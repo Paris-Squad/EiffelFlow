@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.example.data.local.CsvAuthRepositoryImpl
+import org.example.data.local.csvrepository.CsvAuthRepositoryImpl
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
 import org.junit.jupiter.api.BeforeEach

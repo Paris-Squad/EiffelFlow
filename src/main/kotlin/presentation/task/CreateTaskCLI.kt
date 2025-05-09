@@ -1,7 +1,7 @@
 package org.example.presentation.task
 
 import kotlinx.coroutines.runBlocking
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.model.Project
 import org.example.domain.model.Task
 import org.example.domain.model.TaskState

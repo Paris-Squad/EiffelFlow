@@ -6,8 +6,8 @@ import data.mongorepository.MongoAuthRepositoryImpl
 import data.mongorepository.MongoProjectRepositoryImpl
 import data.mongorepository.MongoTaskRepositoryImpl
 import data.mongorepository.MongoUserRepositoryImpl
-import org.example.data.MongoCollections
-import org.example.data.MongoConfigProvider
+import org.example.data.remote.MongoCollections
+import org.example.data.remote.MongoConfigProvider
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.AuthRepository
 import org.example.domain.repository.ProjectRepository

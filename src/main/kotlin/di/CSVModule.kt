@@ -1,15 +1,15 @@
 package org.example.di
 
-import org.example.data.local.CsvAuditRepositoryImpl
-import org.example.data.local.CsvAuthRepositoryImpl
-import org.example.data.local.CsvProjectRepositoryImpl
-import org.example.data.local.CsvTaskRepositoryImpl
-import org.example.data.local.CsvUserRepositoryImpl
-import org.example.data.storage.FileDataSource
-import org.example.data.storage.parser.AuditCsvParser
-import org.example.data.storage.parser.ProjectCsvParser
-import org.example.data.storage.parser.TaskCsvParser
-import org.example.data.storage.parser.UserCsvParser
+import org.example.data.local.csvrepository.CsvAuditRepositoryImpl
+import org.example.data.local.csvrepository.CsvAuthRepositoryImpl
+import org.example.data.local.csvrepository.CsvProjectRepositoryImpl
+import org.example.data.local.csvrepository.CsvTaskRepositoryImpl
+import org.example.data.local.csvrepository.CsvUserRepositoryImpl
+import org.example.data.local.FileDataSource
+import org.example.data.local.parser.AuditCsvParser
+import org.example.data.local.parser.ProjectCsvParser
+import org.example.data.local.parser.TaskCsvParser
+import org.example.data.local.parser.UserCsvParser
 import org.example.domain.repository.*
 import org.koin.dsl.module
 import java.io.File

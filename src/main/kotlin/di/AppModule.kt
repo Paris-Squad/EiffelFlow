@@ -1,6 +1,10 @@
 package org.example.di
 
-import org.example.data.storage.parser.*
+import org.example.data.local.parser.AuditCsvParser
+import org.example.data.local.parser.ProjectCsvParser
+import org.example.data.local.parser.StateCsvParser
+import org.example.data.local.parser.TaskCsvParser
+import org.example.data.local.parser.UserCsvParser
 import org.koin.dsl.module
 
 val appModule = module {

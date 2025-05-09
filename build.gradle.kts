@@ -55,8 +55,8 @@ tasks.named<JacocoReport>("jacocoTestReport") {
                 exclude("org/example/domain/utils/**")
                 exclude("org/example/di/**")
                 exclude("org/example/MainKt.class")
-                exclude("org/example/data/storage/SessionManger.class")
-                exclude("org/example/data/MongoConfigProvider.class")
+                exclude("org/example/data/utils/SessionManger.class")
+                exclude("org/example/data/remote/MongoConfigProvider.class")
             }
         })
     )
