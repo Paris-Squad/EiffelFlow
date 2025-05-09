@@ -8,7 +8,6 @@ import org.bson.Document
 import org.example.data.MongoCollections
 import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 

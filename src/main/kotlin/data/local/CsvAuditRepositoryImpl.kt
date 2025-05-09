@@ -1,4 +1,4 @@
-package org.example.data.repository
+package org.example.data.local
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
@@ -7,7 +7,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
-class AuditRepositoryImpl(
+class CsvAuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
     private val fileDataSource: FileDataSource,
 //    private val taskRepository: TaskRepository

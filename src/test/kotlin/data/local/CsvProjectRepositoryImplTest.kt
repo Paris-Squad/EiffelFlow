@@ -1,11 +1,11 @@
-package data.repository
+package data.local
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.mockk
-import org.example.data.repository.ProjectRepositoryImpl
+import org.example.data.local.CsvProjectRepositoryImpl
 import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,7 +25,7 @@ import utils.ProjectsMock
 import utils.UserMock
 import java.io.IOException
 
-class ProjectRepositoryImplTest {
+class CsvProjectRepositoryImplTest {
 
     private lateinit var projectRepository: ProjectRepository
     private val csvStorageManager: FileDataSource = mockk(relaxed = true)
@@ -36,7 +36,7 @@ class ProjectRepositoryImplTest {
 
     @BeforeEach
     fun setUp() {
-        projectRepository = ProjectRepositoryImpl(
+        projectRepository = CsvProjectRepositoryImpl(
             projectCsvParser = projectMapper,
             fileDataSource = csvStorageManager,
             auditRepository = auditRepository

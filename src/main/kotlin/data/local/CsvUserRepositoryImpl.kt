@@ -1,4 +1,4 @@
-package org.example.data.repository
+package org.example.data.local
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
@@ -11,7 +11,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import java.util.UUID
 
-class UserRepositoryImpl(
+class CsvUserRepositoryImpl(
     private val userCsvParser: UserCsvParser,
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,

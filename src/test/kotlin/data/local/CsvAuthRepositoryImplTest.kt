@@ -1,9 +1,9 @@
-package data.repository
+package data.local
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import org.example.data.repository.AuthRepositoryImpl
+import org.example.data.local.CsvAuthRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
 import org.example.data.storage.parser.UserCsvParser
@@ -19,7 +19,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import kotlin.test.assertEquals
 
-class AuthRepositoryImplTest {
+class CsvAuthRepositoryImplTest {
     private lateinit var authRepository: AuthRepository
     private val authFileManager: FileDataSource = mockk()
     private val userFileManager: FileDataSource = mockk()
@@ -27,7 +27,7 @@ class AuthRepositoryImplTest {
 
     @BeforeEach
     fun setUp() {
-        authRepository = AuthRepositoryImpl(
+        authRepository = CsvAuthRepositoryImpl(
             authFileDataSource = authFileManager,
             usersFileDataSource = userFileManager,
             userCsvParser = userMapper

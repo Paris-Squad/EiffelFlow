@@ -1,4 +1,4 @@
-package data.repository
+package data.local
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import utils.TaskMock
 import java.io.IOException
 import java.util.UUID
-import org.example.data.repository.TaskRepositoryImpl
+import org.example.data.local.CsvTaskRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
 import org.example.data.storage.parser.TaskCsvParser
@@ -24,19 +24,19 @@ import utils.MockAuditLog
 
 import utils.UserMock
 
-class TaskRepositoryImplTest {
+class CsvTaskRepositoryImplTest {
 
     private val fileDataSource: FileDataSource = mockk(relaxed = true)
     private val taskMapper: TaskCsvParser = mockk(relaxed = true)
     private val auditRepository: AuditRepository = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
-    private lateinit var taskRepository: TaskRepositoryImpl
+    private lateinit var taskRepository: CsvTaskRepositoryImpl
 
     private val changedField = "title"
 
     @BeforeEach
     fun setUp() {
-        taskRepository = TaskRepositoryImpl(
+        taskRepository = CsvTaskRepositoryImpl(
             taskCsvParser = taskMapper,
             fileDataSource = fileDataSource,
             auditRepository = auditRepository

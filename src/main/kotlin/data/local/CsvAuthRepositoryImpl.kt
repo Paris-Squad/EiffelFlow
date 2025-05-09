@@ -1,4 +1,4 @@
-package org.example.data.repository
+package org.example.data.local
 
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.SessionManger
@@ -9,7 +9,7 @@ import org.example.domain.repository.AuthRepository
 import org.example.domain.utils.ValidationErrorMessage
 import java.io.FileNotFoundException
 
-class AuthRepositoryImpl(
+class CsvAuthRepositoryImpl(
     private val authFileDataSource: FileDataSource,
     private val usersFileDataSource: FileDataSource,
     private val userCsvParser: UserCsvParser

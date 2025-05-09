@@ -1,11 +1,11 @@
-package data.repository
+package data.local
 
 import com.google.common.truth.Truth.assertThat
 import domain.usecase.task.TaskMock.validTask
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
-import org.example.data.repository.AuditRepositoryImpl
+import org.example.data.local.CsvAuditRepositoryImpl
 import org.example.data.storage.FileDataSource
 import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.exception.EiffelFlowException
@@ -19,7 +19,7 @@ import utils.MockAuditLog
 import utils.MockAuditLog.AUDIT_LOG
 import java.util.*
 
-class AuditRepositoryImplTest {
+class CsvAuditRepositoryImplTest {
 
     private lateinit var auditRepository: AuditRepository
     private val csvStorageManager: FileDataSource = mockk()
@@ -28,7 +28,7 @@ class AuditRepositoryImplTest {
 
     @BeforeEach
     fun setUp() {
-        auditRepository = AuditRepositoryImpl(
+        auditRepository = CsvAuditRepositoryImpl(
             auditCsvParser,
             csvStorageManager,
             taskRepositoryProvider

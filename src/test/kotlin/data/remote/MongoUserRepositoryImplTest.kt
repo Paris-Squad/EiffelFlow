@@ -1,10 +1,11 @@
-package data.mongorepository
+package data.remote
 
 import com.google.common.truth.Truth.assertThat
 import com.mongodb.MongoException
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import data.mongorepository.MongoUserRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
