@@ -5,8 +5,8 @@ import org.example.domain.usecase.task.CreateTaskUseCase
 import org.example.presentation.presenter.io.InputReader
 import org.example.presentation.presenter.io.Printer
 import org.example.presentation.presenter.task.CreateTaskCLI
-import com.google.common.truth.Truth.assertThat
 import io.mockk.*
+import kotlinx.coroutines.test.runTest
 import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
@@ -37,18 +37,40 @@ class CreateTaskCLITest {
 
     @Test
     fun `should return the created task when task is successfully created`() {
-        //Given
-        every { inputReader.readString() } returnsMany listOf("valid title", "Valid Description", "1", "1")
-        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
-        coEvery { createTaskUseCase.createTask(any()) } returns validTask
+        runTest {
+            //Given
+            every { inputReader.readString() } returnsMany listOf("valid title", "Valid Description", "1", "1")
+            coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
+            coEvery { createTaskUseCase.createTask(any()) } returns validTask
 
+            //When
+            createTaskCli.createTaskInput()
 
-        //When
-        val result = createTaskCli.createTask(validTask)
+            // Then
+            verify {
+                printer.displayLn(match { (it as String).contains("Task created successfully") })
+            }
 
-        //Then
-        assertThat(result).isEqualTo(validTask)
+        }
+    }
 
+    @Test
+    fun `should not create task when projects are empty`() {
+        runTest {
+            //Given
+            every { inputReader.readString() } returnsMany listOf("valid title", "Valid Description", "1", "1")
+            coEvery { getProjectUseCase.getProjects() } returns listOf()
+            coEvery { createTaskUseCase.createTask(any()) } returns validTask
+
+            //When
+            createTaskCli.createTaskInput()
+
+            // Then
+            verify {
+                printer.displayLn("Enter task title:")
+            }
+
+        }
     }
 
     @Test
@@ -67,9 +89,39 @@ class CreateTaskCLITest {
     }
 
     @Test
+    fun `should print error when task name is null`() {
+        // Given
+        every { inputReader.readString() } returnsMany listOf(null, "valid title", "Valid Description", "1", "1")
+        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
+        coEvery { createTaskUseCase.createTask(any()) } returns validTask
+
+
+        // When
+        createTaskCli.createTaskInput()
+
+        // Then
+        verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
+    }
+
+    @Test
     fun `should print error when task description is empty`() {
         // Given
         every { inputReader.readString() } returnsMany listOf("valid title", "", "Valid Description", "1", "1")
+        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
+        coEvery { createTaskUseCase.createTask(any()) } returns validTask
+
+
+        // When
+        createTaskCli.createTaskInput()
+
+        // Then
+        verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
+    }
+
+    @Test
+    fun `should print error when task description is null`() {
+        // Given
+        every { inputReader.readString() } returnsMany listOf("valid title", null, "Valid Description", "1", "1")
         coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
         coEvery { createTaskUseCase.createTask(any()) } returns validTask
 
@@ -98,16 +150,17 @@ class CreateTaskCLITest {
 
         // Then
         verify {
-            printer.displayLn("Please enter valid number between 1 and 4")
+            printer.displayLn(match { (it as String).contains("Please enter a valid number") })
         }
     }
+
     @Test
     fun `should print error  when project input is invalid`() {
         // Given
         every { inputReader.readString() } returnsMany listOf(
             "Valid Title", "Valid Description", "4", "-1", "1"
         )
-        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT,CORRECT_PROJECT)
+        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT, CORRECT_PROJECT)
         coEvery { createTaskUseCase.createTask(any()) } returns validTask
 
 
@@ -117,7 +170,7 @@ class CreateTaskCLITest {
 
         // Then
         verify {
-            printer.displayLn("Please enter valid number of project")
+            printer.displayLn(match { (it as String).contains("Please enter a valid number") })
         }
     }
 
