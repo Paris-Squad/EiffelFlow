@@ -4,12 +4,12 @@ import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.utils.ValidationErrorMessage
 
 class ValidatePasswordUseCase {
-    fun validatePassword(password: String): Result<Unit> {
+    fun validatePassword(password: String) {
         val validationResult = getPasswordValidationErrors(password)
 
-        return if (validationResult.isNotEmpty()) {
-            Result.failure(AuthenticationException(validationResult))
-        } else Result.success(Unit)
+         if (validationResult.isNotEmpty()) {
+           throw AuthenticationException(validationResult)
+        }
     }
 
     fun getPasswordValidationErrors(password: String): Set<ValidationErrorMessage> {

@@ -6,6 +6,7 @@ import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.usecase.auth.ValidateUserNameUseCase
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class ValidateUserNameUseCaseTest {
 
@@ -15,45 +16,51 @@ class ValidateUserNameUseCaseTest {
     fun `validateUserName() should return success when username meets all requirements`() {
         val validUserName = "valid_username123"
 
-        val result = useCase.validateUserName(validUserName)
-
-        assertThat(result.isSuccess).isTrue()
+         useCase.validateUserName(validUserName)
     }
 
     @Test
     fun `validateUserName() should return AuthenticationException when username is too short`() {
         val invalidUserName = "us"
 
-        val result = useCase.validateUserName(invalidUserName)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validateUserName(invalidUserName)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Username must be at least 3 characters long")
        }
 
     @Test
     fun `validateUserName() should return AuthenticationException when username is too long`() {
         val invalidUserName = "thisusernameiswaytoolongandexceedsthethirtycharacterlimit"
 
-        val result = useCase.validateUserName(invalidUserName)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validateUserName(invalidUserName)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Username must be at most 30 characters long")
     }
 
     @Test
     fun `validateUserName() should return AuthenticationException when username contains invalid characters`() {
         val invalidUserName = "invalid@username!"
 
-        val result = useCase.validateUserName(invalidUserName)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validateUserName(invalidUserName)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Username must contain only letters, numbers, and underscores")
     }
 
     @Test
     fun `validateUserName() should return AuthenticationException with all errors when username fails multiple validations`() {
         val invalidUserName = "@"
 
-        val result = useCase.validateUserName(invalidUserName)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validateUserName(invalidUserName)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Username must contain only letters, numbers, and underscores")
     }
 
     @Nested
