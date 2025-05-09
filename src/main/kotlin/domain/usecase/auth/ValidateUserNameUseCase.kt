@@ -4,12 +4,12 @@ import org.example.domain.utils.ValidationErrorMessage
 import org.example.domain.exception.EiffelFlowException.AuthenticationException
 
 class ValidateUserNameUseCase {
-    fun validateUserName(userName: String): Result<Unit> {
+    fun validateUserName(userName: String) {
         val validationResult = getUserNameValidationErrors(userName)
 
-        return if (validationResult.isNotEmpty()) {
-            Result.failure(AuthenticationException(validationResult))
-        } else Result.success(Unit)
+         if (validationResult.isNotEmpty()) {
+           throw AuthenticationException(validationResult)
+        }
     }
 
     fun getUserNameValidationErrors(userName: String): Set<ValidationErrorMessage> {
