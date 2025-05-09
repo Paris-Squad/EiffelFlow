@@ -25,6 +25,7 @@ class MongoUserRepositoryImpl(
     private val usersCollection = database.getCollection<User>(collectionName = MongoCollections.USERS)
 
     override suspend fun createUser(user: User): User {
+        validateAdminPermission()
         try {
             val existingUser = usersCollection.find(eq("userId", user.userId)).firstOrNull()
             if (existingUser != null) {
@@ -50,37 +51,41 @@ class MongoUserRepositoryImpl(
             val query = eq("userId", user.userId)
             val oldUser = usersCollection.findOneAndUpdate(query, updates, options)
 
-            return oldUser?.let {
-                val fieldChanges = oldUser.getFieldChanges(user)
-                val changedFieldsNames = fieldChanges.map { it.fieldName }
-                val oldValues = fieldChanges.map { it.oldValue }
-                val newValues = fieldChanges.map { it.newValue }
-                logAction(
-                    user = user,
-                    actionType = AuditLogAction.UPDATE,
-                    changedField = changedFieldsNames.toString(),
-                    oldValue = oldValues.toString(),
-                    newValue = newValues.toString(),
-                )
-                user
-            } ?: throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
+            if (oldUser == null) {
+                throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
+            }
+
+            val fieldChanges = oldUser.getFieldChanges(user)
+            val changedFieldsNames = fieldChanges.map { it.fieldName }
+            val oldValues = fieldChanges.map { it.oldValue }
+            val newValues = fieldChanges.map { it.newValue }
+            logAction(
+                user = user,
+                actionType = AuditLogAction.UPDATE,
+                changedField = changedFieldsNames.toString(),
+                oldValue = oldValues.toString(),
+                newValue = newValues.toString(),
+            )
+            return user
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't update User with id ${user.userId} because ${exception.message}")
         }
     }
 
     override suspend fun deleteUser(userId: UUID): User {
+        validateAdminPermission()
         try {
             val query = eq("userId", userId)
             val deletedUser = usersCollection.findOneAndDelete(query)
 
-            return deletedUser?.let {
-                logAction(
-                    user = deletedUser,
-                    actionType = AuditLogAction.DELETE
-                )
-                deletedUser
-            } ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
+            if (deletedUser == null) {
+                throw EiffelFlowException.NotFoundException("User with id $userId not found")
+            }
+            logAction(
+                user = deletedUser,
+                actionType = AuditLogAction.DELETE
+            )
+            return deletedUser
 
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't delete User with id $userId because ${exception.message}")
@@ -88,6 +93,7 @@ class MongoUserRepositoryImpl(
     }
 
     override suspend fun getUserById(userId: UUID): User {
+        validateAdminPermission()
         try {
             val user = usersCollection.find(eq("userId", userId)).firstOrNull()
             return user ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
@@ -97,10 +103,17 @@ class MongoUserRepositoryImpl(
     }
 
     override suspend fun getUsers(): List<User> {
+        validateAdminPermission()
         try {
-            return  usersCollection.find().toList()
+            return usersCollection.find().toList()
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't get Users because ${exception.message}")
+        }
+    }
+
+    private fun validateAdminPermission() {
+        require(SessionManger.isAdmin()) {
+            throw EiffelFlowException.AuthorizationException("Only admin can create user")
         }
     }
 
