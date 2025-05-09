@@ -1,7 +1,5 @@
 package presentation.presenter.project
 
-import org.example.domain.usecase.project.CreateProjectUseCase
-import org.example.presentation.project.CreateProjectCLI
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
@@ -9,13 +7,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
+import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
+import org.example.presentation.project.CreateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
-import java.util.UUID
-
+import java.util.*
 
 class CreateProjectPresenterTest {
 
@@ -26,21 +25,22 @@ class CreateProjectPresenterTest {
 
     @BeforeEach
     fun setup() {
-        createProjectCli = CreateProjectCLI(createProjectUseCase = createProjectUseCase, inputReader = inputReader, printer = printer)
+        createProjectCli =
+            CreateProjectCLI(createProjectUseCase = createProjectUseCase, inputReader = inputReader, printer = printer)
     }
 
     @Test
     fun `should return the created Project when project is successfully created`() {
-            //Given
-            coEvery {
-                createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
-            } returns ProjectsMock.CORRECT_PROJECT
+        //Given
+        coEvery {
+            createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
+        } returns ProjectsMock.CORRECT_PROJECT
 
-            //When
-            val result = createProjectCli.createProject(ProjectsMock.CORRECT_PROJECT)
+        //When
+        val result = createProjectCli.createProject(ProjectsMock.CORRECT_PROJECT)
 
-            //Then
-            assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
+        //Then
+        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
 
     }
 
@@ -83,7 +83,7 @@ class CreateProjectPresenterTest {
         // When
         createProjectCli.createProjectInput()
         // Then
-        verify(exactly = 1) { printer.displayLn("Project name cannot be empty.")}
+        verify(exactly = 1) { printer.displayLn("Project name cannot be empty.") }
     }
 
     @Test
@@ -137,30 +137,44 @@ class CreateProjectPresenterTest {
     @Test
     fun `should print error when EiffelFlowException occurs`() {
         // Given
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "123e4567-e89b-12d3-a456-426614174000")
-        coEvery { createProjectUseCase.createProject(any()) } throws EiffelFlowException.IOException("Failed to create the project")
+        val exception = EiffelFlowException.IOException("Failed to create the project")
+        every { inputReader.readString() } returnsMany listOf(
+            "Project1",
+            "Desc",
+            "123e4567-e89b-12d3-a456-426614174000"
+        )
+        coEvery {
+            createProjectUseCase.createProject(any())
+        } throws exception
 
         // When
         createProjectCli.createProjectInput()
 
         // Then
         verify {
-            printer.displayLn("Failed to create the project: Failed to create the project")
+            printer.displayLn("An error occurred: ${exception.message}")
         }
     }
 
     @Test
     fun `should print error when a general exception occurs`() {
         // Given
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "123e4567-e89b-12d3-a456-426614174000")
-        coEvery { createProjectUseCase.createProject(any()) } throws Exception("Unexpected error")
+        val exception = Exception("Unexpected error")
+        every { inputReader.readString() } returnsMany listOf(
+            "Project1",
+            "Desc",
+            "123e4567-e89b-12d3-a456-426614174000"
+        )
+        coEvery {
+            createProjectUseCase.createProject(any())
+        } throws exception
 
         // When
         createProjectCli.createProjectInput()
 
         // Then
         verify {
-            printer.displayLn("An error occurred while creating the project: Unexpected error")
+            printer.displayLn("An error occurred: ${exception.message}")
         }
     }
 
