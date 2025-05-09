@@ -23,7 +23,8 @@ val csvModule = module{
         AuditRepositoryImpl(
             auditCsvParser = get<AuditCsvParser>(),
             fileDataSource = FileDataSource(File(AuditRepositoryImpl.FILE_NAME)),
-            taskRepository = get()
+//            taskRepository = get()
+            taskRepositoryProvider = lazy { get() }
         )
     }
     single<ProjectRepository> {
