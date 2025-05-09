@@ -99,29 +99,6 @@ class CreateTaskCLITest {
     }
 
     @Test
-    fun `should print error when getting projects failed2`() {
-        runTest {
-            //Given
-            val exception = EiffelFlowException.IOException("Failed to get projects")
-            every {
-                inputReader.readString()
-            } returnsMany listOf("valid title", "Valid Description", "1", "1")
-            coEvery {
-                getProjectUseCase.getProjects()
-            } throws EiffelFlowException.IOException("Task creation failed")
-
-            //When
-            createTaskCli.start()
-
-            // Then
-            verify {
-                printer.displayLn("An error occurred: Task creation failed")
-            }
-
-        }
-    }
-
-    @Test
     fun `should not create task when projects are empty`() {
         runTest {
             //Given
