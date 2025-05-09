@@ -13,6 +13,7 @@ import org.example.domain.repository.AuthRepository
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.repository.TaskRepository
 import org.example.domain.repository.UserRepository
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 
@@ -21,32 +22,31 @@ val mongoModule = module{
     single { MongoConfigProvider() }
     single<MongoDatabase> { get<MongoConfigProvider>().getDatabase() }
 
-
-    single<AuditRepository> {
+    single<AuditRepository>(named("mongoAuditRepo")) {
         MongoAuditRepositoryImpl(
             database = get(),
-            taskRepositoryProvider = lazy { get() }
+            taskRepositoryProvider = lazy { get(named("mongoTaskRepo")) }
         )
     }
-    single<ProjectRepository> {
+    single<ProjectRepository>(named("mongoProjectRepo")) {
         MongoProjectRepositoryImpl(
             database = get(),
-            auditRepository = get()
+            auditRepository = get(named("mongoAuditRepo"))
         )
     }
-    single<TaskRepository> {
+    single<TaskRepository>(named("mongoTaskRepo")) {
         MongoTaskRepositoryImpl(
             database = get(),
-            auditRepository = get()
+            auditRepository = get(named("mongoAuditRepo"))
         )
     }
-    single<UserRepository> {
+    single<UserRepository>(named("mongoUserRepo")) {
         MongoUserRepositoryImpl(
             database = get(),
-            auditRepository = get()
+            auditRepository = get(named("mongoAuditRepo"))
         )
     }
-    single<AuthRepository> {
+    single<AuthRepository>(named("mongoAuthRepo")) {
         MongoAuthRepositoryImpl(
             database = get()
         )
