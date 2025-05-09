@@ -1,11 +1,11 @@
-package presentation.presenter
+package presentation.presenter.auth
 
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth
 import io.mockk.coEvery
 import io.mockk.mockk
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.RegisterUseCase
-import org.example.presentation.presenter.RegisterPresenter
+import org.example.presentation.presenter.auth.RegisterPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -25,15 +25,17 @@ class RegisterPresenterTest {
     @Test
     fun `should return user when registration is successful`() {
 
-        coEvery { registerUseCase.register(
-            user.validUser.username,
-            user.validUser.password,
-            user.validUser.role)
-        }returns user.validUser
+        coEvery {
+            registerUseCase.register(
+                user.validUser.username,
+                user.validUser.password,
+                user.validUser.role
+            )
+        } returns user.validUser
 
         val result = registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
 
-        assertThat(result).isEqualTo(user.validUser)
+        Truth.assertThat(result).isEqualTo(user.validUser)
 
     }
 
@@ -47,7 +49,7 @@ class RegisterPresenterTest {
         val thrown = assertThrows<EiffelFlowException.AuthorizationException> {
             registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
         }
-        assertThat(thrown.message).contains("Not allowed")
+        Truth.assertThat(thrown.message).contains("Not allowed")
     }
 
     @Test
@@ -63,6 +65,6 @@ class RegisterPresenterTest {
         val thrown = assertThrows<RuntimeException> {
             registerPresenter.register(user.validUser.username, user.validUser.password, user.validUser.role)
         }
-        assertThat(thrown.message).contains("An error occurred during registration: Unexpected error")
+        Truth.assertThat(thrown.message).contains("An error occurred during registration: Unexpected error")
     }
 }

@@ -1,4 +1,4 @@
-package org.example.presentation.presenter
+package org.example.presentation.presenter.auth
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
@@ -37,9 +37,8 @@ class LoginCLI(
 
     fun login(userName: String, password: String) {
         return runBlocking {
-                loginUseCase.login(userName = userName, password = password)
+            loginUseCase.login(userName = userName, password = password)
         }
     }
 
 }
-

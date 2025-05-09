@@ -1,16 +1,15 @@
-package presentation.presenter
+package presentation.presenter.auth
 
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth
 import io.mockk.coEvery
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LogoutUseCase
-import org.example.presentation.presenter.LogoutPresenter
+import org.example.presentation.presenter.auth.LogoutPresenter
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
 
 class LogoutPresenterTest {
     private val logoutUseCase : LogoutUseCase = mockk(relaxed = true)
@@ -30,7 +29,7 @@ class LogoutPresenterTest {
         val result = logoutPresenter.logout()
 
         // Then
-        assertThat(result).isEqualTo("Logout successful")
+        Truth.assertThat(result).isEqualTo("Logout successful")
     }
 
     @Test
@@ -43,7 +42,7 @@ class LogoutPresenterTest {
         val result = logoutPresenter.logout()
 
         // Then
-        assertThat(result).isEqualTo("failed logout")
+        Truth.assertThat(result).isEqualTo("failed logout")
     }
 
     @Test
@@ -56,7 +55,7 @@ class LogoutPresenterTest {
         val result = logoutPresenter.logout()
 
         // Then
-        assertThat(result).isEqualTo("Logout failed")
+        Truth.assertThat(result).isEqualTo("Logout failed")
     }
 
 

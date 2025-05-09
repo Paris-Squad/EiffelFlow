@@ -1,13 +1,12 @@
-package presentation.presenter
+package presentation.presenter.auth
 
-import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
-import org.example.presentation.presenter.LoginCLI
+import org.example.presentation.presenter.auth.LoginCLI
 import org.example.presentation.presenter.io.InputReader
 import org.example.presentation.presenter.io.Printer
 import org.junit.jupiter.api.BeforeEach
@@ -87,4 +86,3 @@ class LoginCLITest {
 
 
 }
-

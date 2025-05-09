@@ -1,4 +1,4 @@
-package org.example.presentation.presenter
+package org.example.presentation.presenter.auth
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
