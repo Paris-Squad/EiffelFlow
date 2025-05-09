@@ -12,7 +12,7 @@ import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 
 class MongoAuthRepositoryImpl(
-    private val database: MongoDatabase
+     database: MongoDatabase
 ) : AuthRepository {
 
     private val authCollection = database.getCollection<User>(collectionName = MongoCollections.AUTH)
