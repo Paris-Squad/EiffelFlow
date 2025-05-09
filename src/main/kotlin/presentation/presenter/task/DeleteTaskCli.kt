@@ -4,8 +4,8 @@ import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Task
 import org.example.domain.usecase.task.DeleteTaskUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import java.util.*
 
 
