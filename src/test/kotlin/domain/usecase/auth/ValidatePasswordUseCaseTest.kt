@@ -6,6 +6,7 @@ import org.example.domain.exception.EiffelFlowException.AuthenticationException
 import org.example.domain.usecase.auth.ValidatePasswordUseCase
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class ValidatePasswordUseCaseTest {
 
@@ -15,63 +16,74 @@ class ValidatePasswordUseCaseTest {
     fun `validatePassword() should return success when password meets all requirements`() {
         val validPassword = "Valid1Password!"
 
-        val result = useCase.validatePassword(validPassword)
+        useCase.validatePassword(validPassword)
 
-        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
     fun `validatePassword() should return PasswordValidationException when password has no uppercase letters`() {
         val invalidPassword = "invalid1password!"
 
-        val result = useCase.validatePassword(invalidPassword)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validatePassword(invalidPassword)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Password must contain at least one uppercase letter")
     }
 
     @Test
     fun `validatePassword() should return PasswordValidationException when password has no lowercase letters`() {
         val invalidPassword = "INVALID1PASSWORD!"
 
-        val result = useCase.validatePassword(invalidPassword)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validatePassword(invalidPassword)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Password must contain at least one lowercase letter")
     }
 
     @Test
     fun `validatePassword() should return PasswordValidationException when password has no digits`() {
         val invalidPassword = "InvalidPassword!"
 
-        val result = useCase.validatePassword(invalidPassword)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validatePassword(invalidPassword)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Password must contain at least one digit")
     }
 
     @Test
     fun `validatePassword() should return PasswordValidationException when password has no special characters`() {
         val invalidPassword = "Invalid1Password"
 
-        val result = useCase.validatePassword(invalidPassword)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validatePassword(invalidPassword)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Password must contain at least one special character")
     }
 
     @Test
     fun `validatePassword() should return PasswordValidationException when password is too short`() {
         val invalidPassword = "Inv1!"
 
-        val result = useCase.validatePassword(invalidPassword)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validatePassword(invalidPassword)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Password must be at least 8 characters long")
     }
 
     @Test
     fun `validatePassword() should return PasswordValidationException with all errors when password fails multiple validations`() {
         val invalidPassword = "inv"
 
-        val result = useCase.validatePassword(invalidPassword)
+        val exception = assertThrows<AuthenticationException> {
+            useCase.validatePassword(invalidPassword)
+        }
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(AuthenticationException::class.java)
+        assertThat(exception.message).contains("Password must be at least 8 characters long")
     }
 
     @Nested
