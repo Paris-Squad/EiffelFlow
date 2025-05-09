@@ -1,6 +1,6 @@
 package presentation.presenter.task
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import org.example.presentation.presenter.task.DeleteTaskCLI
 import com.google.common.truth.Truth.assertThat
 import io.mockk.Runs
