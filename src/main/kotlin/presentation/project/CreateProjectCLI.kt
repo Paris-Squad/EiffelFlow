@@ -1,11 +1,13 @@
 package org.example.presentation.project
 
 import kotlinx.coroutines.runBlocking
+import org.example.data.storage.SessionManger
 import org.example.domain.model.Project
 import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
+import org.koin.core.component.getScopeId
 import java.util.UUID
 import kotlin.text.isNullOrBlank
 
@@ -31,19 +33,10 @@ class CreateProjectCLI(
                 return@tryStartCli
             }
 
-            printer.displayLn("Enter admin ID:")
-            val adminIdInput = inputReader.readString()
-            val adminId = try {
-                UUID.fromString(adminIdInput)
-            } catch (e: IllegalArgumentException) {
-                printer.displayLn("Invalid admin ID format.")
-                return@tryStartCli
-            }
-
             val project = Project(
                 projectName = name,
                 projectDescription = description,
-                adminId = adminId
+                adminId = SessionManger.getUser().userId
             )
 
             val createdProject = createProject(project)

@@ -1,20 +1,26 @@
 package presentation.presenter.project
 
+import org.example.domain.usecase.project.CreateProjectUseCase
+import org.example.presentation.project.CreateProjectCLI
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.verify
+import io.mockk.verifyOrder
+import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
-import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import org.example.presentation.project.CreateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
-import java.util.*
+import utils.UserMock
+import java.util.UUID
+
+
 
 class CreateProjectPresenterTest {
 
@@ -22,9 +28,12 @@ class CreateProjectPresenterTest {
     private val inputReader: InputReader = mockk()
     private val printer: Printer = mockk(relaxed = true)
     private lateinit var createProjectCli: CreateProjectCLI
+    //private val adminId = SessionManger.login(UserMock.adminUser)
 
     @BeforeEach
     fun setup() {
+        mockkObject(SessionManger)
+        every { SessionManger.getUser() } returns UserMock.adminUser
         createProjectCli =
             CreateProjectCLI(createProjectUseCase = createProjectUseCase, inputReader = inputReader, printer = printer)
     }
@@ -54,7 +63,7 @@ class CreateProjectPresenterTest {
             adminId = validAdminId
         )
 
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", validAdminId.toString())
+        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
         coEvery { createProjectUseCase.createProject(any()) } returns expectedProject
 
         // When
@@ -110,73 +119,47 @@ class CreateProjectPresenterTest {
         verify { printer.displayLn("Project description cannot be empty.") }
     }
 
-    @Test
-    fun `should print error when admin ID format is invalid`() {
-        // Given
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "uuid")
-
-        // When
-        createProjectCli.createProjectInput()
-
-        // Then
-        verify { printer.displayLn("Invalid admin ID format.") }
-    }
 
     @Test
-    fun `should print error when admin ID is missing or null`() {
-        // Given
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "")
-
-        // When
-        createProjectCli.createProjectInput()
-
-        // Then
-        verify { printer.displayLn("Invalid admin ID format.") }
-    }
-
-    @Test
-    fun `should print error when EiffelFlowException occurs`() {
-        // Given
+    fun `should print error when EiffelFlowException occurs during creation`() {
         val exception = EiffelFlowException.IOException("Failed to create the project")
-        every { inputReader.readString() } returnsMany listOf(
-            "Project1",
-            "Desc",
-            "123e4567-e89b-12d3-a456-426614174000"
-        )
-        coEvery {
-            createProjectUseCase.createProject(any())
-        } throws exception
+        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
+        coEvery { createProjectUseCase.createProject(any()) } throws exception
 
-        // When
         createProjectCli.createProjectInput()
 
-        // Then
-        verify {
-            printer.displayLn("An error occurred: ${exception.message}")
+        verifyOrder {
+            printer.displayLn("Enter project name:")
+            printer.displayLn("Enter project description:")
+            printer.displayLn("An error occurred: Failed to create the project")
         }
     }
 
     @Test
-    fun `should print error when a general exception occurs`() {
-        // Given
+    fun `should print error when generic Exception occurs during creation`() {
         val exception = Exception("Unexpected error")
-        every { inputReader.readString() } returnsMany listOf(
-            "Project1",
-            "Desc",
-            "123e4567-e89b-12d3-a456-426614174000"
-        )
-        coEvery {
-            createProjectUseCase.createProject(any())
-        } throws exception
+        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
+        coEvery { createProjectUseCase.createProject(any()) } throws exception
 
-        // When
         createProjectCli.createProjectInput()
 
-        // Then
-        verify {
-            printer.displayLn("An error occurred: ${exception.message}")
+        verifyOrder {
+            printer.displayLn("Enter project name:")
+            printer.displayLn("Enter project description:")
+            printer.displayLn("An error occurred: Unexpected error")
         }
     }
 
+    @Test
+    fun `should print error when inputReader throws exception`() {
+        val exception = RuntimeException("Input device failure")
+        every { inputReader.readString() } throws exception
 
+        createProjectCli.createProjectInput()
+
+        verify {
+            printer.displayLn("Enter project name:")
+            printer.displayLn("An error occurred: ${exception.message}")
+        }
+    }
 }
