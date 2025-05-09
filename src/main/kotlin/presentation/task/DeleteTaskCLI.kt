@@ -1,4 +1,4 @@
-package org.example.presentation.presenter.task
+package org.example.presentation.task
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
@@ -6,8 +6,7 @@ import org.example.domain.model.Task
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import java.util.*
-
+import java.util.UUID
 
 class DeleteTaskCLI(
     private val deleteTaskUseCase: DeleteTaskUseCase,
