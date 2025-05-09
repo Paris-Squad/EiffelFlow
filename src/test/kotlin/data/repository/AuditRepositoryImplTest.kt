@@ -2,11 +2,7 @@ package data.repository
 
 import com.google.common.truth.Truth.assertThat
 import domain.usecase.task.TaskMock.validTask
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import org.example.data.repository.AuditRepositoryImpl
@@ -28,11 +24,15 @@ class AuditRepositoryImplTest {
     private lateinit var auditRepository: AuditRepository
     private val csvStorageManager: FileDataSource = mockk()
     private val auditCsvParser: AuditCsvParser = mockk()
-    private val taskRepository: TaskRepository = mockk()
+    private var taskRepositoryProvider: Lazy<TaskRepository> = mockk()
 
     @BeforeEach
     fun setUp() {
-        auditRepository = AuditRepositoryImpl(auditCsvParser, csvStorageManager, taskRepository)
+        auditRepository = AuditRepositoryImpl(
+            auditCsvParser,
+            csvStorageManager,
+            taskRepositoryProvider
+        )
     }
 
     @Test
@@ -147,7 +147,7 @@ class AuditRepositoryImplTest {
 
             every { csvStorageManager.readLinesFromFile() } returns csvLines
             every { auditCsvParser.parseCsvLine(csvLine) } returns expectedAuditLog
-            coEvery { taskRepository.getTasks() } returns listOf(validTask)
+            coEvery { taskRepositoryProvider.value.getTasks() } returns listOf(validTask)
 
             // When
             val result = auditRepository.getProjectAuditLogById(projectId)
@@ -163,7 +163,7 @@ class AuditRepositoryImplTest {
             // Given
             val csvLines = listOf(MockAuditLog.FULL_CSV_STRING_LINE)
             every { csvStorageManager.readLinesFromFile() } returns csvLines
-            coEvery { taskRepository.getTasks() } throws EiffelFlowException
+            coEvery { taskRepositoryProvider.value.getTasks() } throws EiffelFlowException
                 .NotFoundException("No audit logs found for project or related tasks:${validTask.projectId}")
 
 
@@ -186,7 +186,7 @@ class AuditRepositoryImplTest {
             val csvLines = listOf(MockAuditLog.FULL_CSV_STRING_LINE)
 
             every { csvStorageManager.readLinesFromFile() } returns csvLines
-            coEvery { taskRepository.getTasks() } returns listOf(validTask.copy(taskId = taskId, projectId = projectId))
+            coEvery { taskRepositoryProvider.value.getTasks() } returns listOf(validTask.copy(taskId = taskId, projectId = projectId))
 
 
             every { auditCsvParser.parseCsvLine(csvLines[0]) } returns auditLog
@@ -212,7 +212,7 @@ class AuditRepositoryImplTest {
             every { csvStorageManager.readLinesFromFile() } returns listOf("validLine", "invalidLine")
             every { auditCsvParser.parseCsvLine("validLine") } returns auditLog
             every { auditCsvParser.parseCsvLine("invalidLine") } throws IllegalArgumentException()
-            coEvery { taskRepository.getTasks() } returns listOf(task)
+            coEvery { taskRepositoryProvider.value.getTasks() } returns listOf(task)
             // When
             val result = auditRepository.getProjectAuditLogById(projectId)
 
@@ -264,7 +264,7 @@ class AuditRepositoryImplTest {
             every { csvStorageManager.readLinesFromFile() } returns csvLines
             every { auditCsvParser.parseCsvLine("logLine1") } returns log1
             every { auditCsvParser.parseCsvLine("logLine2") } returns log2
-            coEvery { taskRepository.getTasks() } returns listOf(
+            coEvery { taskRepositoryProvider.value.getTasks() } returns listOf(
                 validTask.copy(taskId = taskId1, projectId = projectId),
                 validTask.copy(taskId = taskId2, projectId = projectId)
             )
@@ -276,7 +276,6 @@ class AuditRepositoryImplTest {
             assertThat(result).containsExactly(log2, log1)
         }
     }
-
 
 
     //endregion

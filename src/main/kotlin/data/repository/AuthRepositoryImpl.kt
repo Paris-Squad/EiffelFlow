@@ -10,12 +10,14 @@ import org.example.domain.utils.ValidationErrorMessage
 import java.io.FileNotFoundException
 
 class AuthRepositoryImpl(
-    private val fileDataSource: FileDataSource, private val userCsvParser: UserCsvParser
+    private val authFileDataSource: FileDataSource,
+    private val usersFileDataSource: FileDataSource,
+    private val userCsvParser: UserCsvParser
 ) : AuthRepository {
 
     override suspend fun loginUser(username: String, password: String): User {
         return try {
-            val lines = fileDataSource.readLinesFromFile()
+            val lines = usersFileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { userCsvParser.parseCsvLine(it) }
 
             val user = users.find { it.username == username } ?: throw EiffelFlowException.AuthenticationException(
@@ -39,7 +41,7 @@ class AuthRepositoryImpl(
     override suspend fun saveUserLogin(user: User): User {
         return try {
             val userCsv = userCsvParser.serialize(user)
-            fileDataSource.writeLinesToFile(userCsv)
+            authFileDataSource.writeLinesToFile(userCsv)
             SessionManger.login(user)
             user
         } catch (e: Exception) {
@@ -49,7 +51,7 @@ class AuthRepositoryImpl(
 
     override suspend fun isUserLoggedIn(): Boolean {
         return try {
-            val lines = fileDataSource.readLinesFromFile()
+            val lines = authFileDataSource.readLinesFromFile()
             if (lines.any { it.isNotBlank() }) {
                 val userCsv = lines.first { it.isNotBlank() }
                 val user = userCsvParser.parseCsvLine(userCsv)
@@ -66,7 +68,7 @@ class AuthRepositoryImpl(
 
     override suspend fun clearLogin() {
         return try {
-            fileDataSource.clearFile()
+            authFileDataSource.clearFile()
             SessionManger.logout()
         } catch (e: Exception) {
             throw EiffelFlowException.IOException(e.message)

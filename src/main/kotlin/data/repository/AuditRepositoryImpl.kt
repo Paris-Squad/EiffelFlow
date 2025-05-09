@@ -5,13 +5,17 @@ import org.example.data.storage.parser.AuditCsvParser
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
-import java.util.*
+import java.util.UUID
 
 class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
     private val fileDataSource: FileDataSource,
-    private val taskRepository: TaskRepository
+//    private val taskRepository: TaskRepository
+    taskRepositoryProvider: Lazy<TaskRepository>
 ) : AuditRepository {
+    private val taskRepository: TaskRepository by taskRepositoryProvider
+
+
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
         val line = auditCsvParser.serialize(auditLog)
         fileDataSource.writeLinesToFile(line)
