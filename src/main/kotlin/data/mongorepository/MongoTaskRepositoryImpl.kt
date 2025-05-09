@@ -56,22 +56,24 @@ class MongoTaskRepositoryImpl(
 
             val options = FindOneAndUpdateOptions().upsert(false)
             val query = eq("taskId", task.taskId)
-            val oldUser = tasksCollection.findOneAndUpdate(query, updates, options)
+            val oldTask = tasksCollection.findOneAndUpdate(query, updates, options)
 
-            return oldUser?.let {
-                val fieldChanges = oldTask.getFieldChanges(task)
-                val changedFieldsNames = fieldChanges.map { it.fieldName }
-                val oldValues = fieldChanges.map { it.oldValue }
-                val newValues = fieldChanges.map { it.newValue }
-                logAction(
-                    task = task,
-                    actionType = AuditLogAction.UPDATE,
-                    changedField = changedFieldsNames.toString(),
-                    oldValue = oldValues.toString(),
-                    newValue = newValues.toString(),
-                )
-                task
-            } ?: throw EiffelFlowException.NotFoundException("Task with id ${task.projectId} not found")
+            if (oldTask == null) {
+                throw EiffelFlowException.NotFoundException("Task with id ${task.projectId} not found")
+            }
+
+            val fieldChanges = oldTask.getFieldChanges(task)
+            val changedFieldsNames = fieldChanges.map { it.fieldName }
+            val oldValues = fieldChanges.map { it.oldValue }
+            val newValues = fieldChanges.map { it.newValue }
+            logAction(
+                task = task,
+                actionType = AuditLogAction.UPDATE,
+                changedField = changedFieldsNames.toString(),
+                oldValue = oldValues.toString(),
+                newValue = newValues.toString(),
+            )
+            return task
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't update Task with id ${task.projectId} because ${exception.message}")
         }
@@ -82,13 +84,15 @@ class MongoTaskRepositoryImpl(
             val query = eq("taskId", taskId)
             val deletedTask = tasksCollection.findOneAndDelete(query)
 
-            return deletedTask?.let {
-                logAction(
-                    task = deletedTask,
-                    actionType = AuditLogAction.DELETE
-                )
-                deletedTask
-            } ?: throw EiffelFlowException.NotFoundException("Task with id $taskId not found")
+            if (deletedTask == null) {
+                throw EiffelFlowException.NotFoundException("Task with id $taskId not found")
+            }
+
+            logAction(
+                task = deletedTask,
+                actionType = AuditLogAction.DELETE
+            )
+            return deletedTask
 
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't delete Task with id $taskId because ${exception.message}")

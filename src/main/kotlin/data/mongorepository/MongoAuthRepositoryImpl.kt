@@ -6,7 +6,9 @@ import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.Document
 import org.example.data.MongoCollections
+import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 
@@ -31,14 +33,23 @@ class MongoAuthRepositoryImpl(
     }
 
     override suspend fun isUserLoggedIn(): Boolean {
-       authCollection.find().firstOrNull() ?: throw EiffelFlowException.NotFoundException(
-            "User is not logged in"
-        )
-        return true
+        try {
+            authCollection.find().firstOrNull() ?: throw EiffelFlowException.NotFoundException(
+                "User is not logged in"
+            )
+            return true
+        } catch (exception: Throwable) {
+            throw EiffelFlowException.IOException("Can't check if user is logged in because ${exception.message}")
+        }
     }
 
     override suspend fun clearLogin() {
-        authCollection.deleteMany(Document())
+        try {
+            authCollection.deleteMany(Document())
+            SessionManger.logout()
+        } catch (throwable: Throwable) {
+            throw EiffelFlowException.IOException("Can't clear login because ${throwable.message}")
+        }
     }
 
     override suspend fun loginUser(username: String, password: String): User {
@@ -51,7 +62,9 @@ class MongoAuthRepositoryImpl(
             ).firstOrNull()
 
             existUser ?: throw EiffelFlowException.NotFoundException("Invalid username or password")
-            return saveUserLogin(existUser)
+            val savedUser = saveUserLogin(existUser)
+            SessionManger.login(savedUser)
+            return savedUser
         } catch (throwable: Throwable) {
             throw EiffelFlowException.IOException("Can't login user because ${throwable.message}")
         }
