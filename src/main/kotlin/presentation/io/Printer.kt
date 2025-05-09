@@ -1,4 +1,4 @@
-package org.example.presentation.presenter.io
+package org.example.presentation.io
 
 interface Printer {
     fun displayLn(input: Any? = "\n")

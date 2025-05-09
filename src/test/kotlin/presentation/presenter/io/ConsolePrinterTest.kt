@@ -1,7 +1,7 @@
 package presentation.presenter.io
 
 
-import org.example.presentation.presenter.io.ConsolePrinter
+import org.example.presentation.io.ConsolePrinter
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream

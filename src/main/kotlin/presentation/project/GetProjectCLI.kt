@@ -1,44 +1,41 @@
-package org.example.presentation.presenter.project
+package org.example.presentation.project
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
 import org.example.domain.usecase.project.GetProjectUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.BaseCli
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import java.util.UUID
 
 class GetProjectCLI(
-    private val getProjectUseCase: GetProjectUseCase ,
+    private val getProjectUseCase: GetProjectUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
+) : BaseCli(printer) {
 
-    fun displayProjects(){
-        try {
+    fun displayProjects() {
+        tryStartCli {
             val projects = getProjects()
-            if(projects.isEmpty()){
+            if (projects.isEmpty()) {
                 printer.displayLn("No projects found.")
-            } else{
+            } else {
                 projects.forEachIndexed { index, project ->
                     printer.displayLn("${index + 1}. ${project.projectName} - ${project.projectDescription}")
                 }
             }
-        } catch (e: EiffelFlowException) {
-            throw e
-        } catch (e: Exception) {
-            throw RuntimeException("An error occurred while retrieving the projects: ${e.message}", e)
         }
 
     }
 
-    fun getProjects(): List<Project> {
+    private fun getProjects(): List<Project> {
         return runBlocking {
-                getProjectUseCase.getProjects()
-            }
+            getProjectUseCase.getProjects()
+        }
     }
 
-    fun displayProjectById(){
+    fun displayProjectById() {
         try {
             printer.displayLn("Enter project ID : ")
             val input = inputReader.readString()
@@ -53,7 +50,7 @@ class GetProjectCLI(
             printer.displayLn("Project details : $project")
 
         } catch (e: IllegalArgumentException) {
-        printer.displayLn("Invalid UUID format.")
+            printer.displayLn("Invalid UUID format.")
         } catch (e: EiffelFlowException) {
             throw e
         } catch (e: Exception) {
@@ -61,10 +58,10 @@ class GetProjectCLI(
         }
     }
 
-    fun getProjectById(projectId: UUID): Project{
+    fun getProjectById(projectId: UUID): Project {
         return runBlocking {
-                getProjectUseCase.getProjectById(projectId)
-            }
+            getProjectUseCase.getProjectById(projectId)
+        }
     }
 
 }

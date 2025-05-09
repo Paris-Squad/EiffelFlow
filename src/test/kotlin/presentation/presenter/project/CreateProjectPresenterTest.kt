@@ -1,7 +1,7 @@
 package presentation.presenter.project
 
 import org.example.domain.usecase.project.CreateProjectUseCase
-import org.example.presentation.presenter.project.CreateProjectCLI
+import org.example.presentation.project.CreateProjectCLI
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
@@ -9,8 +9,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock

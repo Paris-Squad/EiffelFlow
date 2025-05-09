@@ -2,9 +2,9 @@ package presentation.presenter.task
 
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.domain.usecase.task.CreateTaskUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
-import org.example.presentation.presenter.task.CreateTaskCLI
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
+import org.example.presentation.task.CreateTaskCLI
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.example.data.storage.SessionManger
@@ -44,7 +44,7 @@ class CreateTaskCLITest {
             coEvery { createTaskUseCase.createTask(any()) } returns validTask
 
             //When
-            createTaskCli.createTaskInput()
+            createTaskCli.start()
 
             // Then
             verify {
@@ -63,7 +63,7 @@ class CreateTaskCLITest {
             coEvery { createTaskUseCase.createTask(any()) } returns validTask
 
             //When
-            createTaskCli.createTaskInput()
+            createTaskCli.start()
 
             // Then
             verify {
@@ -82,7 +82,7 @@ class CreateTaskCLITest {
 
 
         // When
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
         // Then
         verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
@@ -97,7 +97,7 @@ class CreateTaskCLITest {
 
 
         // When
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
         // Then
         verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
@@ -112,7 +112,7 @@ class CreateTaskCLITest {
 
 
         // When
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
         // Then
         verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
@@ -127,7 +127,7 @@ class CreateTaskCLITest {
 
 
         // When
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
         // Then
         verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
@@ -145,7 +145,7 @@ class CreateTaskCLITest {
 
 
         // When
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
 
         // Then
@@ -165,7 +165,7 @@ class CreateTaskCLITest {
 
 
         // When
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
 
         // Then
@@ -183,7 +183,7 @@ class CreateTaskCLITest {
         coEvery { createTaskUseCase.createTask(any()) } throws EiffelFlowException.IOException("Task creation failed")
 
 
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
 
         // Then
@@ -199,7 +199,7 @@ class CreateTaskCLITest {
         coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
         coEvery { createTaskUseCase.createTask(any()) } throws IOException("Unexpected Error")
 
-        createTaskCli.createTaskInput()
+        createTaskCli.start()
 
         // Then
         verify {

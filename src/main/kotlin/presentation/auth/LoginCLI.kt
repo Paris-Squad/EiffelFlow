@@ -1,10 +1,10 @@
-package org.example.presentation.presenter.auth
+package org.example.presentation.auth
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 
 class LoginCLI(
     private val loginUseCase: LoginUseCase,

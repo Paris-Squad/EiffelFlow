@@ -1,43 +1,37 @@
-package org.example.presentation.presenter.project
+package org.example.presentation.project
 
 
 import kotlinx.coroutines.runBlocking
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
 import org.example.domain.usecase.project.DeleteProjectUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.BaseCli
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import java.util.UUID
 
 class DeleteProjectCLI(
     private val deleteProjectUseCase: DeleteProjectUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
+) : BaseCli(printer) {
     fun deleteProjectInput() {
-        try {
+        tryStartCli {
             printer.displayLn("Enter project ID to delete: ")
             val input = inputReader.readString()
 
             if (input.isNullOrBlank()) {
                 printer.displayLn("Project ID cannot be empty.")
-                return
+                return@tryStartCli
             }
 
             val projectId = UUID.fromString(input.trim())
             val deletedProject = deleteProject(projectId)
             printer.displayLn("Project deleted successfully $deletedProject")
-        } catch (e: IllegalArgumentException) {
-            printer.displayLn("Invalid UUID format.")
-        } catch (e: EiffelFlowException) {
-            printer.displayLn("Failed to delete the project: ${e.message}")
-        } catch (e: Exception) {
-            printer.displayLn("An error occurred while deleting the project: ${e.message} ")
         }
     }
 
-     fun deleteProject(projectId: UUID): Project {
-       return runBlocking {
+    fun deleteProject(projectId: UUID): Project {
+        return runBlocking {
             deleteProjectUseCase.deleteProject(projectId)
         }
     }

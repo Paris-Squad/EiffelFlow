@@ -6,9 +6,9 @@ import kotlinx.datetime.LocalDateTime
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
-import org.example.presentation.presenter.audit.GetProjectAuditLogsCLI
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
+import org.example.presentation.audit.GetProjectAuditLogsCLI
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
 import java.util.UUID

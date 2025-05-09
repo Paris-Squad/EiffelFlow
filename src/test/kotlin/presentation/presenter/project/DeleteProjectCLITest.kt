@@ -10,9 +10,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.DeleteProjectUseCase
-import org.example.presentation.presenter.io.InputReader
-import org.example.presentation.presenter.io.Printer
-import org.example.presentation.presenter.project.DeleteProjectCLI
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
+import org.example.presentation.project.DeleteProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
