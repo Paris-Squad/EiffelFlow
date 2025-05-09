@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.delay
 import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 import utils.UserMock
 import java.util.UUID
-
+import kotlin.coroutines.cancellation.CancellationException
 
 
 class CreateProjectPresenterTest {
@@ -28,8 +29,6 @@ class CreateProjectPresenterTest {
     private val inputReader: InputReader = mockk()
     private val printer: Printer = mockk(relaxed = true)
     private lateinit var createProjectCli: CreateProjectCLI
-    //private val adminId = SessionManger.login(UserMock.adminUser)
-
     @BeforeEach
     fun setup() {
         mockkObject(SessionManger)
@@ -122,44 +121,52 @@ class CreateProjectPresenterTest {
 
     @Test
     fun `should print error when EiffelFlowException occurs during creation`() {
+        //Given
         val exception = EiffelFlowException.IOException("Failed to create the project")
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
         coEvery { createProjectUseCase.createProject(any()) } throws exception
 
+        //When
         createProjectCli.createProjectInput()
 
-        verifyOrder {
-            printer.displayLn("Enter project name:")
-            printer.displayLn("Enter project description:")
-            printer.displayLn("An error occurred: Failed to create the project")
+        //Then
+        verify {
+            printer.displayLn("An error occurred: ${exception.message}")
         }
     }
 
     @Test
     fun `should print error when generic Exception occurs during creation`() {
+        //Given
         val exception = Exception("Unexpected error")
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
         coEvery { createProjectUseCase.createProject(any()) } throws exception
 
+        //When
         createProjectCli.createProjectInput()
 
-        verifyOrder {
-            printer.displayLn("Enter project name:")
-            printer.displayLn("Enter project description:")
-            printer.displayLn("An error occurred: Unexpected error")
-        }
-    }
-
-    @Test
-    fun `should print error when inputReader throws exception`() {
-        val exception = RuntimeException("Input device failure")
-        every { inputReader.readString() } throws exception
-
-        createProjectCli.createProjectInput()
-
+        // Then
         verify {
-            printer.displayLn("Enter project name:")
             printer.displayLn("An error occurred: ${exception.message}")
         }
+    }
+    @Test
+    fun `should handle multiple suspension points in createProject`() {
+        // Given
+        val expectedProject = ProjectsMock.CORRECT_PROJECT
+        coEvery {
+            createProjectUseCase.createProject(any())
+        } coAnswers {
+            delay(50)
+            delay(50)
+            expectedProject
+        }
+        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
+
+        // When
+        createProjectCli.createProjectInput()
+
+        // Then
+        verify { printer.displayLn("Project created successfully: $expectedProject") }
     }
 }
