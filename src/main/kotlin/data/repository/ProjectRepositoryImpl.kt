@@ -8,6 +8,7 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.Project
+import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
@@ -28,7 +29,7 @@ class ProjectRepositoryImpl(
 
         return try {
             val csvLine = projectCsvParser.serialize(project)
-            fileDataSource.writeLinesToFile(csvLine + "\n")
+            fileDataSource.writeLinesToFile(csvLine)
             val auditLog = project.toAuditLog(
                 editor = SessionManger.getUser(),
                 actionType = AuditLogAction.CREATE,
@@ -74,26 +75,22 @@ class ProjectRepositoryImpl(
         }
 
         return try {
-            val lines = fileDataSource.readLinesFromFile().toMutableList()
 
-            val removedLine = lines.find { line ->
-                val project = projectCsvParser.parseCsvLine(line)
-                project.projectId == projectId
-            } ?: throw EiffelFlowException.IOException(
-                "Can't delete project. Project not found with ID: $projectId."
-            )
+            val projects = getProjects()
 
-            lines.remove(removedLine)
-            fileDataSource.writeLinesToFile(lines.joinToString("\n"))
-            val deletedProject = projectCsvParser.parseCsvLine(removedLine)
+            val projectToDelete = projects.find { it.projectId == projectId }
+                ?: throw EiffelFlowException.NotFoundException("Project not found")
 
-            val auditLog = deletedProject.toAuditLog(
+            val projectCsv = projectCsvParser.serialize(projectToDelete)
+            fileDataSource.deleteLineFromFile(projectCsv)
+
+            val auditLog = projectToDelete.toAuditLog(
                 editor = SessionManger.getUser(),
                 actionType = AuditLogAction.CREATE,
-                newValue = deletedProject.projectName
+                newValue = projectToDelete.projectName
             )
             auditRepository.createAuditLog(auditLog)
-            deletedProject
+            projectToDelete
         } catch (throwable: Throwable) {
             throw EiffelFlowException.IOException(
                 "Can't delete project. Project not found with ID: $projectId, ${throwable.message}"
