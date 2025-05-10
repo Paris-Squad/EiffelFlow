@@ -15,7 +15,7 @@ class GetProjectCLI(
     private val printer: Printer
 ) : BaseCli(printer) {
 
-    fun displayProjects() {
+    fun start() {
         tryStartCli {
             val projects = getProjects()
             if (projects.isEmpty()) {
@@ -49,7 +49,7 @@ class GetProjectCLI(
             val project = getProjectById(projectId)
             printer.displayLn("Project details : $project")
 
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             printer.displayLn("Invalid UUID format.")
         } catch (e: EiffelFlowException) {
             throw e
