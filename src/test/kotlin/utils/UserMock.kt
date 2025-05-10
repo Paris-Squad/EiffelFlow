@@ -1,17 +1,22 @@
 package utils
 
+import org.example.data.remote.mapper.UserMapper
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import java.io.FileNotFoundException
 import java.util.UUID
 
 object UserMock {
+    private val userMapper = UserMapper()
+    
     val validUser = User(
         userId = UUID.fromString("11111111-1111-1111-1111-111111111111"),
         username = "validUser",
         password = "validPass",
         role = RoleType.MATE
     )
+    
+    val VALID_USER_DTO = userMapper.toDto(validUser)
 
     val adminUser = User(
         userId = UUID.fromString("33333333-3333-3333-3333-333333333333"),
@@ -20,6 +25,8 @@ object UserMock {
         role = RoleType.ADMIN
     )
 
+    val ADMIN_USER_DTO = userMapper.toDto(adminUser)
+    
     val updateUser = User(
         userId = UUID.fromString("44444444-4444-4444-4444-444444444444"),
         username = "test",
@@ -27,6 +34,8 @@ object UserMock {
         role = RoleType.MATE
     )
 
+    val UPDATE_USER_DTO = userMapper.toDto(updateUser)
+    
     val existingUser = User(
         userId = updateUser.userId,
         username = "old-test",
@@ -62,11 +71,12 @@ object UserMock {
             role = RoleType.MATE
         )
     )
+    
+    val MULTIPLE_USER_DTO = multipleUsers.map { userMapper.toDto(it) }
 
-    const val userCsv = "user-csv-string"
-    const val oldUserCsv = "old-user-csv"
-    const val newUserCsv = "new-user-csv"
+    const val USER_CSV = "user-csv-string"
+    const val OLD_USER_CSV = "old-user-csv"
+    const val NEW_USER_CSV = "new-user-csv"
 
     val fileNotFoundException = FileNotFoundException("File not found")
-    val runtimeException = RuntimeException("Some error")
 }
