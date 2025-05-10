@@ -2,75 +2,70 @@ package org.example.presentation.audit
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
+import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.jetbrains.annotations.VisibleForTesting
-import java.util.*
+import java.util.UUID
 
 class GetProjectAuditLogsCLI(
     private val getProjectAuditUseCase: GetProjectAuditUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
+) : BaseCli(printer) {
     fun getProjectAuditLogsInput() {
-        try {
-            printer.displayLn("Enter project ID to get Audit Logs: ")
+        tryStartCli {
+            printer.displayLn("Please enter the Project ID to retrieve the Audit Logs:")
             val input = inputReader.readString()
 
             if (input.isNullOrBlank()) {
-                printer.displayLn("Project ID cannot be empty.")
-                return
+                printer.displayLn("Project ID cannot be left blank. Please provide a valid ID.")
+                return@tryStartCli
             }
 
-            val projectId = UUID.fromString(input.trim())
+            val projectId = try {
+                UUID.fromString(input.trim())
+            } catch (e: IllegalArgumentException) {
+                printer.displayLn("The format of the Project ID is invalid. Please enter a valid UUID.")
+                return@tryStartCli
+            }
+
             getProjectAuditLogs(projectId)
 
-        } catch (e: IllegalArgumentException) {
-            printer.displayLn("Invalid Project ID format.")
-        } catch (e: EiffelFlowException.NotFoundException) {
-            printer.displayLn("Failed to get audit logs: ${e.message}")
-        } catch (e: Exception) {
-            printer.displayLn("An error occurred while retrieving audit logs: ${e.message}")
         }
     }
 
     fun getProjectAuditLogs(projectId: UUID) {
         runBlocking {
-            try {
-                val projectAuditLogs = getProjectAuditUseCase.getProjectAuditLogsById(projectId)
+            val projectAuditLogs = getProjectAuditUseCase.getProjectAuditLogsById(projectId)
+            if (projectAuditLogs.isEmpty()) {
+                printer.displayLn("No audit logs found for the specified Project ID: $projectId.")
+                return@runBlocking
+            }
 
-                if (projectAuditLogs.isEmpty()) {
-                    printer.displayLn("No audit logs found for project $projectId.")
-                    return@runBlocking
+            val projectLog = projectAuditLogs.firstOrNull { it.itemId == projectId }
+            val projectName = if (projectLog?.itemName.isNullOrBlank()) "Unnamed Project" else projectLog.itemName
+            printer.displayLn("Audit Logs for Project: '$projectName'")
+
+            projectAuditLogs.forEach { log ->
+                val logType = if (log.itemId == projectId) "Project" else "Task"
+
+                val actionType = when (log.actionType) {
+                    AuditLogAction.CREATE -> "Created"
+                    AuditLogAction.UPDATE -> "Updated"
+                    AuditLogAction.DELETE -> "Deleted"
                 }
 
-                val projectLog = projectAuditLogs.firstOrNull { it.itemId == projectId }
-                val projectName = if (projectLog?.itemName.isNullOrBlank()) "Unnamed Project" else projectLog!!.itemName
-                printer.displayLn("Audit Logs for Project: $projectName")
-
-                projectAuditLogs.forEach { log ->
-                    val logType = if (log.itemId == projectId) "Project" else "Task"
-
-                    val actionType = when (log.actionType) {
-                        AuditLogAction.CREATE -> "Created"
-                        AuditLogAction.UPDATE -> "Updated"
-                        AuditLogAction.DELETE -> "Deleted"
-                    }
-
-                    printer.displayLn("[$logType] $actionType ${log.itemName}")
-                    printer.displayLn("  Audit ID: ${log.auditId}")
-                    printer.displayLn("  Date: ${log.auditTime} / Time: ${formatTime(log.auditTime)}")
-                    printer.displayLn("  Modified By: ${log.editorName}")
-                    printer.displayLn("  Field Changed: ${log.changedField ?: "Not Available"}")
-                    printer.displayLn("    Old: ${log.oldValue ?: "Not Available"}")
-                    printer.displayLn("    New: ${log.newValue ?: "Not Available"}")
-                    printer.displayLn("_".repeat(50))
-                }
-            } catch (e: EiffelFlowException) {
-                printer.displayLn("Failed to get audit logs: ${e.message}")
+                printer.displayLn("[$logType] $actionType ${log.itemName}")
+                printer.displayLn("  Audit ID     : ${log.auditId}")
+                printer.displayLn("  Date         : ${log.auditTime.date} / Time: ${formatTime(log.auditTime)}")
+                printer.displayLn("  Modified By  : ${log.editorName}")
+                printer.displayLn("  Field Changed: ${log.changedField ?: "Not Available"}")
+                printer.displayLn("    Old        : ${log.oldValue ?: "Not Available"}")
+                printer.displayLn("    New        : ${log.newValue ?: "Not Available"}")
+                printer.displayLn("-".repeat(50))
             }
         }
     }
