@@ -17,9 +17,7 @@ import org.example.data.remote.MongoCollections
 import org.example.data.remote.mapper.TaskMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.model.AuditLog
 import org.example.domain.model.Task
-import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -34,13 +32,11 @@ class MongoTaskRepositoryImplTest {
     private val taskMapper: TaskMapper = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private lateinit var tasksCollection: MongoCollection<Task>
-    private lateinit var auditRepository: AuditRepository
     private lateinit var taskRepository: TaskRepository
 
     @BeforeEach
     fun setup() {
         tasksCollection = mockk(relaxed = true)
-        auditRepository = mockk(relaxed = true)
 
         val mockDatabase = mockk<MongoDatabase>()
         every {
@@ -51,7 +47,6 @@ class MongoTaskRepositoryImplTest {
 
         taskRepository = MongoTaskRepositoryImpl(
            database =  mockDatabase,
-           auditRepository = auditRepository,
             taskMapper = taskMapper
         )
     }
@@ -66,9 +61,6 @@ class MongoTaskRepositoryImplTest {
 
         coEvery { mockFindFlow.collect(any()) } coAnswers {
         }
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
         coEvery {
             tasksCollection.insertOne(eq(TaskMock.validTask), any())
         } returns mockk()
@@ -89,9 +81,6 @@ class MongoTaskRepositoryImplTest {
             val collector = arg<FlowCollector<Task>>(0)
             collector.emit(TaskMock.validTask)
         }
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
 
         //When /Then
         assertThrows(EiffelFlowException.IOException::class.java) {
@@ -100,38 +89,11 @@ class MongoTaskRepositoryImplTest {
     }
 
     @Test
-    fun `createTask should throw Exception when audit log creation fails`() = runTest {
-        //Given
-        val mockFindFlow = mockk<FindFlow<Task>>()
-
-        coEvery { tasksCollection.find(any<Bson>()) } returns mockFindFlow
-
-        coEvery { mockFindFlow.collect(any()) } coAnswers {
-        }
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
-        coEvery {
-            tasksCollection.insertOne(eq(TaskMock.validTask), any())
-        } throws EiffelFlowException.IOException("Custom exception")
-
-        //When then
-        assertThrows<EiffelFlowException.IOException> {
-            taskRepository.createTask(TaskMock.validTask)
-        }
-
-    }
-
-    @Test
     fun `createTask should throw Exception when write to mongodb fails`() = runTest {
         //Given
         val mockFindFlow = mockk<FindFlow<Task>>()
 
         coEvery { tasksCollection.find(any<Bson>()) } returns mockFindFlow
-
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
 
         coEvery {
             tasksCollection.insertOne(eq(TaskMock.validTask), any())
@@ -210,25 +172,6 @@ class MongoTaskRepositoryImplTest {
             }
         }
     }
-
-    @Test
-    fun `updateTask should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            coEvery {
-                auditRepository.createAuditLog(any())
-            } throws Throwable("Can't Update Task")
-
-            // When & Then
-            assertThrows<EiffelFlowException.IOException> {
-                taskRepository.updateTask(
-                    task = TaskMock.inProgressTask,
-                    oldTask = TaskMock.validTask,
-                    changedField = "role"
-                )
-            }
-        }
-    }
     //endregion
 
     //region deleteTask
@@ -240,9 +183,6 @@ class MongoTaskRepositoryImplTest {
                 any()
             )
         } returns TaskMock.inProgressTask
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
 
         // When
         val result = taskRepository.deleteTask(TaskMock.inProgressTask.taskId)
@@ -287,20 +227,6 @@ class MongoTaskRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `deleteTask should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            coEvery {
-                auditRepository.createAuditLog(any())
-            } throws Throwable("Can't Delete Task")
-
-            // When & Then
-            assertThrows<EiffelFlowException.IOException> {
-                taskRepository.deleteTask(TaskMock.validTask.taskId)
-            }
-        }
-    }
     //endregion
 
 

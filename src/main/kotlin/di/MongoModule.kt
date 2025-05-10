@@ -31,7 +31,6 @@ val mongoModule = module {
     single<TaskRepository> {
         MongoTaskRepositoryImpl(
             database = get(),
-            auditRepository = get(),
             taskMapper = get()
         )
     }
