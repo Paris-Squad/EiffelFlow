@@ -27,8 +27,7 @@ val csvModule = module {
     single<TaskRepository> {
         TaskRepositoryImpl(
             taskCsvParser = get<TaskCsvParser>(),
-            fileDataSource = FileDataSource(File(TaskRepositoryImpl.FILE_NAME)),
-            auditRepository = get()
+            fileDataSource = FileDataSource(File(TaskRepositoryImpl.FILE_NAME))
         )
     }
     single<UserRepository> {

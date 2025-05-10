@@ -1,14 +1,12 @@
 package data.repository
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coEvery
-import io.mockk.coJustRun
+
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.test.runTest
-import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.TaskMock
@@ -16,20 +14,15 @@ import java.io.IOException
 import java.util.UUID
 import org.example.data.repository.TaskRepositoryImpl
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.SessionManger
 import org.example.data.storage.parser.TaskCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.assertThrows
-import utils.MockAuditLog
 
-import utils.UserMock
 
 class TaskRepositoryImplTest {
 
     private val fileDataSource: FileDataSource = mockk(relaxed = true)
     private val taskMapper: TaskCsvParser = mockk(relaxed = true)
-    private val auditRepository: AuditRepository = mockk(relaxed = true)
-    private val sessionManger: SessionManger = mockk(relaxed = true)
     private lateinit var taskRepository: TaskRepositoryImpl
 
     private val changedField = "title"
@@ -38,8 +31,7 @@ class TaskRepositoryImplTest {
     fun setUp() {
         taskRepository = TaskRepositoryImpl(
             taskCsvParser = taskMapper,
-            fileDataSource = fileDataSource,
-            auditRepository = auditRepository
+            fileDataSource = fileDataSource
         )
     }
 
@@ -48,10 +40,8 @@ class TaskRepositoryImplTest {
     fun `createTask should return the created task`() {
         runTest {
             // Given
-            every { sessionManger.getUser() } returns UserMock.adminUser
             every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
             every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
-            coEvery { auditRepository.createAuditLog(any()) } returns TaskMock.validAuditLog
 
             // When
             val result = taskRepository.createTask(TaskMock.validTask)
@@ -65,25 +55,8 @@ class TaskRepositoryImplTest {
     fun `createTask should return failure when task creation fails`() {
         runTest {
             //Given
-            every { sessionManger.getUser() } returns UserMock.adminUser
             every { taskMapper.serialize(TaskMock.validTask) } throws IOException("Error")
             every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
-            // When / Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
-                taskRepository.createTask(TaskMock.validTask)
-            }
-            assertThat(exception.message).contains("Can't create task")
-        }
-    }
-
-    @Test
-    fun `createTask should return failure when audit creation fails`() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.adminUser
-            every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
-            every { fileDataSource.writeLinesToFile(TaskMock.ValidTaskCSV) } just runs
-            coEvery { auditRepository.createAuditLog(any()) } throws IOException("Audit failed")
             // When / Then
             val exception = assertThrows<EiffelFlowException.IOException> {
                 taskRepository.createTask(TaskMock.validTask)
@@ -98,11 +71,9 @@ class TaskRepositoryImplTest {
     fun `updateTask should return success if the task is updated`() {
         runTest {
             // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
             every { taskMapper.serialize(TaskMock.validTask) } returns TaskMock.ValidTaskCSV
             every { taskMapper.serialize(TaskMock.inProgressTask) } returns TaskMock.ValidTaskCSV
             every { fileDataSource.updateLinesToFile(TaskMock.ValidTaskCSV, TaskMock.ValidTaskCSV) } just runs
-            coJustRun { auditRepository.createAuditLog(MockAuditLog.AUDIT_LOG) }
 
             // When
             val result = taskRepository.updateTask(TaskMock.inProgressTask, TaskMock.validTask, changedField)
@@ -118,7 +89,6 @@ class TaskRepositoryImplTest {
             // Given
             val exceptionMessage = "File update failed"
 
-            every { sessionManger.getUser() } returns UserMock.validUser
             every { taskMapper.serialize(any()) } throws Exception(exceptionMessage)
             every { fileDataSource.updateLinesToFile(any(), any()) } throws Exception(exceptionMessage)
 

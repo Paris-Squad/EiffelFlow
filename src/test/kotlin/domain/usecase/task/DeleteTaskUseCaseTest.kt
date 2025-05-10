@@ -3,14 +3,18 @@ package domain.usecase.task
 import com.google.common.truth.Truth.assertThat
 import domain.usecase.task.TaskMock.validTask
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import utils.UserMock
 import java.util.UUID
 
 class DeleteTaskUseCaseTest {
@@ -18,17 +22,22 @@ class DeleteTaskUseCaseTest {
     private lateinit var taskRepository: TaskRepository
     private lateinit var deleteTaskUseCase: DeleteTaskUseCase
     private lateinit var taskIdToDelete: UUID
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
+    private val sessionManger: SessionManger = mockk(relaxed = true)
+
+
 
     @BeforeEach
     fun setUp() {
         taskRepository = mockk()
-        deleteTaskUseCase = DeleteTaskUseCase(taskRepository)
+        deleteTaskUseCase = DeleteTaskUseCase(taskRepository = taskRepository, auditRepository = auditRepository)
         taskIdToDelete = UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
     }
 
     @Test
     fun `deleteTask should return success when task exists`() {
         runTest {
+            every { sessionManger.getUser() } returns UserMock.validUser
             coEvery { taskRepository.deleteTask(taskIdToDelete) } returns validTask
 
             val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
