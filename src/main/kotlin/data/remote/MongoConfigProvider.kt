@@ -18,14 +18,22 @@ class MongoConfigProvider {
         )
         val codecRegistry = fromRegistries(uuidRegistry, customRegistry, defaultRegistry)
 
-        return MongoClient.create(CONNECTION_STRING_URI_PLACEHOLDER)
-            .getDatabase(DATABASE_NAME)
+        val connectionString = getConnectionString()
+        val databaseName = System.getenv("DATABASE_NAME")
+        return MongoClient.create(connectionString)
+            .getDatabase(databaseName)
             .withCodecRegistry(codecRegistry)
     }
 
-    companion object {
-        private const val CONNECTION_STRING_URI_PLACEHOLDER =
-            "mongodb+srv://abdelrahmanraafaat:5PcgrHNqtPP4Cdez@cluster0.bekcque.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-        private const val DATABASE_NAME = "eiffle_flow"
+    private fun getConnectionString(): String {
+        val protocol = System.getenv("MONGO_PROTOCOL")
+        val userName = System.getenv("MONGO_USER_NAME")
+        val password = System.getenv("MONGO_PASSWORD")
+        val hostName = System.getenv("MONGO_HOSTNAME")
+        val connectionOptions = System.getenv("MONGO_CONNECTION_OPTIONS")
+        val appName = System.getenv("MONGO_APP_NAME")
+
+        val connectionString = "$protocol://$userName:$password@$hostName/$connectionOptions&appName=$appName"
+        return connectionString
     }
 }
