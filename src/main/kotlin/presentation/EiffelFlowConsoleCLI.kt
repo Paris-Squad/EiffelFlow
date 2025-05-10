@@ -43,6 +43,7 @@ class EiffelFlowConsoleCLI {
             5. get project
             5. update project
             7. view project audit logs
+            8. edit task
             0. Exit
             """.trimIndent()
             )
@@ -58,6 +59,7 @@ class EiffelFlowConsoleCLI {
                 "5" -> uiContainer.getProjectCLI.start()
                 "6" -> uiContainer.updateProjectCLI.start()
                 "7" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
+                "8" -> uiContainer.editTaskCli.start()
                 "0" -> {
                     println("Thanks for using our app!")
                     break
