@@ -19,7 +19,7 @@ import java.util.UUID
 
 class MongoUserRepositoryImpl(
     database: MongoDatabase,
-    private val auditRepository: AuditRepository
+    private val auditRepository: AuditRepository,
 ) : UserRepository {
 
     private val usersCollection = database.getCollection<User>(collectionName = MongoCollections.USERS)

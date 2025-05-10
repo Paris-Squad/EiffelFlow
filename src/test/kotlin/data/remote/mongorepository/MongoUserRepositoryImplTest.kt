@@ -42,7 +42,7 @@ class MongoUserRepositoryImplTest {
         val mockDatabase = mockk<MongoDatabase>()
         every { mockDatabase.getCollection<User>(MongoCollections.USERS) } returns usersCollection
         every { sessionManger.getUser() } returns UserMock.adminUser
-        userRepository = MongoUserRepositoryImpl(mockDatabase, auditRepository)
+        userRepository = MongoUserRepositoryImpl(mockDatabase, auditRepository, mockk(relaxed = true))
     }
 
     //region createUser
