@@ -1,15 +1,15 @@
-package org.example.presentation.auth
+package org.example.presentation.user
 
 import kotlinx.coroutines.runBlocking
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
-import org.example.domain.usecase.auth.RegisterUseCase
+import org.example.domain.usecase.user.CreateUserUseCase
 import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 
-class RegisterCLI(
-    private val registerUseCase: RegisterUseCase,
+class CreateUserCLI(
+    private val createUserUseCase: CreateUserUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
 ) : BaseCli(printer) {
@@ -47,7 +47,7 @@ class RegisterCLI(
 
     fun register(username: String, password: String, role: RoleType): User {
         return runBlocking {
-            registerUseCase.register(
+            createUserUseCase.register(
                 username = username,
                 password = password,
                 userRole = role

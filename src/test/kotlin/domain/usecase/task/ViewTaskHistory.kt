@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
-import org.example.domain.usecase.task.ViewTaskHistoryUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

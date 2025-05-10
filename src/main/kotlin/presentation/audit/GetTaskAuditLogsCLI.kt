@@ -37,7 +37,7 @@ class GetTaskAuditLogsCLI(
         }
     }
 
-    fun displayAuditLogsForTask(taskId: UUID) {
+   private fun displayAuditLogsForTask(taskId: UUID) {
         runBlocking {
             val taskAuditLogs = getTaskAuditLogsUseCase.getTaskAuditLogsById(taskId)
             if (taskAuditLogs.isEmpty()) {

@@ -13,7 +13,7 @@ import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
-import org.example.domain.usecase.auth.RegisterUseCase
+import org.example.domain.usecase.user.CreateUserUseCase
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
@@ -26,14 +26,14 @@ class RegisterUseCaseTest {
     private val userRepository: UserRepository = mockk(relaxed = true)
     private val hashPasswordUseCase: HashPasswordUseCase = mockk(relaxed = true)
 
-    private lateinit var registerUseCase: RegisterUseCase
+    private lateinit var registerUseCase: CreateUserUseCase
 
     @BeforeEach
     fun setUp() {
         mockkObject(SessionManger)
         every { SessionManger.getUser() } returns adminUser
         every { SessionManger.isAdmin() } returns true
-        registerUseCase = RegisterUseCase(
+        registerUseCase = CreateUserUseCase(
             userRepository, hashPasswordUseCase
         )
     }
