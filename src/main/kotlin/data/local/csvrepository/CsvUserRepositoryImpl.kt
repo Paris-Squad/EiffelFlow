@@ -1,8 +1,9 @@
 package org.example.data.local.csvrepository
 
+import org.example.data.BaseRepository
 import org.example.data.local.FileDataSource
-import org.example.data.utils.SessionManger
 import org.example.data.local.parser.UserCsvParser
+import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
@@ -15,9 +16,9 @@ class CsvUserRepositoryImpl(
     private val userCsvParser: UserCsvParser,
     private val fileDataSource: FileDataSource,
     private val auditRepository: AuditRepository,
-) : UserRepository {
+) : BaseRepository(), UserRepository {
     override suspend fun createUser(user: User): User {
-        return try {
+        return wrapInTryCatch {
             validateAdminPermission()
             val userAsCsv = userCsvParser.serialize(user)
             val users = getUsers()
@@ -28,10 +29,6 @@ class CsvUserRepositoryImpl(
             val auditLog = user.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
             auditRepository.createAuditLog(auditLog)
             user
-        } catch (e: EiffelFlowException.AuthorizationException) {
-            throw e
-        }catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't Create User because ${e.message}")
         }
     }
 
@@ -48,7 +45,7 @@ class CsvUserRepositoryImpl(
     }
 
     override suspend fun updateUser(user: User): User {
-        return try {
+        return wrapInTryCatch {
             val users = getUsers()
             val existingUser = users.find { it.userId == user.userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID ${user.userId} not found")
@@ -65,15 +62,12 @@ class CsvUserRepositoryImpl(
                 oldValue = existingUser.toString()
             )
             auditRepository.createAuditLog(auditLog)
-
             user
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't Update User because ${e.message}")
         }
     }
 
     override suspend fun deleteUser(userId: UUID): User {
-        return try {
+        return wrapInTryCatch {
             validateAdminPermission()
             val users = getUsers()
             val userToDelete = users.find { it.userId == userId }
@@ -88,33 +82,25 @@ class CsvUserRepositoryImpl(
             auditRepository.createAuditLog(auditLog)
 
             userToDelete
-        } catch (e: EiffelFlowException.AuthorizationException) {
-            throw e
-        }catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't Delete User because ${e.message}")
         }
     }
 
     override suspend fun getUserById(userId: UUID): User {
-        return try {
+        return wrapInTryCatch {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
 
             val user = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
             user
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't get User because ${e.message}")
         }
     }
 
     override suspend fun getUsers(): List<User> {
-        return try {
+        return wrapInTryCatch {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
             users
-        } catch (e: Exception) {
-            throw EiffelFlowException.IOException("Can't get Users because ${e.message}")
         }
     }
 
