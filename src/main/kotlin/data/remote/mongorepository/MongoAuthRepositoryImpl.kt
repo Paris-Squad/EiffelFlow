@@ -6,25 +6,25 @@ import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.Document
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.dto.MongoUserDto
+import org.example.data.remote.mapper.UserMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 
 class MongoAuthRepositoryImpl(
-     database: MongoDatabase
+    database: MongoDatabase,
+    private val userMapper: UserMapper
 ) : AuthRepository {
 
-    private val authCollection = database.getCollection<User>(collectionName = MongoCollections.AUTH)
-    private val usersCollection = database.getCollection<User>(collectionName = MongoCollections.USERS)
+    private val authCollection = database.getCollection<MongoUserDto>(collectionName = MongoCollections.AUTH)
+    private val usersCollection = database.getCollection<MongoUserDto>(collectionName = MongoCollections.USERS)
 
     override suspend fun saveUserLogin(user: User): User {
         try {
-            val existingUser = authCollection.find(eq("userId", user.userId)).firstOrNull()
-            if (existingUser != null) {
-                throw EiffelFlowException.IOException("User with userId ${user.userId} already exists")
-            }
-            authCollection.insertOne(user)
+            val userDto = userMapper.toDto(user)
+            authCollection.insertOne(userDto)
             return user
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't save user login because ${exception.message}")
@@ -53,14 +53,15 @@ class MongoAuthRepositoryImpl(
 
     override suspend fun loginUser(username: String, password: String): User {
         try {
-            val existUser = usersCollection.find(
-                and(
-                    eq("username", username),
-                    eq("password", password)
-                )
+            val userNameQuery = eq(MongoUserDto::username.name, username)
+            val passwordQuery = eq(MongoUserDto::password.name, password)
+            val existUserDto = usersCollection.find(
+                and(userNameQuery, passwordQuery)
             ).firstOrNull()
 
-            existUser ?: throw EiffelFlowException.NotFoundException("Invalid username or password")
+            existUserDto ?: throw EiffelFlowException.NotFoundException("Invalid username or password")
+
+            val existUser = userMapper.fromDto(existUserDto)
             val savedUser = saveUserLogin(existUser)
             SessionManger.login(savedUser)
             return savedUser

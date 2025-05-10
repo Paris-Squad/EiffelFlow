@@ -1,11 +1,13 @@
 package data.mongorepository
 
 import com.mongodb.client.model.Filters.eq
-import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.dto.MongoAuditLogDto
+import org.example.data.remote.mapper.AuditLogMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
@@ -14,19 +16,17 @@ import java.util.UUID
 
 class MongoAuditRepositoryImpl(
     database: MongoDatabase,
-    taskRepositoryProvider: Lazy<TaskRepository>
+    taskRepositoryProvider: Lazy<TaskRepository>,
+    private val auditLogMapper: AuditLogMapper
 ) : AuditRepository {
 
     private val taskRepository: TaskRepository by taskRepositoryProvider
-    private val auditLogsCollection = database.getCollection<AuditLog>(collectionName = MongoCollections.AUDIT_LOGS)
+    private val auditLogsCollection = database.getCollection<MongoAuditLogDto>(collectionName = MongoCollections.AUDIT_LOGS)
 
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
         try {
-            val existingLog = auditLogsCollection.find(eq("auditId", auditLog.auditId)).firstOrNull()
-            if (existingLog != null) {
-                throw EiffelFlowException.IOException("AuditLog with auditId ${auditLog.auditId} already exists")
-            }
-            auditLogsCollection.insertOne(auditLog)
+            val auditLogDto = auditLogMapper.toDto(auditLog)
+            auditLogsCollection.insertOne(auditLogDto)
             return auditLog
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't create AuditLog because ${exception.message}")
@@ -52,9 +52,10 @@ class MongoAuditRepositoryImpl(
         }
     }
 
-    private fun findAuditLogsByItemId(itemId: UUID): FindFlow<AuditLog> {
-        return auditLogsCollection
-            .find(eq("itemId", itemId))
+    private fun findAuditLogsByItemId(itemId: UUID): Flow<AuditLog> {
+        val auditLogsDto = auditLogsCollection
+            .find(eq(MongoAuditLogDto::itemId.name, itemId.toString()))
+        return auditLogsDto.map { auditLogMapper.fromDto(it) }
     }
 
     private suspend fun getAuditProjectTasks(
@@ -70,7 +71,8 @@ class MongoAuditRepositoryImpl(
 
     override suspend fun getAuditLogs(): List<AuditLog> {
         try {
-            return auditLogsCollection.find().toList()
+            val auditLogsDto = auditLogsCollection.find().toList()
+            return auditLogsDto.map { auditLogMapper.fromDto(it) }
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't get AuditLogs because ${exception.message}")
         }

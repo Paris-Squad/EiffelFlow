@@ -15,7 +15,6 @@ import org.example.domain.repository.TaskRepository
 import org.example.domain.repository.UserRepository
 import org.koin.dsl.module
 
-
 val mongoModule = module{
     single { MongoCollections }
     single { MongoConfigProvider() }
@@ -25,19 +24,22 @@ val mongoModule = module{
     single<AuditRepository> {
         MongoAuditRepositoryImpl(
             database = get(),
-            taskRepositoryProvider = lazy { get() }
+            taskRepositoryProvider = lazy { get() },
+            auditLogMapper = get()
         )
     }
     single<ProjectRepository> {
         MongoProjectRepositoryImpl(
             database = get(),
-            auditRepository = get()
+            auditRepository = get(),
+            projectMapper = get()
         )
     }
     single<TaskRepository> {
         MongoTaskRepositoryImpl(
             database = get(),
-            auditRepository = get()
+            auditRepository = get(),
+            taskMapper = get()
         )
     }
     single<UserRepository> {
@@ -49,7 +51,8 @@ val mongoModule = module{
     }
     single<AuthRepository> {
         MongoAuthRepositoryImpl(
-            database = get()
+            database = get(),
+            userMapper = get()
         )
     }
 }

@@ -5,7 +5,10 @@ import com.mongodb.client.model.FindOneAndUpdateOptions
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.dto.MongoProjectDto
+import org.example.data.remote.mapper.ProjectMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
@@ -14,25 +17,23 @@ import org.example.domain.model.Project
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 import org.example.domain.utils.getFieldChanges
-import java.util.UUID
+import java.util.*
 
 class MongoProjectRepositoryImpl(
     database: MongoDatabase,
-    private val auditRepository: AuditRepository
+    private val auditRepository: AuditRepository,
+    private val projectMapper: ProjectMapper
 ) : ProjectRepository {
 
-    private val projectsCollection = database.getCollection<Project>(collectionName = MongoCollections.PROJECTS)
+    private val projectsCollection = database.getCollection<MongoProjectDto>(collectionName = MongoCollections.PROJECTS)
 
     override suspend fun createProject(project: Project): Project {
         require(SessionManger.isAdmin()) {
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
         }
         try {
-            val existingProject = projectsCollection.find(eq("projectId", project.projectId)).firstOrNull()
-            if (existingProject != null) {
-                throw EiffelFlowException.IOException("Project with projectId ${project.projectId} already exists")
-            }
-            projectsCollection.insertOne(project)
+            val projectDto = projectMapper.toDto(project)
+            projectsCollection.insertOne(projectDto)
 
             logAction(project, AuditLogAction.CREATE)
 
@@ -52,15 +53,16 @@ class MongoProjectRepositoryImpl(
         }
 
         try {
+            val projectDto = projectMapper.toDto(project)
             val updates = Updates.combine(
-                Updates.set(Project::projectName.name, project.projectName),
-                Updates.set(Project::projectDescription.name, project.projectDescription),
-                Updates.set(Project::adminId.name, project.adminId),
-                Updates.set(Project::taskStates.name, project.taskStates),
+                Updates.set(MongoProjectDto::projectName.name, projectDto.projectName),
+                Updates.set(MongoProjectDto::projectDescription.name, projectDto.projectDescription),
+                Updates.set(MongoProjectDto::adminId.name, projectDto.adminId),
+                Updates.set(MongoProjectDto::taskStates.name, projectDto.taskStates),
             )
 
             val options = FindOneAndUpdateOptions().upsert(false)
-            val query = eq("projectId", project.projectId)
+            val query = eq(MongoProjectDto::_id.name, project.projectId.toString())
             val oldUser = projectsCollection.findOneAndUpdate(query, updates, options)
 
             if (oldUser == null) {
@@ -89,12 +91,12 @@ class MongoProjectRepositoryImpl(
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
         }
         try {
-            val query = eq("projectId", projectId)
-            val deletedProject = projectsCollection.findOneAndDelete(query)
-
-            if (deletedProject == null) {
+            val query = eq(MongoProjectDto::_id.name, projectId.toString())
+            val deletedProjectDto = projectsCollection.findOneAndDelete(query)
+            if (deletedProjectDto == null) {
                 throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
             }
+            val deletedProject = projectMapper.fromDto(deletedProjectDto)
             logAction(
                 project = deletedProject,
                 actionType = AuditLogAction.DELETE
@@ -111,8 +113,12 @@ class MongoProjectRepositoryImpl(
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
         }
         try {
-            val project = projectsCollection.find(eq("projectId", projectId)).firstOrNull()
-            return project ?: throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
+            val query = eq(MongoProjectDto::_id.name, projectId.toString())
+            val projectDto = projectsCollection.find(query).firstOrNull()
+            projectDto ?: throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
+            val project = projectMapper.fromDto(projectDto)
+            return project
+
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't get Project with id $projectId because ${exception.message}")
         }
@@ -123,11 +129,8 @@ class MongoProjectRepositoryImpl(
             throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
         }
         try {
-            val projects = mutableListOf<Project>()
-            projectsCollection.find().collect { project ->
-                projects.add(project)
-            }
-            return projects
+            val projectsDto = projectsCollection.find().toList()
+            return projectsDto.map { projectMapper.fromDto(it) }
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't get Projects because ${exception.message}")
         }
