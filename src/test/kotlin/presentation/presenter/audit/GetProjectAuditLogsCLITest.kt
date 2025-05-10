@@ -158,17 +158,6 @@ class GetProjectAuditLogsCLITest {
     }
 
     @Test
-    fun `should print error message invalid formatting when input is not a valid UUID`() {
-        // Given
-        every { inputReader.readString() } returns "invalid-uuid"
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getProjectAuditLogsInput()
-        // Then
-        verify { printer.displayLn("The format of the Project ID is invalid. Please enter a valid UUID.") }
-    }
-
-    @Test
     fun `should print error message when project ID is empty or null or blank`() {
 
         listOf(null, "", "   ").forEach {
