@@ -2,6 +2,7 @@ package presentation.presenter.project
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -13,7 +14,6 @@ import org.example.presentation.io.Printer
 import org.example.presentation.project.CreateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.ProjectsMock
 import java.util.*
 
 class CreateProjectPresenterTest {
@@ -30,37 +30,32 @@ class CreateProjectPresenterTest {
     }
 
     @Test
-    fun `should return the created Project when project is successfully created`() {
-        //Given
-        coEvery {
-            createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
-        } returns ProjectsMock.CORRECT_PROJECT
-
-        //When
-        val result = createProjectCli.createProject(ProjectsMock.CORRECT_PROJECT)
-
-        //Then
-        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-
-    }
-
-    @Test
     fun `should create project successfully with valid input`() {
         // Given
         val validAdminId = UUID.randomUUID()
+        val projectName = "Project1"
+        val projectDescription = "Desc"
+
         val expectedProject = Project(
-            projectName = "Project1",
-            projectDescription = "Desc",
+            projectName = projectName,
+            projectDescription = projectDescription,
             adminId = validAdminId
         )
 
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", validAdminId.toString())
+        every { inputReader.readString() } returnsMany listOf(projectName, projectDescription, validAdminId.toString())
         coEvery { createProjectUseCase.createProject(any()) } returns expectedProject
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
+        coVerify {
+            createProjectUseCase.createProject(withArg { project ->
+                assertThat(project.projectName).isEqualTo(projectName)
+                assertThat(project.projectDescription).isEqualTo(projectDescription)
+                assertThat(project.adminId).isEqualTo(validAdminId)
+            })
+        }
         verify { printer.displayLn("Project created successfully: $expectedProject") }
     }
 
@@ -70,7 +65,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returns ""
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project name cannot be empty.") }
@@ -81,7 +76,7 @@ class CreateProjectPresenterTest {
         // Given
         every { inputReader.readString() } returns null
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
         // Then
         verify(exactly = 1) { printer.displayLn("Project name cannot be empty.") }
     }
@@ -92,7 +87,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", "")
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project description cannot be empty.") }
@@ -104,7 +99,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", null)
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project description cannot be empty.") }
@@ -116,7 +111,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "uuid")
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Invalid admin ID format.") }
@@ -128,7 +123,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "")
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Invalid admin ID format.") }
@@ -148,11 +143,11 @@ class CreateProjectPresenterTest {
         } throws exception
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify {
-            printer.displayLn("An error occurred: ${exception.message}")
+            printer.displayLn("Something went wrong:Failed to create the project")
         }
     }
 
@@ -170,13 +165,11 @@ class CreateProjectPresenterTest {
         } throws exception
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify {
             printer.displayLn("An error occurred: ${exception.message}")
         }
     }
-
-
 }

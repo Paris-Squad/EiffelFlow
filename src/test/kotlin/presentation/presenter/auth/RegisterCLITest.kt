@@ -37,7 +37,7 @@ class RegisterCLITest {
         )
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -51,7 +51,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("", "password123")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -65,7 +65,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returns null
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -79,7 +79,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("user", "")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -93,7 +93,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("user", null)
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -107,7 +107,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("user", "password123", "5")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -121,7 +121,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("user", "password123", "invalid")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -135,7 +135,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("user", "password123", "")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -149,7 +149,7 @@ class RegisterCLITest {
         every { inputReader.readString() } returnsMany listOf("user", "password123", null)
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
@@ -164,11 +164,11 @@ class RegisterCLITest {
         coEvery { registerUseCase.register("user", "password123", RoleType.MATE) } throws RuntimeException("Unexpected error")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
-            printer.displayLn("An error occurred during registration: Unexpected error")
+            printer.displayLn("An error occurred: Unexpected error")
         }
     }
 
@@ -181,11 +181,11 @@ class RegisterCLITest {
         } throws EiffelFlowException.AuthorizationException("Unauthorized")
 
         // When
-        registerCli.onRegisterClick()
+        registerCli.start()
 
         // Then
         verify {
-            printer.displayLn("Register Failed")
+            printer.displayLn("Authorization failed:Unauthorized")
         }
     }
 
