@@ -1,7 +1,9 @@
 package org.example.di
 
+import org.example.presentation.EiffelFlowConsoleCLI
 import org.example.presentation.UIContainer
 import org.example.presentation.audit.GetProjectAuditLogsCLI
+import org.example.presentation.auth.CheckCurrentSessionCLI
 import org.example.presentation.auth.LoginCLI
 import org.example.presentation.auth.RegisterCLI
 import org.example.presentation.helper.ConsolePrinter
@@ -31,6 +33,9 @@ val uiModule = module {
     singleOf(::LoginCLI)
     singleOf(::GetProjectAuditLogsCLI)
     singleOf(::UIContainer)
+
+    singleOf(::CheckCurrentSessionCLI)
+    singleOf(::EiffelFlowConsoleCLI)
     singleOf(::EditTaskCli)
 
 }
