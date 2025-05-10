@@ -21,6 +21,7 @@ dependencies {
     // For Kotlin driver
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.11.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.0-M1")
@@ -54,9 +55,10 @@ tasks.named<JacocoReport>("jacocoTestReport") {
                 exclude("org/example/domain/exception/**")
                 exclude("org/example/domain/utils/**")
                 exclude("org/example/di/**")
+                exclude("org/example/data/remote/dto/**")
                 exclude("org/example/MainKt.class")
-                exclude("org/example/data/storage/SessionManger.class")
-                exclude("org/example/data/MongoConfigProvider.class")
+                exclude("org/example/data/utils/SessionManger.class")
+                exclude("org/example/data/remote/MongoConfigProvider.class")
             }
         })
     )

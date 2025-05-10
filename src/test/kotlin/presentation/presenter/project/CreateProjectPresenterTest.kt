@@ -10,7 +10,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import kotlinx.coroutines.delay
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.model.Project
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer

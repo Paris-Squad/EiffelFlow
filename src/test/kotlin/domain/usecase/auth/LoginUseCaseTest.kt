@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.example.data.repository.AuthRepositoryImpl
+import org.example.data.local.csvrepository.CsvAuthRepositoryImpl
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
 import org.junit.jupiter.api.BeforeEach
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.assertThrows
 import utils.UserMock
 
 class LoginUseCaseTest {
-    private val authRepositoryImpl: AuthRepositoryImpl = mockk(relaxed = true)
+    private val authRepositoryImpl: CsvAuthRepositoryImpl = mockk(relaxed = true)
     private lateinit var loginUseCase: LoginUseCase
 
     @BeforeEach

@@ -1,6 +1,6 @@
 package org.example.domain.usecase.project
 
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction

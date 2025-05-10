@@ -1,6 +1,6 @@
 package org.example.presentation.project
 
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.model.Project
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer

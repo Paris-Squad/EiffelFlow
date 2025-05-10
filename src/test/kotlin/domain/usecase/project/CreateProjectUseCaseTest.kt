@@ -9,7 +9,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import kotlinx.coroutines.test.runTest
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.Test

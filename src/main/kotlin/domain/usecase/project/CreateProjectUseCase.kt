@@ -1,6 +1,6 @@
 package org.example.domain.usecase.project
 
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.model.Project
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
