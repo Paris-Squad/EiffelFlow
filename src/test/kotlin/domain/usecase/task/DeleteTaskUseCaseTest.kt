@@ -1,7 +1,6 @@
 package domain.usecase.task
 
 import com.google.common.truth.Truth.assertThat
-import domain.usecase.task.TaskMock.validTask
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -14,6 +13,7 @@ import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import utils.TaskMock
 import utils.UserMock
 import java.util.UUID
 
@@ -38,11 +38,11 @@ class DeleteTaskUseCaseTest {
     fun `deleteTask should return success when task exists`() {
         runTest {
             every { sessionManger.getUser() } returns UserMock.validUser
-            coEvery { taskRepository.deleteTask(taskIdToDelete) } returns validTask
+            coEvery { taskRepository.deleteTask(taskIdToDelete) } returns TaskMock.validTask
 
             val result = deleteTaskUseCase.deleteTask(taskIdToDelete)
 
-            assertThat(result).isEqualTo(validTask)
+            assertThat(result).isEqualTo(TaskMock.validTask)
         }
     }
 
