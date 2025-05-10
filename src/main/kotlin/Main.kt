@@ -4,13 +4,7 @@ import org.example.di.appModule
 import org.example.di.mongoModule
 import org.example.di.uiModule
 import org.example.di.useCasesModule
-import org.example.presentation.auth.LoginCLI
-import org.example.presentation.auth.RegisterCLI
-import org.example.presentation.project.CreateProjectCLI
-import org.example.presentation.project.DeleteProjectCLI
-import org.example.presentation.project.GetProjectCLI
-import org.example.presentation.project.UpdateProjectCLI
-import org.example.presentation.task.CreateTaskCLI
+import org.example.presentation.UIContainer
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -18,16 +12,13 @@ fun main() {
     startKoin {
         modules(appModule, useCasesModule, uiModule, mongoModule)
     }
-
-//    mealConsoleUI.createProjectInput()
-
     start()
-
 }
 
 
 fun start() {
-    println("Welcome to the plan-mit.")
+    println("Welcome to the EiffelFlow.")
+    val uiContainer = getKoin().get<UIContainer>()
     while (true) {
         println(
             """
@@ -39,6 +30,7 @@ fun start() {
             5. delete project
             6. get project
             7. update project
+            8. view project audit logs
             0. Exit
             """.trimIndent()
         )
@@ -47,59 +39,22 @@ fun start() {
         val input = readlnOrNull()
 
         when (input) {
-            "1" -> login()
-            "2" -> register()
-            "3" -> createProject()
-            "4" -> createTask()
-            "5" -> deleteProject()
-            "6" -> getProject()
-            "7" -> updateProject()
+            "1" -> uiContainer.loginCLI.start()
+            "2" -> uiContainer.registerCLI.start()
+            "3" -> uiContainer.getProjectCLI.start()
+            "4" -> uiContainer.createTaskCLI.start()
+            "5" -> uiContainer.deleteProjectCLI.start()
+            "6" -> uiContainer.getProjectCLI.start()
+            "7" -> uiContainer.updateProjectCLI.start()
+            "8" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
             "0" -> {
                 println("Thanks for using our app!")
                 break
             }
 
-            else -> println("Invalid input. Please enter a number from 0 to 15.")
+            else -> println("Invalid input. Please enter a number from 0 to 8.")
         }
 
         println("\n-------------------------------\n")
     }
 }
-
-
-private fun login() {
-    val login = getKoin().get<LoginCLI>()
-    login.onLoginClicked()
-}
-
-private fun register() {
-    val register = getKoin().get<RegisterCLI>()
-    register.onRegisterClick()
-}
-
-private fun createProject() {
-    val createProjectCLI = getKoin().get<CreateProjectCLI>()
-    createProjectCLI.createProjectInput()
-}
-
-private fun createTask() {
-    val createTaskCLI = getKoin().get<CreateTaskCLI>()
-    createTaskCLI.start()
-}
-
-private fun deleteProject() {
-    val deleteProjectCLI = getKoin().get<DeleteProjectCLI>()
-    deleteProjectCLI.deleteProjectInput()
-}
-
-private fun getProject() {
-    val getProjectCLI = getKoin().get<GetProjectCLI>()
-    getProjectCLI.displayProjects()
-}
-
-private fun updateProject() {
-    val updateProjectCLI = getKoin().get<UpdateProjectCLI>()
-    updateProjectCLI.updateProjectInput()
-}
-
-
