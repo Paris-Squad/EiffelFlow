@@ -3,7 +3,7 @@ package domain.usecase.task
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.model.RoleType
 import org.example.domain.model.TaskState
 import org.example.domain.exception.EiffelFlowException

@@ -6,7 +6,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
