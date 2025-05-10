@@ -32,7 +32,7 @@ class GetProjectAuditLogsCLI(
         }
     }
 
-    fun getProjectAuditLogs(projectId: UUID) {
+    private fun getProjectAuditLogs(projectId: UUID) {
         runBlocking {
             val projectAuditLogs = getProjectAuditUseCase.getProjectAuditLogsById(projectId)
             if (projectAuditLogs.isEmpty()) {

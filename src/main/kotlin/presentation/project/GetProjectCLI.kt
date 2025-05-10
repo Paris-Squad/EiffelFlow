@@ -7,7 +7,7 @@ import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import java.util.UUID
+import java.util.*
 
 class GetProjectCLI(
     private val getProjectUseCase: GetProjectUseCase,
@@ -58,7 +58,7 @@ class GetProjectCLI(
         }
     }
 
-    fun getProjectById(projectId: UUID): Project {
+    private fun getProjectById(projectId: UUID): Project {
         return runBlocking {
             getProjectUseCase.getProjectById(projectId)
         }

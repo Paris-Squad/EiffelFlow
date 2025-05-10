@@ -7,22 +7,22 @@ import io.mockk.verify
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
-import org.example.domain.usecase.auth.RegisterUseCase
-import org.example.presentation.auth.RegisterCLI
+import org.example.domain.usecase.user.CreateUserUseCase
+import org.example.presentation.user.CreateUserCLI
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class RegisterCLITest {
-    private val registerUseCase: RegisterUseCase = mockk(relaxed = true)
-    private lateinit var registerCli: RegisterCLI
+    private val registerUseCase: CreateUserUseCase = mockk(relaxed = true)
+    private lateinit var registerCli: CreateUserCLI
     private val inputReader: InputReader = mockk()
     private val printer: Printer = mockk(relaxed = true)
 
     @BeforeEach
     fun setup() {
-        registerCli = RegisterCLI(registerUseCase =registerUseCase, inputReader = inputReader, printer = printer)
+        registerCli = CreateUserCLI(createUserUseCase =registerUseCase, inputReader = inputReader, printer = printer)
 
     }
 

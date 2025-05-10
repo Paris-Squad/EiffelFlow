@@ -2,10 +2,13 @@ package org.example.di
 
 import org.example.presentation.EiffelFlowConsoleCLI
 import org.example.presentation.UIContainer
+import org.example.presentation.audit.GetAuditLogsCLI
 import org.example.presentation.audit.GetProjectAuditLogsCLI
+import org.example.presentation.audit.GetTaskAuditLogsCLI
 import org.example.presentation.auth.CheckCurrentSessionCLI
 import org.example.presentation.auth.LoginCLI
-import org.example.presentation.auth.RegisterCLI
+import org.example.presentation.auth.LogoutCLI
+import org.example.presentation.user.CreateUserCLI
 import org.example.presentation.helper.ConsolePrinter
 import org.example.presentation.io.ConsoleReader
 import org.example.presentation.io.InputReader
@@ -21,21 +24,40 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val uiModule = module {
+
+    //Helper
     single<Printer> { ConsolePrinter() }
     single<InputReader> { ConsoleReader() }
-    singleOf(::CreateTaskCLI)
+
+    //Audit
+    singleOf(::GetAuditLogsCLI)
+    singleOf(::GetProjectAuditLogsCLI)
+    singleOf(::GetTaskAuditLogsCLI)
+
+    //Auth
+    singleOf(::CheckCurrentSessionCLI)
+    singleOf(::LoginCLI)
+    singleOf(::LogoutCLI)
+
+    //User
+    singleOf(::CreateUserCLI)
+
+    //Project
     singleOf(::CreateProjectCLI)
-    singleOf(::RegisterCLI)
     singleOf(::DeleteProjectCLI)
-    singleOf(::DeleteTaskCLI)
     singleOf(::GetProjectCLI)
     singleOf(::UpdateProjectCLI)
-    singleOf(::LoginCLI)
-    singleOf(::GetProjectAuditLogsCLI)
-    singleOf(::UIContainer)
 
-    singleOf(::CheckCurrentSessionCLI)
-    singleOf(::EiffelFlowConsoleCLI)
+    //Task
+    singleOf(::CreateTaskCLI)
+    singleOf(::DeleteTaskCLI)
     singleOf(::EditTaskCli)
+
+    //Main UI
+    singleOf(::UIContainer)
+    singleOf(::EiffelFlowConsoleCLI)
+
+
+
 
 }

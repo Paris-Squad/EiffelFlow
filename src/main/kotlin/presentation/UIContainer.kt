@@ -1,8 +1,11 @@
 package org.example.presentation
 
+import org.example.presentation.audit.GetAuditLogsCLI
 import org.example.presentation.audit.GetProjectAuditLogsCLI
+import org.example.presentation.audit.GetTaskAuditLogsCLI
 import org.example.presentation.auth.LoginCLI
-import org.example.presentation.auth.RegisterCLI
+import org.example.presentation.auth.LogoutCLI
+import org.example.presentation.user.CreateUserCLI
 import org.example.presentation.project.CreateProjectCLI
 import org.example.presentation.project.DeleteProjectCLI
 import org.example.presentation.project.GetProjectCLI
@@ -14,7 +17,7 @@ import org.example.presentation.task.EditTaskCli
 data class UIContainer(
     val getProjectAuditLogsCLI: GetProjectAuditLogsCLI,
     val loginCLI: LoginCLI,
-    val registerCLI: RegisterCLI,
+    val registerCLI: CreateUserCLI,
     val createProjectCLI: CreateProjectCLI,
     val deleteProjectCLI: DeleteProjectCLI,
     val getProjectCLI: GetProjectCLI,
@@ -22,4 +25,7 @@ data class UIContainer(
     val createTaskCLI: CreateTaskCLI,
     val editTaskCli: EditTaskCli,
     val deleteTaskCLI: DeleteTaskCLI,
+    val logoutCLI: LogoutCLI,
+    val getTaskAuditLogsCLI: GetTaskAuditLogsCLI,
+    val getAuditLogsCLI: GetAuditLogsCLI,
 )

@@ -31,19 +31,37 @@ class EiffelFlowConsoleCLI {
         startUI(uiContainer)
     }
 
+    fun logout(uiContainer: UIContainer) {
+        uiContainer.logoutCLI.start()
+        while (SessionManger.isLoggedIn()){
+            startUI(uiContainer)
+        }
+        loginUI(uiContainer)
+    }
+
     fun startUI(uiContainer: UIContainer) {
         while (true) {
             println(
                 """
             Choose an option:
-            1. register
-            2. create project
-            3. create task
-            4. delete project
-            5. get project
-            5. update project
-            7. view project audit logs
-            8. edit task
+            1. Create user
+            2. Create project
+            3. Delete project
+            4. Update project
+            5. View all projects
+            6. view project by ID
+            7. Create task
+            8. Edit task
+            9. Delete task
+            10. View all tasks
+            11. View task by ID
+            12. Get Project AuditLogs by ID
+            13. Get Task AuditLogs by ID
+            14. Get All AuditLogs
+            15. Update profile
+            16. Delete User
+            17. View all users
+            18. Logout
             0. Exit
             """.trimIndent()
             )
@@ -53,13 +71,23 @@ class EiffelFlowConsoleCLI {
 
             when (input) {
                 "1" -> uiContainer.registerCLI.start()
-                "2" -> uiContainer.getProjectCLI.start()
-                "3" -> uiContainer.createTaskCLI.start()
-                "4" -> uiContainer.deleteProjectCLI.start()
+                "2" -> uiContainer.createProjectCLI.start()
+                "3" -> uiContainer.deleteProjectCLI.start()
+                "4" -> uiContainer.updateProjectCLI.start()
                 "5" -> uiContainer.getProjectCLI.start()
-                "6" -> uiContainer.updateProjectCLI.start()
-                "7" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
+                "6" -> uiContainer.getProjectCLI.displayProjectById()
+                "7" -> uiContainer.createTaskCLI.start()
                 "8" -> uiContainer.editTaskCli.start()
+                "9" -> uiContainer.deleteTaskCLI.start()
+                "10" -> TODO("View all tasks")
+                "11" -> TODO("View task by ID")
+                "12" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
+                "13" -> uiContainer.getTaskAuditLogsCLI.getTaskAuditLogsInput()
+                "14" -> uiContainer.getAuditLogsCLI.getAllAuditLogs()
+                "15" -> TODO("Update profile")
+                "16" -> TODO("Delete User")
+                "17" -> TODO("View all users")
+                "18" -> uiContainer.logoutCLI.start()
                 "0" -> {
                     println("Thanks for using our app!")
                     break
