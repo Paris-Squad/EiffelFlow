@@ -10,7 +10,13 @@ import org.bson.codecs.configuration.CodecRegistries.fromRegistries
 import org.example.domain.utils.KotlinxLocalDateTimeCodec
 
 class MongoConfigProvider {
-    fun getDatabase(): MongoDatabase {
+
+    fun getMongoClient(): MongoClient{
+        val connectionString = getConnectionString()
+        return MongoClient.create(connectionString)
+    }
+
+    fun getDatabase(mongoClient: MongoClient): MongoDatabase {
         val defaultRegistry = MongoClientSettings.getDefaultCodecRegistry()
         val customRegistry = fromCodecs(KotlinxLocalDateTimeCodec())
         val uuidRegistry = fromCodecs(
@@ -18,9 +24,8 @@ class MongoConfigProvider {
         )
         val codecRegistry = fromRegistries(uuidRegistry, customRegistry, defaultRegistry)
 
-        val connectionString = getConnectionString()
         val databaseName = System.getenv("DATABASE_NAME")
-        return MongoClient.create(connectionString)
+        return mongoClient
             .getDatabase(databaseName)
             .withCodecRegistry(codecRegistry)
     }

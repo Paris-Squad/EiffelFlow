@@ -1,5 +1,6 @@
 package org.example
 
+import com.mongodb.kotlin.client.coroutine.MongoClient
 import org.example.di.appModule
 import org.example.di.mongoModule
 import org.example.di.uiModule
@@ -12,7 +13,10 @@ fun main() {
     startKoin {
         modules(appModule, useCasesModule, uiModule, mongoModule)
     }
+
+    val mongoClient = getKoin().get<MongoClient>()
     start()
+    mongoClient.close()
 }
 
 
