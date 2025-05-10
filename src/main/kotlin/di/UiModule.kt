@@ -5,6 +5,7 @@ import org.example.presentation.UIContainer
 import org.example.presentation.audit.GetProjectAuditLogsCLI
 import org.example.presentation.auth.CheckCurrentSessionCLI
 import org.example.presentation.auth.LoginCLI
+import org.example.presentation.auth.LogoutCLI
 import org.example.presentation.auth.RegisterCLI
 import org.example.presentation.helper.ConsolePrinter
 import org.example.presentation.io.ConsoleReader
@@ -37,5 +38,6 @@ val uiModule = module {
     singleOf(::CheckCurrentSessionCLI)
     singleOf(::EiffelFlowConsoleCLI)
     singleOf(::EditTaskCli)
+    singleOf(::LogoutCLI)
 
 }

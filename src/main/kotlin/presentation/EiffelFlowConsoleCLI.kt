@@ -31,19 +31,28 @@ class EiffelFlowConsoleCLI {
         startUI(uiContainer)
     }
 
+    fun logout(uiContainer: UIContainer) {
+        uiContainer.logoutCLI.start()
+        while (SessionManger.isLoggedIn()){
+            startUI(uiContainer)
+        }
+        loginUI(uiContainer)
+    }
+
     fun startUI(uiContainer: UIContainer) {
         while (true) {
             println(
                 """
             Choose an option:
-            1. register
+            1. Create user
             2. create project
             3. create task
             4. delete project
             5. get project
-            5. update project
+            6. update project
             7. view project audit logs
             8. edit task
+            9. Logout
             0. Exit
             """.trimIndent()
             )
@@ -53,13 +62,14 @@ class EiffelFlowConsoleCLI {
 
             when (input) {
                 "1" -> uiContainer.registerCLI.start()
-                "2" -> uiContainer.getProjectCLI.start()
+                "2" -> uiContainer.createProjectCLI.start()
                 "3" -> uiContainer.createTaskCLI.start()
                 "4" -> uiContainer.deleteProjectCLI.start()
                 "5" -> uiContainer.getProjectCLI.start()
                 "6" -> uiContainer.updateProjectCLI.start()
                 "7" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
                 "8" -> uiContainer.editTaskCli.start()
+                "9" -> uiContainer.logoutCLI.start()
                 "0" -> {
                     println("Thanks for using our app!")
                     break

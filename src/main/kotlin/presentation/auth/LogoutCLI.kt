@@ -7,10 +7,10 @@ import org.example.presentation.BaseCli
 import org.example.presentation.io.Printer
 
 class LogoutCLI(
-    private  val logoutUseCase: LogoutUseCase ,
+    private val logoutUseCase: LogoutUseCase,
     private val printer: Printer
 ) : BaseCli(printer) {
-    fun start(){
+    fun start() {
         try {
             logout()
             printer.displayLn("Logout successful")
@@ -19,9 +19,7 @@ class LogoutCLI(
         }
     }
 
-    fun logout(){
-        return runBlocking {
-                logoutUseCase.logout()
-        }
+    private fun logout() = runBlocking {
+        logoutUseCase.logout()
     }
 }
