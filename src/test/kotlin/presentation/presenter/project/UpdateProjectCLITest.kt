@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
-import org.example.data.storage.SessionManger
+import org.example.data.utils.SessionManger
 import org.example.domain.model.Project
 import org.example.domain.usecase.project.UpdateProjectUseCase
 import org.example.presentation.io.InputReader

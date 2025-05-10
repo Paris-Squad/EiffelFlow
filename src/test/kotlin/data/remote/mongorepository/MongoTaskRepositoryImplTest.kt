@@ -31,6 +31,7 @@ import java.util.UUID
 
 class MongoTaskRepositoryImplTest {
 
+    private val taskMapper: TaskMapper = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private lateinit var tasksCollection: MongoCollection<Task>
     private lateinit var auditRepository: AuditRepository
