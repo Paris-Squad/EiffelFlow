@@ -9,6 +9,7 @@ import org.example.presentation.project.GetProjectCLI
 import org.example.presentation.project.UpdateProjectCLI
 import org.example.presentation.task.CreateTaskCLI
 import org.example.presentation.task.DeleteTaskCLI
+import org.example.presentation.task.EditTaskCli
 
 data class UIContainer(
     val getProjectAuditLogsCLI: GetProjectAuditLogsCLI,
@@ -19,5 +20,6 @@ data class UIContainer(
     val getProjectCLI: GetProjectCLI,
     val updateProjectCLI: UpdateProjectCLI,
     val createTaskCLI: CreateTaskCLI,
+    val editTaskCli: EditTaskCli,
     val deleteTaskCLI: DeleteTaskCLI,
 )

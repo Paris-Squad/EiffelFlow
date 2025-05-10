@@ -16,6 +16,7 @@ import org.example.presentation.project.GetProjectCLI
 import org.example.presentation.project.UpdateProjectCLI
 import org.example.presentation.task.CreateTaskCLI
 import org.example.presentation.task.DeleteTaskCLI
+import org.example.presentation.task.EditTaskCli
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -35,4 +36,6 @@ val uiModule = module {
 
     singleOf(::CheckCurrentSessionCLI)
     singleOf(::EiffelFlowConsoleCLI)
+    singleOf(::EditTaskCli)
+
 }
