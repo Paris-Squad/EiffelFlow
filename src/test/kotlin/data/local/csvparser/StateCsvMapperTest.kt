@@ -8,13 +8,13 @@ import kotlin.test.Test
 
 class StateCsvParserTest {
 
-    private val StateCsvParser = StateCsvParser()
+    private val stateCsvParser = StateCsvParser()
 
     @Test
     fun `should map CSV line to State entity correctly`() {
 
         //Given / When
-        val result = StateCsvParser.parseCsvLine(CSV_STRING_LINE)
+        val result = stateCsvParser.parseCsvLine(CSV_STRING_LINE)
 
         // Then
         assertThat(result).isEqualTo(STATE)
@@ -25,7 +25,7 @@ class StateCsvParserTest {
     fun `should map State entity to CSV line correctly`() {
 
         //Given / When
-        val result = StateCsvParser.serialize(STATE)
+        val result = stateCsvParser.serialize(STATE)
 
         // Then
         assertThat(result).isEqualTo(CSV_STRING_LINE)

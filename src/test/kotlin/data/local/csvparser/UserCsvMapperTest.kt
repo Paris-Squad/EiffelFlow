@@ -9,13 +9,13 @@ import kotlin.test.Test
 
 class UserCsvParserTest {
 
-    private val UserCsvParser = UserCsvParser()
+    private val userCsvParser = UserCsvParser()
 
     @Test
     fun `should map CSV line to User entity correctly`() {
 
         //Given / When
-        val result = UserCsvParser.parseCsvLine(CSV_STRING_LINE)
+        val result = userCsvParser.parseCsvLine(CSV_STRING_LINE)
 
         // Then
         assertThat(result).isEqualTo(USER)
@@ -26,7 +26,7 @@ class UserCsvParserTest {
     fun `should map User entity to CSV line correctly`() {
 
         //Given / When
-        val result = UserCsvParser.serialize(USER)
+        val result = userCsvParser.serialize(USER)
 
         // Then
         assertThat(result).isEqualTo(CSV_STRING_LINE)
