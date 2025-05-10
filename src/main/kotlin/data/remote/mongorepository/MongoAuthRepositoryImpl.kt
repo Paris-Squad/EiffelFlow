@@ -33,9 +33,10 @@ class MongoAuthRepositoryImpl(
 
     override suspend fun isUserLoggedIn(): Boolean {
         try {
-            authCollection.find().firstOrNull() ?: throw EiffelFlowException.NotFoundException(
-                "User is not logged in"
-            )
+           val currentUserDto = authCollection.find().firstOrNull()
+            currentUserDto ?: return false
+            val currentUser = userMapper.fromDto(currentUserDto)
+            SessionManger.login(currentUser)
             return true
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't check if user is logged in because ${exception.message}")
@@ -54,7 +55,7 @@ class MongoAuthRepositoryImpl(
     override suspend fun loginUser(username: String, password: String): User {
         try {
             val userDto = findUserByCredentials(username, password)
-            userDto ?: throw EiffelFlowException.NotFoundException("Invalid username or password")
+            userDto ?: throw EiffelFlowException.NotFoundException("Invalid Credentials")
 
             val existUser = userMapper.fromDto(userDto)
             val savedUser = saveUserLogin(existUser)
