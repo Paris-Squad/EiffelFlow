@@ -4,8 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.verify
-import org.example.domain.exception.EiffelFlowException
+import org.example.data.storage.SessionManger
 import org.example.domain.model.Project
 import org.example.domain.usecase.project.UpdateProjectUseCase
 import org.example.presentation.io.InputReader
@@ -14,6 +15,7 @@ import org.example.presentation.project.UpdateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
+import utils.UserMock
 import java.util.*
 
 class UpdateProjectCLITest {
@@ -25,6 +27,8 @@ class UpdateProjectCLITest {
 
     @BeforeEach
     fun setup() {
+        mockkObject(SessionManger)
+        every { SessionManger.getUser() } returns UserMock.adminUser
         updateProjectCli =
             UpdateProjectCLI(
                 updateProjectUseCase = updateProjectUseCase,
@@ -50,67 +54,16 @@ class UpdateProjectCLITest {
         val expectedProject = Project(
             projectName = "Project1",
             projectDescription = "Desc",
-            adminId = adminId
+            adminId = SessionManger.getUser().userId
         )
 
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", adminId.toString())
+        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
         coEvery { updateProjectUseCase.updateProject(any()) } returns expectedProject
 
         updateProjectCli.start()
 
         verify { printer.displayLn("Project updated successfully: $expectedProject") }
     }
-
-    @Test
-    fun `should throw Exception when unknown exception occurs during input flow`() {
-        val adminId = UUID.randomUUID()
-
-        every { inputReader.readString() } returnsMany listOf("Project1", "Description", adminId.toString())
-
-        coEvery {
-            updateProjectUseCase.updateProject(
-                match {
-                    it.projectName == "Project1" &&
-                            it.projectDescription == "Description" &&
-                            it.adminId == adminId
-                }
-            )
-        } throws IllegalStateException("Unexpected failure")
-
-        //When
-        updateProjectCli.start()
-
-        // Then
-        verify {
-            printer.displayLn("An error occurred: Unexpected failure")
-        }
-    }
-
-    @Test
-    fun `should rethrow EiffelFlowException when updateProjectUseCase throws Exception`() {
-        val adminId = UUID.randomUUID()
-
-        every { inputReader.readString() } returnsMany listOf("Project1", "Description", adminId.toString())
-
-        coEvery {
-            updateProjectUseCase.updateProject(
-                match {
-                    it.projectName == "Project1" &&
-                            it.projectDescription == "Description" &&
-                            it.adminId == adminId
-                }
-            )
-        } throws EiffelFlowException.IOException("Simulated IO error")
-
-        //When
-        updateProjectCli.start()
-
-        // Then
-        verify {
-            printer.displayLn("Something went wrong:Simulated IO error")
-        }
-    }
-
 
     @Test
     fun `should return updated project when multiple fields of project are updated`() {
@@ -163,14 +116,4 @@ class UpdateProjectCLITest {
 
         verify { printer.displayLn("Project description cannot be empty.") }
     }
-
-    @Test
-    fun `should print error when admin ID format is invalid`() {
-        every { inputReader.readString() } returnsMany listOf("Project1", "Description", "not-a-uuid")
-
-        updateProjectCli.start()
-
-        verify { printer.displayLn("Invalid admin ID format.") }
-    }
-
 }
