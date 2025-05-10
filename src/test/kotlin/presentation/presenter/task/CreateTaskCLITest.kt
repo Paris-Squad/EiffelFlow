@@ -235,7 +235,7 @@ class CreateTaskCLITest {
 
         // Then
         verify {
-            printer.displayLn("An error occurred: Task creation failed")
+            printer.displayLn("Something went wrong:Task creation failed")
         }
     }
 

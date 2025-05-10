@@ -1,8 +1,8 @@
 package org.example.presentation.auth
 
 import kotlinx.coroutines.runBlocking
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.auth.LoginUseCase
+import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 
@@ -10,27 +10,17 @@ class LoginCLI(
     private val loginUseCase: LoginUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
-    fun onLoginClicked(){
-        try {
-            printer.displayLn("Enter user name:")
-            val name = inputReader.readString()
-            if (name.isNullOrBlank()) {
-                printer.displayLn("user name cannot be empty.")
-                return
-            }
-            printer.displayLn("Enter password:")
-            val password = inputReader.readString()
-            if (password.isNullOrBlank()) {
-                printer.displayLn("password cannot be empty.")
-                return
+) : BaseCli(printer) {
+    fun start() {
+        tryStartCli {
+            val credentials = readCredentials(inputReader)
+            if (credentials == null) {
+                return@tryStartCli
             }
 
+            val (name, password) = credentials
             login(userName = name, password = password)
             printer.displayLn("Login successful")
-
-        } catch (e: EiffelFlowException.AuthorizationException) {
-            printer.displayLn("Login Failed")
         }
     }
 

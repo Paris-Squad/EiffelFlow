@@ -51,7 +51,6 @@ class MongoProjectRepositoryImplTest {
 
         projectRepository = MongoProjectRepositoryImpl(
            database =  mockDatabase,
-            auditRepository = auditRepository,
             projectMapper = projectMapper
         )
     }
@@ -78,17 +77,6 @@ class MongoProjectRepositoryImplTest {
 
         //Then
         assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-    }
-
-    @Test
-    fun `createProject should throw Exception when user is not admin`() = runTest {
-        // Given
-        every { sessionManger.getUser() } returns UserMock.validUser
-
-        // When/Then
-        assertThrows<EiffelFlowException.AuthorizationException> {
-            projectRepository.createProject(ProjectsMock.CORRECT_PROJECT)
-        }
     }
 
     @Test
@@ -177,21 +165,6 @@ class MongoProjectRepositoryImplTest {
     }
 
     @Test
-    fun `updateProject should throw Exception when user is not admin`() = runTest {
-        // Given
-        every { sessionManger.getUser() } returns UserMock.validUser
-
-        // When/Then
-        assertThrows<EiffelFlowException.AuthorizationException> {
-            projectRepository.updateProject(
-                project = ProjectsMock.updatedProject,
-                oldProject = ProjectsMock.CORRECT_PROJECT,
-                changedField = "description"
-            )
-        }
-    }
-
-    @Test
     fun `updateProject should throw Exception when project is not found`() {
         runTest {
             // Given
@@ -275,17 +248,6 @@ class MongoProjectRepositoryImplTest {
 
         // Then
         assertThat(result).isEqualTo(ProjectsMock.updatedProject)
-    }
-
-    @Test
-    fun `deleteProject should throw Exception when user is not admin`() = runTest {
-        // Given
-        every { sessionManger.getUser() } returns UserMock.validUser
-
-        // When/Then
-        assertThrows<EiffelFlowException.AuthorizationException> {
-            projectRepository.deleteProject(ProjectsMock.CORRECT_PROJECT.projectId)
-        }
     }
 
     @Test

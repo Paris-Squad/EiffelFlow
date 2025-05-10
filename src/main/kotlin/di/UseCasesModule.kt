@@ -1,9 +1,13 @@
 package org.example.di
 
+import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.example.domain.usecase.auth.*
 import org.example.domain.usecase.project.CreateProjectUseCase
+import org.example.domain.usecase.project.DeleteProjectUseCase
 import org.example.domain.usecase.project.GetProjectUseCase
+import org.example.domain.usecase.project.UpdateProjectUseCase
 import org.example.domain.usecase.task.CreateTaskUseCase
+import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.koin.dsl.module
 
 val useCasesModule = module {
@@ -13,9 +17,10 @@ val useCasesModule = module {
     factory { RegisterUseCase(get(), get()) }
     single { GetProjectUseCase(get()) }
     single { CreateTaskUseCase(get()) }
-    single { CreateProjectUseCase(get()) }
+    single { CreateProjectUseCase(get(),get()) }
     single { LoginUseCase(get()) }
-
-    single { RegisterUseCase(get() , get()) }
-    single { HashPasswordUseCase() }
+    single { GetProjectAuditUseCase(get()) }
+    single { DeleteProjectUseCase(get(),get()) }
+    single { UpdateProjectUseCase(get(),get()) }
+    single { DeleteTaskUseCase(get()) }
 }

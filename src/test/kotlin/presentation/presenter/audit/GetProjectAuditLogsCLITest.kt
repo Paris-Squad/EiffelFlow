@@ -51,7 +51,7 @@ class GetProjectAuditLogsCLITest {
         // When
         cli.getProjectAuditLogsInput()
         // Then
-        verify { printer.displayLn("Invalid Project ID format.") }
+        verify { printer.displayLn("An error occurred: Invalid UUID string: invalid-uuid") }
     }
 
     @Test
@@ -136,7 +136,7 @@ class GetProjectAuditLogsCLITest {
         // When
         cli.getProjectAuditLogsInput()
         // Then
-        verify { printer.displayLn("An error occurred while retrieving audit logs: General error") }
+        verify { printer.displayLn("An error occurred: General error") }
     }
 
     @Test
@@ -232,7 +232,7 @@ class GetProjectAuditLogsCLITest {
         // When
         cliSpy.getProjectAuditLogsInput()
         // Then
-        verify { printer.displayLn("An error occurred while retrieving audit logs: Unexpected error") }
+        verify { printer.displayLn("An error occurred: Unexpected error") }
     }
     @Test
     fun `should print error when input is blank`() {
@@ -252,7 +252,7 @@ class GetProjectAuditLogsCLITest {
         // When
         cli.getProjectAuditLogsInput()
         // Then
-        verify { printer.displayLn("Invalid Project ID format.") }
+        verify { printer.displayLn("An error occurred: Invalid UUID string: invalid-uuid") }
     }
     @Test
     fun `should handle EiffelFlowException when getting audit logs`() {
@@ -265,7 +265,7 @@ class GetProjectAuditLogsCLITest {
         // When
         cliSpy.getProjectAuditLogsInput()
         // Then
-        verify { printer.displayLn("Failed to get audit logs: Audit failed") }
+        verify { printer.displayLn("Audit failed") }
     }
     @Test
     fun `should handle generic exception when getting audit logs`() {
@@ -278,7 +278,7 @@ class GetProjectAuditLogsCLITest {
         // When
         cliSpy.getProjectAuditLogsInput()
         // Then
-        verify { printer.displayLn("An error occurred while retrieving audit logs: Unexpected") }
+        verify { printer.displayLn("An error occurred: Unexpected") }
     }
 
     @Test

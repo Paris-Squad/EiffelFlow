@@ -31,7 +31,6 @@ val mongoModule = module{
     single<ProjectRepository> {
         MongoProjectRepositoryImpl(
             database = get(),
-            auditRepository = get(),
             projectMapper = get()
         )
     }

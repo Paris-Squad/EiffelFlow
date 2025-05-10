@@ -52,7 +52,7 @@ class DeleteProjectCLITest {
         every { printer.displayLn(any()) } just Runs
 
         // When
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
         verify { printer.displayLn("Project deleted successfully ${ProjectsMock.CORRECT_PROJECT}") }
@@ -76,7 +76,7 @@ class DeleteProjectCLITest {
         every { printer.displayLn(any()) } just Runs
 
         // When
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
         verify { printer.displayLn("Project ID cannot be empty.") }
@@ -88,7 +88,7 @@ class DeleteProjectCLITest {
         every { inputReader.readString() } returns "   "
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         verify { printer.displayLn("Project ID cannot be empty.") }
     }
@@ -98,7 +98,7 @@ class DeleteProjectCLITest {
         every { inputReader.readString() } returns "uuid"
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         verify {
             printer.displayLn("An error occurred: Invalid UUID string: uuid")
@@ -116,11 +116,11 @@ class DeleteProjectCLITest {
         } throws exception
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
         verify {
-            printer.displayLn("An error occurred: ${exception.message}")
+            printer.displayLn("Project not found")
         }
     }
 
@@ -136,7 +136,7 @@ class DeleteProjectCLITest {
         // every { printer.display(any()) } just Runs
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
         verify {

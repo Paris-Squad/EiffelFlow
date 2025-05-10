@@ -11,31 +11,21 @@ import org.example.data.remote.dto.MongoProjectDto
 import org.example.data.remote.mapper.ProjectMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.mapper.toAuditLog
-import org.example.domain.model.AuditLogAction
 import org.example.domain.model.Project
-import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
-import org.example.domain.utils.getFieldChanges
-import java.util.*
+import java.util.UUID
 
 class MongoProjectRepositoryImpl(
     database: MongoDatabase,
-    private val auditRepository: AuditRepository,
     private val projectMapper: ProjectMapper
 ) : ProjectRepository {
 
     private val projectsCollection = database.getCollection<MongoProjectDto>(collectionName = MongoCollections.PROJECTS)
 
     override suspend fun createProject(project: Project): Project {
-        require(SessionManger.isAdmin()) {
-            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
-        }
         try {
             val projectDto = projectMapper.toDto(project)
             projectsCollection.insertOne(projectDto)
-
-            logAction(project, AuditLogAction.CREATE)
 
             return project
         } catch (exception: Throwable) {
@@ -48,10 +38,6 @@ class MongoProjectRepositoryImpl(
         oldProject: Project,
         changedField: String
     ): Project {
-        require(SessionManger.isAdmin()) {
-            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
-        }
-
         try {
             val projectDto = projectMapper.toDto(project)
             val updates = Updates.combine(
@@ -69,17 +55,6 @@ class MongoProjectRepositoryImpl(
                 throw EiffelFlowException.NotFoundException("Project with id ${project.projectId} not found")
             }
 
-            val fieldChanges = oldProject.getFieldChanges(project)
-            val changedFieldsNames = fieldChanges.map { it.fieldName }
-            val oldValues = fieldChanges.map { it.oldValue }
-            val newValues = fieldChanges.map { it.newValue }
-            logAction(
-                project = project,
-                actionType = AuditLogAction.UPDATE,
-                changedField = changedFieldsNames.toString(),
-                oldValue = oldValues.toString(),
-                newValue = newValues.toString(),
-            )
             return project
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Can't update Project with id ${project.projectId} because ${exception.message}")
@@ -87,9 +62,6 @@ class MongoProjectRepositoryImpl(
     }
 
     override suspend fun deleteProject(projectId: UUID): Project {
-        require(SessionManger.isAdmin()) {
-            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to create project")
-        }
         try {
             val query = eq(MongoProjectDto::_id.name, projectId.toString())
             val deletedProjectDto = projectsCollection.findOneAndDelete(query)
@@ -97,10 +69,6 @@ class MongoProjectRepositoryImpl(
                 throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
             }
             val deletedProject = projectMapper.fromDto(deletedProjectDto)
-            logAction(
-                project = deletedProject,
-                actionType = AuditLogAction.DELETE
-            )
             return deletedProject
 
         } catch (exception: Throwable) {
@@ -136,20 +104,4 @@ class MongoProjectRepositoryImpl(
         }
     }
 
-    private suspend fun logAction(
-        project: Project,
-        actionType: AuditLogAction,
-        changedField: String? = null,
-        oldValue: String? = null,
-        newValue: String = project.toString()
-    ) {
-        val auditLog = project.toAuditLog(
-            editor = SessionManger.getUser(),
-            actionType = actionType,
-            changedField = changedField,
-            oldValue = oldValue,
-            newValue = newValue,
-        )
-        auditRepository.createAuditLog(auditLog)
-    }
 }
