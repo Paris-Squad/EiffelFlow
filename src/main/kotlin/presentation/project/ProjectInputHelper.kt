@@ -1,5 +1,6 @@
 package org.example.presentation.project
 
+import org.example.data.storage.SessionManger
 import org.example.domain.model.Project
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
@@ -22,19 +23,11 @@ object ProjectInputHelper {
             return null
         }
 
-        printer.displayLn("Enter admin ID:")
-        val adminIdInput = inputReader.readString()
-        val adminId = try {
-            UUID.fromString(adminIdInput)
-        } catch (_: IllegalArgumentException) {
-            printer.displayLn("Invalid admin ID format.")
-            return null
-        }
 
         return Project(
             projectName = name,
             projectDescription = description,
-            adminId = adminId
+            adminId = SessionManger.getUser().userId
         )
     }
 }

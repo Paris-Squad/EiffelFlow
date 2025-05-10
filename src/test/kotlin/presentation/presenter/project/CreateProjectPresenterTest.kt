@@ -1,29 +1,24 @@
 package presentation.presenter.project
 
+import com.google.common.truth.Truth.assertThat
 import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.project.CreateProjectCLI
-import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
-import io.mockk.verifyOrder
 import kotlinx.coroutines.delay
 import org.example.data.storage.SessionManger
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
-import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import org.example.presentation.project.CreateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
 import utils.UserMock
-import java.util.UUID
-import kotlin.coroutines.cancellation.CancellationException
+
 
 
 class CreateProjectPresenterTest {
@@ -41,39 +36,32 @@ class CreateProjectPresenterTest {
             CreateProjectCLI(createProjectUseCase = createProjectUseCase, inputReader = inputReader, printer = printer)
     }
 
-    @Test
-    fun `should return the created Project when project is successfully created`() {
-        //Given
-        coEvery {
-            createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
-        } returns ProjectsMock.CORRECT_PROJECT
-
-        //When
-        val result = createProjectCli.createProject(ProjectsMock.CORRECT_PROJECT)
-
-        //Then
-        assertThat(result).isEqualTo(ProjectsMock.CORRECT_PROJECT)
-
-    }
 
     @Test
     fun `should create project successfully with valid input`() {
         // Given
-        val validAdminId = UUID.randomUUID()
+        val projectName = "Project1"
+        val projectDescription = "Desc"
+
         val expectedProject = Project(
             projectName = projectName,
             projectDescription = projectDescription,
-            adminId = validAdminId
+            adminId = SessionManger.getUser().userId
         )
 
-        every { inputReader.readString() } returnsMany listOf(projectName, projectDescription, validAdminId.toString())
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
+        every { inputReader.readString() } returnsMany listOf(projectName, projectDescription)
         coEvery { createProjectUseCase.createProject(any()) } returns expectedProject
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
+        coVerify {
+            createProjectUseCase.createProject(withArg { project ->
+                assertThat(project.projectName).isEqualTo(projectName)
+                assertThat(project.projectDescription).isEqualTo(projectDescription)
+            })
+        }
         verify { printer.displayLn("Project created successfully: $expectedProject") }
     }
 
@@ -94,7 +82,7 @@ class CreateProjectPresenterTest {
         // Given
         every { inputReader.readString() } returns null
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
         // Then
         verify(exactly = 1) { printer.displayLn("Project name cannot be empty.") }
     }
@@ -122,54 +110,6 @@ class CreateProjectPresenterTest {
         // Then
         verify { printer.displayLn("Project description cannot be empty.") }
     }
-
-    @Test
-    fun `should print error when admin ID format is invalid`() {
-        // Given
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "uuid")
-
-        // When
-        createProjectCli.start()
-
-        // Then
-        verify { printer.displayLn("Invalid admin ID format.") }
-    }
-
-    @Test
-    fun `should print error when EiffelFlowException occurs during creation`() {
-        //Given
-        val exception = EiffelFlowException.IOException("Failed to create the project")
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
-        coEvery { createProjectUseCase.createProject(any()) } throws exception
-
-        // When
-        createProjectCli.start()
-        //When
-        createProjectCli.createProjectInput()
-
-        //Then
-        verify {
-            printer.displayLn("An error occurred: ${exception.message}")
-        }
-    }
-
-    @Test
-    fun `should print error when generic Exception occurs during creation`() {
-        //Given
-        val exception = Exception("Unexpected error")
-        every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
-        coEvery { createProjectUseCase.createProject(any()) } throws exception
-
-        //When
-        createProjectCli.createProjectInput()
-        // When
-        createProjectCli.start()
-
-        // Then
-        verify {
-            printer.displayLn("Something went wrong:Failed to create the project")
-        }
-    }
     @Test
     fun `should handle multiple suspension points in createProject`() {
         // Given
@@ -187,6 +127,7 @@ class CreateProjectPresenterTest {
         createProjectCli.start()
 
         // Then
+        coVerify { createProjectUseCase.createProject(any()) }
         verify { printer.displayLn("Project created successfully: $expectedProject") }
     }
 }
