@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDateTime
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
+import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.jetbrains.annotations.VisibleForTesting
@@ -14,26 +15,20 @@ class GetProjectAuditLogsCLI(
     private val getProjectAuditUseCase: GetProjectAuditUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
+): BaseCli(printer) {
     fun getProjectAuditLogsInput() {
-        try {
+        tryStartCli {
             printer.displayLn("Enter project ID to get Audit Logs: ")
             val input = inputReader.readString()
 
             if (input.isNullOrBlank()) {
                 printer.displayLn("Project ID cannot be empty.")
-                return
+                return@tryStartCli
             }
 
             val projectId = UUID.fromString(input.trim())
             getProjectAuditLogs(projectId)
 
-        } catch (e: IllegalArgumentException) {
-            printer.displayLn("Invalid Project ID format.")
-        } catch (e: EiffelFlowException.NotFoundException) {
-            printer.displayLn("Failed to get audit logs: ${e.message}")
-        } catch (e: Exception) {
-            printer.displayLn("An error occurred while retrieving audit logs: ${e.message}")
         }
     }
 
