@@ -21,7 +21,7 @@ class CsvAuditRepositoryImpl(
     }
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        return getAuditLogs().filter { it.itemId == taskId }
+        return getAuditLogs().filter { it.itemId == taskId }.sortedByDescending { it.auditTime }
     }
 
     override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {

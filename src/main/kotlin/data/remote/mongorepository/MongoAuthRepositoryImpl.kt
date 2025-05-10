@@ -53,20 +53,24 @@ class MongoAuthRepositoryImpl(
 
     override suspend fun loginUser(username: String, password: String): User {
         try {
-            val userNameQuery = eq(MongoUserDto::username.name, username)
-            val passwordQuery = eq(MongoUserDto::password.name, password)
-            val existUserDto = usersCollection.find(
-                and(userNameQuery, passwordQuery)
-            ).firstOrNull()
+            val userDto = findUserByCredentials(username, password)
+            userDto ?: throw EiffelFlowException.NotFoundException("Invalid username or password")
 
-            existUserDto ?: throw EiffelFlowException.NotFoundException("Invalid username or password")
-
-            val existUser = userMapper.fromDto(existUserDto)
+            val existUser = userMapper.fromDto(userDto)
             val savedUser = saveUserLogin(existUser)
             SessionManger.login(savedUser)
             return savedUser
         } catch (throwable: Throwable) {
             throw EiffelFlowException.IOException("Can't login user because ${throwable.message}")
         }
+    }
+
+    private suspend fun findUserByCredentials(username: String, password: String): MongoUserDto? {
+        val userNameQuery = eq(MongoUserDto::username.name, username)
+        val passwordQuery = eq(MongoUserDto::password.name, password)
+        val userDto = usersCollection.find(
+            and(userNameQuery, passwordQuery)
+        ).firstOrNull()
+        return userDto
     }
 }

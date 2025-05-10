@@ -35,7 +35,7 @@ class MongoAuditRepositoryImpl(
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
         try {
-            return findAuditLogsByItemId(taskId).toList()
+            return findAuditLogsByItemId(taskId).toList().sortedByDescending { it.auditTime }
         } catch (exception: Throwable) {
             throw EiffelFlowException.IOException("Unexpected error fetching audit logs ${exception.message}")
         }
