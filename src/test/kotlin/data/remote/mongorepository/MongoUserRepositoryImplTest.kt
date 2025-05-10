@@ -10,27 +10,28 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bson.conversions.Bson
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.dto.MongoUserDto
+import org.example.data.remote.mapper.UserMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import utils.UserMock
-import java.util.UUID
+import java.util.*
 
 class MongoUserRepositoryImplTest {
 
     private val sessionManger: SessionManger = mockk(relaxed = true)
-    private lateinit var usersCollection: MongoCollection<User>
+    private val userMapper: UserMapper = mockk(relaxed = true)
+    private lateinit var usersCollection: MongoCollection<MongoUserDto>
     private lateinit var auditRepository: AuditRepository
     private lateinit var userRepository: UserRepository
 
@@ -40,26 +41,27 @@ class MongoUserRepositoryImplTest {
         auditRepository = mockk(relaxed = true)
 
         val mockDatabase = mockk<MongoDatabase>()
-        every { mockDatabase.getCollection<User>(MongoCollections.USERS) } returns usersCollection
+        every {
+            mockDatabase.getCollection<MongoUserDto>(MongoCollections.USERS)
+        } returns usersCollection
         every { sessionManger.getUser() } returns UserMock.adminUser
-        userRepository = MongoUserRepositoryImpl(mockDatabase, auditRepository, mockk(relaxed = true))
+        userRepository = MongoUserRepositoryImpl(
+            database = mockDatabase,
+            auditRepository = auditRepository,
+            userMapper = userMapper
+        )
     }
 
     //region createUser
     @Test
     fun `createUser should insert user if not exists`() = runTest {
         //Given
-        val mockFindFlow = mockk<FindFlow<User>>()
-
-        coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
-
-        coEvery { mockFindFlow.collect(any()) } coAnswers {
-        }
         coEvery {
             auditRepository.createAuditLog(any())
         } returns mockk<AuditLog>()
+
         coEvery {
-            usersCollection.insertOne(eq(UserMock.validUser), any())
+            usersCollection.insertOne(any())
         } returns mockk()
 
         //When
@@ -70,39 +72,15 @@ class MongoUserRepositoryImplTest {
     }
 
     @Test
-    fun `createUser should throw if user already exists`() = runTest {
-        //Given
-        val mockFindFlow = mockk<FindFlow<User>>()
-        coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
-        coEvery { mockFindFlow.collect(any()) } coAnswers {
-            val collector = arg<FlowCollector<User>>(0)
-            collector.emit(UserMock.validUser)
-        }
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
-
-        //When /Then
-        assertThrows(EiffelFlowException.IOException::class.java) {
-            runBlocking { userRepository.createUser(UserMock.validUser) }
-        }
-    }
-
-    @Test
     fun `createUser should throw Exception when audit log creation fails`() = runTest {
         //Given
-        val mockFindFlow = mockk<FindFlow<User>>()
+        coEvery {
+            usersCollection.insertOne(document = any(), options = any())
+        } returns mockk()
 
-        coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
-
-        coEvery { mockFindFlow.collect(any()) } coAnswers {
-        }
         coEvery {
             auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
-        coEvery {
-            usersCollection.insertOne(eq(UserMock.validUser), any())
-        } throws EiffelFlowException.IOException("Custom exception")
+        } throws EiffelFlowException.IOException("Custom exception")//mockk<AuditLog>()
 
         //When then
         assertThrows<EiffelFlowException.IOException> {
@@ -125,17 +103,25 @@ class MongoUserRepositoryImplTest {
     @Test
     fun `createUser should throw Exception when write to mongodb fails`() = runTest {
         //Given
-        val mockFindFlow = mockk<FindFlow<User>>()
-
-        coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
-
         coEvery {
             auditRepository.createAuditLog(any())
         } returns mockk<AuditLog>()
 
         coEvery {
-            usersCollection.insertOne(eq(UserMock.validUser), any())
-        } returns mockk()
+            usersCollection.insertOne(document = any(), options = any())
+        } throws MongoException("Can't create this user")
+
+        assertThrows<EiffelFlowException.IOException> {
+            userRepository.createUser(UserMock.validUser)
+        }
+    }
+
+    @Test
+    fun `createUser should throw Exception when mapping failed`() = runTest {
+        //Given
+        every {
+            userMapper.toDto(UserMock.validUser)
+        } throws Throwable("Can't map this user")
 
         assertThrows<EiffelFlowException.IOException> {
             userRepository.createUser(UserMock.validUser)
@@ -153,7 +139,7 @@ class MongoUserRepositoryImplTest {
                 any<Bson>(),
                 any()
             )
-        } returns UserMock.validUser
+        } returns UserMock.VALID_USER_DTO
 
         // When
         val result = userRepository.updateUser(UserMock.adminUser)
@@ -223,10 +209,14 @@ class MongoUserRepositoryImplTest {
                 any<Bson>(),
                 any()
             )
-        } returns UserMock.adminUser
+        } returns UserMock.ADMIN_USER_DTO
         coEvery {
             auditRepository.createAuditLog(any())
         } returns mockk<AuditLog>()
+
+        every {
+            userMapper.fromDto(UserMock.ADMIN_USER_DTO)
+        } returns UserMock.adminUser
 
         // When
         val result = userRepository.deleteUser(UserMock.adminUser.userId)
@@ -306,18 +296,22 @@ class MongoUserRepositoryImplTest {
     fun `getUserById should return the user on success`() {
         runTest {
             // Given
-            val mockFindFlow = mockk<FindFlow<User>>()
+            val mockFindFlow = mockk<FindFlow<MongoUserDto>>()
 
             coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
 
             coEvery { mockFindFlow.collect(any()) } coAnswers {
-                val collector = arg<FlowCollector<User>>(0)
-                collector.emit(UserMock.validUser)
+                val collector = arg<FlowCollector<MongoUserDto>>(0)
+                collector.emit(UserMock.VALID_USER_DTO)
             }
 
             coEvery {
                 usersCollection.find()
             } returns mockFindFlow
+
+            every {
+                userMapper.fromDto(UserMock.VALID_USER_DTO)
+            } returns UserMock.validUser
 
             //When
             val result = userRepository.getUserById(UserMock.validUser.userId)
@@ -331,7 +325,7 @@ class MongoUserRepositoryImplTest {
     fun `getUserById should throw Exception when user is not found`() {
         runTest {
             // Given
-            val mockFindFlow = mockk<FindFlow<User>>()
+            val mockFindFlow = mockk<FindFlow<MongoUserDto>>()
 
             coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
 
@@ -385,17 +379,21 @@ class MongoUserRepositoryImplTest {
     fun `getUsers should return list of users`() {
         runTest {
             // Given
-            val mockFindFlow = mockk<FindFlow<User>>()
+            val mockFindFlow = mockk<FindFlow<MongoUserDto>>()
 
             coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
             coEvery { mockFindFlow.collect(any()) } coAnswers {
-                val collector = arg<FlowCollector<User>>(0)
-                UserMock.multipleUsers.forEach { collector.emit(it) }
+                val collector = arg<FlowCollector<MongoUserDto>>(0)
+                UserMock.MULTIPLE_USER_DTO.forEach { collector.emit(it) }
             }
 
             coEvery {
                 usersCollection.find()
             } returns mockFindFlow
+
+            every {
+                userMapper.fromDto(any())
+            } returnsMany UserMock.multipleUsers
 
             //When
             val result = userRepository.getUsers()
@@ -409,7 +407,7 @@ class MongoUserRepositoryImplTest {
     fun `getUsers should return empty list of users when DB is empty`() {
         runTest {
             // Given
-            val mockFindFlow = mockk<FindFlow<User>>()
+            val mockFindFlow = mockk<FindFlow<MongoUserDto>>()
 
             coEvery { usersCollection.find(any<Bson>()) } returns mockFindFlow
             coEvery { mockFindFlow.collect(any()) } coAnswers {
@@ -418,6 +416,10 @@ class MongoUserRepositoryImplTest {
             coEvery {
                 usersCollection.find()
             } returns mockFindFlow
+
+            every {
+                userMapper.fromDto(any())
+            } returnsMany emptyList()
 
             //When
             val result = userRepository.getUsers()

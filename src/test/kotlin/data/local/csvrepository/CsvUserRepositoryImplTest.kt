@@ -26,11 +26,11 @@ import utils.UserMock.adminUser
 import utils.UserMock.existingUser
 import utils.UserMock.fileNotFoundException
 import utils.UserMock.multipleUsers
-import utils.UserMock.newUserCsv
-import utils.UserMock.oldUserCsv
+import utils.UserMock.NEW_USER_CSV
+import utils.UserMock.OLD_USER_CSV
 import utils.UserMock.updateUser
 import utils.UserMock.userById
-import utils.UserMock.userCsv
+import utils.UserMock.USER_CSV
 import utils.UserMock.userToDelete
 import utils.UserMock.validUser
 import java.util.*
@@ -59,9 +59,9 @@ class CsvUserRepositoryImplTest {
             // Given
             every { SessionManger.isAdmin() } returns true
             every { SessionManger.getUser() } returns adminUser
-            every { userMapper.serialize(validUser) } returns userCsv
+            every { userMapper.serialize(validUser) } returns USER_CSV
             every { csvManager.readLinesFromFile() } returns emptyList()
-            every { csvManager.writeLinesToFile(userCsv) } returns Unit
+            every { csvManager.writeLinesToFile(USER_CSV) } returns Unit
             coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
@@ -77,9 +77,9 @@ class CsvUserRepositoryImplTest {
             // Given
             every { SessionManger.isAdmin() } returns true
             every { SessionManger.getUser() } returns adminUser
-            every { userMapper.serialize(validUser) } returns userCsv
+            every { userMapper.serialize(validUser) } returns USER_CSV
             every { csvManager.readLinesFromFile() } returns emptyList()
-            every { csvManager.writeLinesToFile(userCsv) } throws fileNotFoundException
+            every { csvManager.writeLinesToFile(USER_CSV) } throws fileNotFoundException
 
             // When/Then
             val exception = assertThrows<EiffelFlowException.IOException> {
@@ -95,9 +95,9 @@ class CsvUserRepositoryImplTest {
             // Given
             every { SessionManger.isAdmin() } returns true
             every { SessionManger.getUser() } returns adminUser
-            every { userMapper.serialize(validUser) } returns userCsv
+            every { userMapper.serialize(validUser) } returns USER_CSV
             every { csvManager.readLinesFromFile() } returns emptyList()
-            every { csvManager.writeLinesToFile(userCsv) } just Runs
+            every { csvManager.writeLinesToFile(USER_CSV) } just Runs
             coEvery { auditRepository.createAuditLog(any()) } throws customException
 
             // When & Then
@@ -158,9 +158,9 @@ class CsvUserRepositoryImplTest {
             every { SessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns existingUser
-            every { userMapper.serialize(existingUser) } returns oldUserCsv
-            every { userMapper.serialize(updateUser) } returns newUserCsv
-            every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
+            every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
+            every { userMapper.serialize(updateUser) } returns NEW_USER_CSV
+            every { csvManager.updateLinesToFile(NEW_USER_CSV, OLD_USER_CSV) } returns Unit
             coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
@@ -193,9 +193,9 @@ class CsvUserRepositoryImplTest {
             every { SessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns existingUser
-            every { userMapper.serialize(existingUser) } returns oldUserCsv
-            every { userMapper.serialize(updateUser) } returns newUserCsv
-            every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } throws customException
+            every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
+            every { userMapper.serialize(updateUser) } returns NEW_USER_CSV
+            every { csvManager.updateLinesToFile(NEW_USER_CSV, OLD_USER_CSV) } throws customException
 
             // When & Then
             val exception = assertThrows<EiffelFlowException.IOException> {
@@ -212,9 +212,9 @@ class CsvUserRepositoryImplTest {
             every { SessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns existingUser
-            every { userMapper.serialize(existingUser) } returns oldUserCsv
-            every { userMapper.serialize(updateUser) } returns newUserCsv
-            every { csvManager.updateLinesToFile(newUserCsv, oldUserCsv) } returns Unit
+            every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
+            every { userMapper.serialize(updateUser) } returns NEW_USER_CSV
+            every { csvManager.updateLinesToFile(NEW_USER_CSV, OLD_USER_CSV) } returns Unit
             coEvery { auditRepository.createAuditLog(any()) } throws customException
 
             // When & Then
@@ -236,8 +236,8 @@ class CsvUserRepositoryImplTest {
             every { SessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns userToDelete
-            every { userMapper.serialize(userToDelete) } returns userCsv
-            every { csvManager.deleteLineFromFile(userCsv) } returns Unit
+            every { userMapper.serialize(userToDelete) } returns USER_CSV
+            every { csvManager.deleteLineFromFile(USER_CSV) } returns Unit
             coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
@@ -285,8 +285,8 @@ class CsvUserRepositoryImplTest {
             every { SessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns userToDelete
-            every { userMapper.serialize(userToDelete) } returns userCsv
-            every { csvManager.deleteLineFromFile(userCsv) } throws customException
+            every { userMapper.serialize(userToDelete) } returns USER_CSV
+            every { csvManager.deleteLineFromFile(USER_CSV) } throws customException
 
             // When & Then
             val exception = assertThrows<EiffelFlowException.IOException> {
@@ -304,8 +304,8 @@ class CsvUserRepositoryImplTest {
             every { SessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns userToDelete
-            every { userMapper.serialize(userToDelete) } returns userCsv
-            every { csvManager.deleteLineFromFile(userCsv) } returns Unit
+            every { userMapper.serialize(userToDelete) } returns USER_CSV
+            every { csvManager.deleteLineFromFile(USER_CSV) } returns Unit
             coEvery { auditRepository.createAuditLog(any()) } throws customException
 
             // When & Then
