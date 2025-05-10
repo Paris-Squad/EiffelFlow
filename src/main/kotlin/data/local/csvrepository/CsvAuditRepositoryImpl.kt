@@ -1,5 +1,6 @@
 package org.example.data.local.csvrepository
 
+import org.example.data.BaseRepository
 import org.example.data.local.FileDataSource
 import org.example.data.local.parser.AuditCsvParser
 import org.example.domain.model.AuditLog
@@ -11,51 +12,60 @@ class CsvAuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
     private val fileDataSource: FileDataSource,
     taskRepositoryProvider: Lazy<TaskRepository>
-) : AuditRepository {
+) : BaseRepository(), AuditRepository {
     private val taskRepository: TaskRepository by taskRepositoryProvider
 
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
-        val line = auditCsvParser.serialize(auditLog)
-        fileDataSource.writeLinesToFile(line)
-        return auditLog
+        return wrapInTryCatch {
+            val line = auditCsvParser.serialize(auditLog)
+            fileDataSource.writeLinesToFile(line)
+            auditLog
+        }
     }
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        return getAuditLogs().filter { it.itemId == taskId }.sortedByDescending { it.auditTime }
+        return wrapInTryCatch {
+            getAuditLogs().filter { it.itemId == taskId }.sortedByDescending { it.auditTime }
+        }
     }
 
     override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
-        val auditLogs = getAuditLogs()
+        return wrapInTryCatch {
+            val auditLogs = getAuditLogs()
 
-        val auditLogsForProjectTasks = getAuditProjectTasks(projectId, auditLogs)
+            val auditLogsForProjectTasks = getAuditProjectTasks(projectId, auditLogs)
 
-        val auditLogsForProject = auditLogs.filter { it.itemId == projectId }
+            val auditLogsForProject = auditLogs.filter { it.itemId == projectId }
 
-        val allAuditLogsForProject =
-            (auditLogsForProject + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
+            val allAuditLogsForProject =
+                (auditLogsForProject + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
 
-        return allAuditLogsForProject
-
+            allAuditLogsForProject
+        }
     }
 
     private suspend fun getAuditProjectTasks(
         projectId: UUID, auditLogs: List<AuditLog>
     ): List<AuditLog> {
-        val tasksResult = taskRepository.getTasks()
-        val projectTaskIds = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
+        return wrapInTryCatch {
+            val tasksResult = taskRepository.getTasks()
+            val projectTaskIds = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
 
-        val auditLogsForProjectTasks = auditLogs.filter { projectTaskIds.contains(it.itemId) }
-        return auditLogsForProjectTasks
+            val auditLogsForProjectTasks = auditLogs.filter { projectTaskIds.contains(it.itemId) }
+            auditLogsForProjectTasks
+        }
     }
 
     override suspend fun getAuditLogs(): List<AuditLog> {
-        val lines = fileDataSource.readLinesFromFile()
+        return wrapInTryCatch {
+            val lines = fileDataSource.readLinesFromFile()
 
-        return lines.mapNotNull { line ->
-            try {
-                auditCsvParser.parseCsvLine(line)
-            } catch (e: Exception) {
-                null
+            lines.mapNotNull { line ->
+                try {
+                    auditCsvParser.parseCsvLine(line)
+                } catch (_: Exception) {
+                    null
+                }
             }
         }
     }
