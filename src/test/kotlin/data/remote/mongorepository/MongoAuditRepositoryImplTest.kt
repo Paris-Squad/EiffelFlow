@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bson.conversions.Bson
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.mapper.AuditLogMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
@@ -28,6 +29,7 @@ import utils.TaskMock
 class MongoAuditRepositoryImplTest {
 
     private lateinit var auditCollection: MongoCollection<AuditLog>
+    private val auditLogMapper: AuditLogMapper = mockk(relaxed = true)
     private var taskRepository: Lazy<TaskRepository> = mockk(relaxed = true)
     private lateinit var auditRepository: AuditRepository
 
@@ -43,7 +45,8 @@ class MongoAuditRepositoryImplTest {
 
         auditRepository = MongoAuditRepositoryImpl(
             database = mockDatabase,
-            taskRepositoryProvider = taskRepository
+            taskRepositoryProvider = taskRepository,
+            auditLogMapper = auditLogMapper
         )
     }
 

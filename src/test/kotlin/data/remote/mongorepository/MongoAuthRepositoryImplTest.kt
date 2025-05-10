@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import org.bson.Document
 import org.bson.conversions.Bson
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.mapper.UserMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
@@ -25,6 +26,7 @@ import utils.UserMock
 
 class MongoAuthRepositoryImplTest {
 
+    private val userMapper: UserMapper = mockk(relaxed = true)
     private lateinit var authCollection: MongoCollection<User>
     private lateinit var usersCollection: MongoCollection<User>
     private lateinit var authRepository: AuthRepository
@@ -43,7 +45,10 @@ class MongoAuthRepositoryImplTest {
             mockDatabase.getCollection<User>(MongoCollections.USERS)
         } returns usersCollection
 
-        authRepository = MongoAuthRepositoryImpl(mockDatabase)
+        authRepository = MongoAuthRepositoryImpl(
+            database = mockDatabase,
+            userMapper = userMapper
+        )
     }
 
 

@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bson.conversions.Bson
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.mapper.ProjectMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
@@ -30,6 +31,7 @@ import java.util.UUID
 
 class MongoProjectRepositoryImplTest {
 
+    private val projectMapper : ProjectMapper= mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private lateinit var projectsCollection: MongoCollection<Project>
     private lateinit var auditRepository: AuditRepository
@@ -47,7 +49,11 @@ class MongoProjectRepositoryImplTest {
 
         every { sessionManger.getUser() } returns UserMock.adminUser
 
-        projectRepository = MongoProjectRepositoryImpl(mockDatabase, auditRepository)
+        projectRepository = MongoProjectRepositoryImpl(
+           database =  mockDatabase,
+            auditRepository = auditRepository,
+            projectMapper = projectMapper
+        )
     }
 
     //region createProject

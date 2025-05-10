@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bson.conversions.Bson
 import org.example.data.remote.MongoCollections
+import org.example.data.remote.mapper.TaskMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
@@ -47,7 +48,11 @@ class MongoTaskRepositoryImplTest {
 
         every { sessionManger.getUser() } returns UserMock.adminUser
 
-        taskRepository = MongoTaskRepositoryImpl(mockDatabase, auditRepository)
+        taskRepository = MongoTaskRepositoryImpl(
+           database =  mockDatabase,
+           auditRepository = auditRepository,
+            taskMapper = taskMapper
+        )
     }
 
     //region createTask
