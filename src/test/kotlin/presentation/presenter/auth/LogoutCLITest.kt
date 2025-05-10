@@ -28,7 +28,7 @@ class LogoutCLITest {
         coEvery { logoutUseCase.logout() } just runs
 
         // When
-         logoutPresenter.onLogoutClick()
+         logoutPresenter.start()
 
         // Then
         verify { printer.displayLn("Logout successful") }
@@ -41,7 +41,7 @@ class LogoutCLITest {
         coEvery { logoutUseCase.logout() } throws exception
 
         // When
-        logoutPresenter.onLogoutClick()
+        logoutPresenter.start()
 
         // Then
         verify { printer.displayLn("Logout failed") }

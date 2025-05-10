@@ -14,7 +14,7 @@ class DeleteProjectCLI(
     private val inputReader: InputReader,
     private val printer: Printer
 ) : BaseCli(printer) {
-    fun deleteProjectInput() {
+    fun start() {
         tryStartCli {
             printer.displayLn("Enter project ID to delete: ")
             val input = inputReader.readString()

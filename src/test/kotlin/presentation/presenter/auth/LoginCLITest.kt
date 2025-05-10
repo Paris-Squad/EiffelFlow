@@ -32,7 +32,7 @@ class LoginCLITest {
             loginUseCase.login(user.validUser.username, user.validUser.password)
         } returns user.validUser
 
-         loginPresenter.onLoginClicked()
+         loginPresenter.start()
 
         verify { printer.displayLn("Login successful") }
     }
@@ -42,9 +42,9 @@ class LoginCLITest {
         every { inputReader.readString() } returnsMany listOf(user.validUser.username, user.validUser.password)
         coEvery { loginUseCase.login(user.validUser.username, user.validUser.password) } throws EiffelFlowException.AuthorizationException("Login Failed")
 
-        loginPresenter.onLoginClicked()
+        loginPresenter.start()
 
-        verify { printer.displayLn("Login Failed") }
+        verify { printer.displayLn("Authorization failed:Login Failed") }
     }
 
 
@@ -52,7 +52,7 @@ class LoginCLITest {
     fun `should print error message when username is blank`() {
         every { inputReader.readString() } returnsMany listOf("", "anyPassword")
 
-        loginPresenter.onLoginClicked()
+        loginPresenter.start()
 
         verify { printer.displayLn("user name cannot be empty.") }
     }
@@ -61,7 +61,7 @@ class LoginCLITest {
     fun `should print error message when username is null`() {
         every { inputReader.readString() } returns null
 
-        loginPresenter.onLoginClicked()
+        loginPresenter.start()
 
         verify { printer.displayLn("user name cannot be empty.") }
     }
@@ -70,7 +70,7 @@ class LoginCLITest {
     fun `should print error message when password is blank`() {
         every { inputReader.readString() } returnsMany listOf("name", "")
 
-        loginPresenter.onLoginClicked()
+        loginPresenter.start()
 
         verify { printer.displayLn("password cannot be empty.") }
     }
@@ -79,7 +79,7 @@ class LoginCLITest {
     fun `should print error when password is empty`() {
         every { inputReader.readString() } returnsMany listOf("validUser", null)
 
-        loginPresenter.onLoginClicked()
+        loginPresenter.start()
 
         verify { printer.displayLn("password cannot be empty.") }
     }

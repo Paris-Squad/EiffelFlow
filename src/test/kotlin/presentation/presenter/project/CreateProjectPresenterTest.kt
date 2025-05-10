@@ -4,6 +4,7 @@ import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.project.CreateProjectCLI
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -13,8 +14,10 @@ import kotlinx.coroutines.delay
 import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
+import org.example.domain.usecase.project.CreateProjectUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
+import org.example.presentation.project.CreateProjectCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import utils.ProjectsMock
@@ -29,6 +32,7 @@ class CreateProjectPresenterTest {
     private val inputReader: InputReader = mockk()
     private val printer: Printer = mockk(relaxed = true)
     private lateinit var createProjectCli: CreateProjectCLI
+
     @BeforeEach
     fun setup() {
         mockkObject(SessionManger)
@@ -57,11 +61,12 @@ class CreateProjectPresenterTest {
         // Given
         val validAdminId = UUID.randomUUID()
         val expectedProject = Project(
-            projectName = "Project1",
-            projectDescription = "Desc",
+            projectName = projectName,
+            projectDescription = projectDescription,
             adminId = validAdminId
         )
 
+        every { inputReader.readString() } returnsMany listOf(projectName, projectDescription, validAdminId.toString())
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
         coEvery { createProjectUseCase.createProject(any()) } returns expectedProject
 
@@ -78,7 +83,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returns ""
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project name cannot be empty.") }
@@ -100,7 +105,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", "")
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project description cannot be empty.") }
@@ -112,12 +117,23 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", null)
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project description cannot be empty.") }
     }
 
+    @Test
+    fun `should print error when admin ID format is invalid`() {
+        // Given
+        every { inputReader.readString() } returnsMany listOf("Project1", "Desc", "uuid")
+
+        // When
+        createProjectCli.start()
+
+        // Then
+        verify { printer.displayLn("Invalid admin ID format.") }
+    }
 
     @Test
     fun `should print error when EiffelFlowException occurs during creation`() {
@@ -126,6 +142,8 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
         coEvery { createProjectUseCase.createProject(any()) } throws exception
 
+        // When
+        createProjectCli.start()
         //When
         createProjectCli.createProjectInput()
 
@@ -144,10 +162,12 @@ class CreateProjectPresenterTest {
 
         //When
         createProjectCli.createProjectInput()
+        // When
+        createProjectCli.start()
 
         // Then
         verify {
-            printer.displayLn("An error occurred: ${exception.message}")
+            printer.displayLn("Something went wrong:Failed to create the project")
         }
     }
     @Test
@@ -164,7 +184,7 @@ class CreateProjectPresenterTest {
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc")
 
         // When
-        createProjectCli.createProjectInput()
+        createProjectCli.start()
 
         // Then
         verify { printer.displayLn("Project created successfully: $expectedProject") }

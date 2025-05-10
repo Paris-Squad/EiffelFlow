@@ -56,7 +56,7 @@ class UpdateProjectCLITest {
         every { inputReader.readString() } returnsMany listOf("Project1", "Desc", adminId.toString())
         coEvery { updateProjectUseCase.updateProject(any()) } returns expectedProject
 
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         verify { printer.displayLn("Project updated successfully: $expectedProject") }
     }
@@ -78,7 +78,7 @@ class UpdateProjectCLITest {
         } throws IllegalStateException("Unexpected failure")
 
         //When
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         // Then
         verify {
@@ -103,11 +103,11 @@ class UpdateProjectCLITest {
         } throws EiffelFlowException.IOException("Simulated IO error")
 
         //When
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         // Then
         verify {
-            printer.displayLn("An error occurred: Simulated IO error")
+            printer.displayLn("Something went wrong:Simulated IO error")
         }
     }
 
@@ -132,7 +132,7 @@ class UpdateProjectCLITest {
     fun `should print error when project name is empty`() {
         every { inputReader.readString() } returns ""
 
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         verify { printer.displayLn("Project name cannot be empty.") }
     }
@@ -141,7 +141,7 @@ class UpdateProjectCLITest {
     fun `should print error when project name is null`() {
         every { inputReader.readString() } returns null
 
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         verify { printer.displayLn("Project name cannot be empty.") }
     }
@@ -150,7 +150,7 @@ class UpdateProjectCLITest {
     fun `should print error when description is empty`() {
         every { inputReader.readString() } returnsMany listOf("Project1", "")
 
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         verify { printer.displayLn("Project description cannot be empty.") }
     }
@@ -159,7 +159,7 @@ class UpdateProjectCLITest {
     fun `should print error when description is null`() {
         every { inputReader.readString() } returnsMany listOf("Project1", null)
 
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         verify { printer.displayLn("Project description cannot be empty.") }
     }
@@ -168,7 +168,7 @@ class UpdateProjectCLITest {
     fun `should print error when admin ID format is invalid`() {
         every { inputReader.readString() } returnsMany listOf("Project1", "Description", "not-a-uuid")
 
-        updateProjectCli.updateProjectInput()
+        updateProjectCli.start()
 
         verify { printer.displayLn("Invalid admin ID format.") }
     }

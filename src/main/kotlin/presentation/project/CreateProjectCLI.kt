@@ -15,9 +15,9 @@ class CreateProjectCLI(
     private val createProjectUseCase: CreateProjectUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-): BaseCli(printer) {
+) : BaseCli(printer) {
 
-    fun createProjectInput() {
+    fun start() {
         tryStartCli {
             printer.displayLn("Enter project name:")
             val name = inputReader.readString()
@@ -39,14 +39,13 @@ class CreateProjectCLI(
                 adminId = SessionManger.getUser().userId
             )
 
+            val project = ProjectInputHelper.collectProjectInput(inputReader, printer) ?: return@tryStartCli
             val createdProject = createProject(project)
             printer.displayLn("Project created successfully: $createdProject")
         }
     }
 
-    fun createProject(project: Project): Project {
-        return runBlocking {
-            createProjectUseCase.createProject(project)
-        }
+    private fun createProject(project: Project): Project = runBlocking {
+        createProjectUseCase.createProject(project)
     }
 }

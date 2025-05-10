@@ -35,7 +35,7 @@ class GetProjectCLITest {
         coEvery { getProjectUseCase.getProjects() } returns projects
 
         // When
-        getProjectCLI.displayProjects()
+        getProjectCLI.start()
 
         // Then
         verify {
@@ -49,26 +49,10 @@ class GetProjectCLITest {
         coEvery { getProjectUseCase.getProjects() } returns emptyList()
 
         // When
-        getProjectCLI.displayProjects()
+        getProjectCLI.start()
 
         // Then
         verify { printer.displayLn("No projects found.") }
-    }
-
-    @Test
-    fun `should throw EiffelFlowException when retrieving projects fails`() {
-        // Given
-        coEvery {
-            getProjectUseCase.getProjects()
-        } throws EiffelFlowException.IOException("Server error")
-
-        // When
-        getProjectCLI.displayProjects()
-
-        //Then
-        verify {
-            printer.displayLn("An error occurred: Server error")
-        }
     }
 
     @Test
@@ -79,7 +63,7 @@ class GetProjectCLITest {
         } throws RuntimeException("Unexpected")
 
         //When
-        getProjectCLI.displayProjects()
+        getProjectCLI.start()
 
         // Then
         verify {

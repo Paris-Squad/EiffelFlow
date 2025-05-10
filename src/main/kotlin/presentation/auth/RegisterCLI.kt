@@ -1,10 +1,10 @@
 package org.example.presentation.auth
 
 import kotlinx.coroutines.runBlocking
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import org.example.domain.usecase.auth.RegisterUseCase
+import org.example.presentation.BaseCli
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 
@@ -12,21 +12,19 @@ class RegisterCLI(
     private val registerUseCase: RegisterUseCase,
     private val inputReader: InputReader,
     private val printer: Printer
-) {
-    fun onRegisterClick(){
-        try {
-            printer.displayLn("Enter user name:")
-            val name = inputReader.readString()
-            if (name.isNullOrBlank()) {
-                printer.displayLn("user name cannot be empty.")
-                return
+) : BaseCli(printer) {
+    fun start() {
+        onRegisterClick()
+    }
+
+    fun onRegisterClick() {
+        tryStartCli {
+            val credentials = readCredentials(inputReader)
+            if (credentials == null) {
+                return@tryStartCli
             }
-            printer.displayLn("Enter password:")
-            val password = inputReader.readString()
-            if (password.isNullOrBlank()) {
-                printer.displayLn("password cannot be empty.")
-                return
-            }
+
+            val (name, password) = credentials
 
             printer.displayLn("Select a role:")
             RoleType.entries.forEachIndexed { index, role ->
@@ -38,28 +36,23 @@ class RegisterCLI(
                 RoleType.entries[roleInput - 1]
             } else {
                 printer.displayLn("Invalid role selection.")
-                return
+                return@tryStartCli
             }
 
-            register(username = name, password = password,role=role)
+            register(username = name, password = password, role = role)
             printer.displayLn("Registration successful")
-
-        } catch (e: EiffelFlowException.AuthorizationException) {
-            printer.displayLn("Register Failed")
-        }  catch (e: Exception) {
-            printer.displayLn("An error occurred during registration: ${e.message}")
         }
     }
 
 
     fun register(username: String, password: String, role: RoleType): User {
         return runBlocking {
-                registerUseCase.register(
-                    username = username,
-                    password = password,
-                    userRole = role
-                )
-            }
+            registerUseCase.register(
+                username = username,
+                password = password,
+                userRole = role
+            )
+        }
     }
 
 }
