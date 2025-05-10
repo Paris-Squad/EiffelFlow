@@ -1,4 +1,6 @@
-package org.example.presentation.io
+package org.example.presentation.helper
+
+import org.example.presentation.io.Printer
 
 class ConsolePrinter : Printer {
 

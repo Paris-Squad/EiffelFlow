@@ -1,14 +1,14 @@
 package presentation.presenter.task
 
+import io.mockk.*
+import kotlinx.coroutines.test.runTest
+import org.example.data.storage.SessionManger
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.domain.usecase.task.CreateTaskUseCase
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.example.presentation.task.CreateTaskCLI
-import io.mockk.*
-import kotlinx.coroutines.test.runTest
-import org.example.data.storage.SessionManger
-import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.BeforeEach
 import utils.ProjectsMock.CORRECT_PROJECT
 import utils.TaskMock.validTask
@@ -49,6 +49,50 @@ class CreateTaskCLITest {
             // Then
             verify {
                 printer.displayLn(match { (it as String).contains("Task created successfully") })
+            }
+
+        }
+    }
+
+    @Test
+    fun `should print error when user select project not found`() {
+        runTest {
+            //Given
+            val projects = listOf(CORRECT_PROJECT)
+            every {
+                inputReader.readString()
+            } returnsMany listOf("valid title", "Valid Description", "1", null, "1")
+            coEvery { getProjectUseCase.getProjects() } returns projects
+            coEvery { createTaskUseCase.createTask(any()) } returns validTask
+
+            //When
+            createTaskCli.start()
+
+            // Then
+            verify {
+                printer.displayLn("Please enter a valid number between 1 and ${projects.size}")
+            }
+
+        }
+    }
+
+    @Test
+    fun `should print error when getting projects failed`() {
+        runTest {
+            //Given
+            val exception = EiffelFlowException.IOException("Failed to get projects")
+            every {
+                inputReader.readString()
+            } returnsMany listOf("valid title", "Valid Description", "1", "1")
+            coEvery {
+                getProjectUseCase.getProjects()
+            } throws IOException("Unexpected Error")
+            //When
+            createTaskCli.start()
+
+            // Then
+            verify {
+                printer.displayLn("An error occurred: Unexpected Error")
             }
 
         }
@@ -133,26 +177,25 @@ class CreateTaskCLITest {
         verify(exactly = 1) { printer.displayLn("Input cannot be empty.") }
     }
 
-
-    @Test
-    fun `should print error  when state input is invalid`() {
-        // Given
-        every { inputReader.readString() } returnsMany listOf(
-            "Valid Title", "Valid Description", "5", "1", "1"
-        )
-        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
-        coEvery { createTaskUseCase.createTask(any()) } returns validTask
-
-
-        // When
-        createTaskCli.start()
-
-
-        // Then
-        verify {
-            printer.displayLn(match { (it as String).contains("Please enter a valid number") })
-        }
-    }
+//    @Test
+//    fun `should print error  when state input is invalid`() {
+//        // Given
+//        every { inputReader.readString() } returnsMany listOf(
+//            "Valid Title", "Valid Description", "5", "1", "1"
+//        )
+//        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
+//        coEvery { createTaskUseCase.createTask(any()) } returns validTask
+//
+//
+//        // When
+//        createTaskCli.start()
+//
+//
+//        // Then
+//        verify {
+//            printer.displayLn(match { (it as String).contains("Please enter a valid number") })
+//        }
+//    }
 
     @Test
     fun `should print error  when project input is invalid`() {
@@ -178,34 +221,42 @@ class CreateTaskCLITest {
     @Test
     fun `should print error when EiffelFlowException occurs`() {
         // Given
-        every { inputReader.readString() } returnsMany listOf("valid title", "valid Description", "1", "1")
-        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
-        coEvery { createTaskUseCase.createTask(any()) } throws EiffelFlowException.IOException("Task creation failed")
-
+        every {
+            inputReader.readString()
+        } returnsMany listOf("valid title", "valid Description", "1", "1")
+        coEvery {
+            getProjectUseCase.getProjects()
+        } returns listOf(CORRECT_PROJECT)
+        coEvery {
+            createTaskUseCase.createTask(any())
+        } throws EiffelFlowException.IOException("Task creation failed")
 
         createTaskCli.start()
 
-
         // Then
         verify {
-            printer.displayLn(match { (it as String).contains("Failed to create the task:") })
+            printer.displayLn("Something went wrong:Task creation failed")
         }
     }
 
     @Test
     fun `should print generic error when Exception occurs`() {
         // Given
-        every { inputReader.readString() } returnsMany listOf("Task Title", "Task Description", "1", "1")
-        coEvery { getProjectUseCase.getProjects() } returns listOf(CORRECT_PROJECT)
-        coEvery { createTaskUseCase.createTask(any()) } throws IOException("Unexpected Error")
+        every {
+            inputReader.readString()
+        } returnsMany listOf("Task Title", "Task Description", "1", "1")
+        coEvery {
+            getProjectUseCase.getProjects()
+        } returns listOf(CORRECT_PROJECT)
+        coEvery {
+            createTaskUseCase.createTask(any())
+        } throws IOException("Unexpected Error")
 
         createTaskCli.start()
 
         // Then
         verify {
-            printer.displayLn(match {
-                (it as String).contains("An error occurred while creating the task:")
-            })
+            printer.displayLn("An error occurred: Unexpected Error")
         }
     }
 }

@@ -1,13 +1,7 @@
 package presentation.presenter.project
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.DeleteProjectUseCase
 import org.example.presentation.io.InputReader
@@ -17,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
-import java.util.UUID
+import java.util.*
 
 class DeleteProjectCLITest {
 
@@ -30,7 +24,7 @@ class DeleteProjectCLITest {
     fun setUp() {
         deleteProjectCLI = DeleteProjectCLI(
             deleteProjectUseCase = deleteProjectUseCase,
-            inputReader = inputReader ,
+            inputReader = inputReader,
             printer = printer
         )
     }
@@ -58,10 +52,10 @@ class DeleteProjectCLITest {
         every { printer.displayLn(any()) } just Runs
 
         // When
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
-            verify { printer.displayLn("Project deleted successfully ${ProjectsMock.CORRECT_PROJECT}") }
+        verify { printer.displayLn("Project deleted successfully ${ProjectsMock.CORRECT_PROJECT}") }
     }
 
     @Test
@@ -82,7 +76,7 @@ class DeleteProjectCLITest {
         every { printer.displayLn(any()) } just Runs
 
         // When
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
         verify { printer.displayLn("Project ID cannot be empty.") }
@@ -94,7 +88,7 @@ class DeleteProjectCLITest {
         every { inputReader.readString() } returns "   "
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         verify { printer.displayLn("Project ID cannot be empty.") }
     }
@@ -104,41 +98,50 @@ class DeleteProjectCLITest {
         every { inputReader.readString() } returns "uuid"
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
-        verify { printer.displayLn("Invalid UUID format.") }
+        verify {
+            printer.displayLn("An error occurred: Invalid UUID string: uuid")
+        }
     }
 
     @Test
     fun `should print message when EiffelFlowException thrown`() {
         // Given
+        val exception = EiffelFlowException.NotFoundException("Project not found")
         val uuid = UUID.randomUUID()
         every { inputReader.readString() } returns uuid.toString()
-        coEvery { deleteProjectUseCase.deleteProject(uuid) } throws EiffelFlowException.NotFoundException("Project not found")
+        coEvery {
+            deleteProjectUseCase.deleteProject(uuid)
+        } throws exception
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
-        verify { printer.displayLn("Failed to delete the project: Project not found") }
+        verify {
+            printer.displayLn("Project not found")
+        }
     }
-
 
     @Test
     fun `should print unexpected error message when unknown exception is thrown`() {
         // Given
+        val exception = IllegalStateException("Unexpected failure")
         val uuid = UUID.randomUUID()
         every { inputReader.readString() } returns uuid.toString()
-        coEvery { deleteProjectUseCase.deleteProject(uuid) } throws IllegalStateException("Unexpected failure")
-       // every { printer.display(any()) } just Runs
+        coEvery {
+            deleteProjectUseCase.deleteProject(uuid)
+        } throws exception
+        // every { printer.display(any()) } just Runs
         every { printer.displayLn(any()) } just Runs
 
-        deleteProjectCLI.deleteProjectInput()
+        deleteProjectCLI.start()
 
         // Then
-        verify { printer.displayLn("Enter project ID to delete: ") }
-        printer.displayLn()
-        verify { printer.displayLn("An error occurred while deleting the project: Unexpected failure ") }
+        verify {
+            printer.displayLn("An error occurred: ${exception.message}")
+        }
     }
 
 }

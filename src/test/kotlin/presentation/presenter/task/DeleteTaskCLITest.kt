@@ -1,23 +1,15 @@
 package presentation.presenter.task
-import org.example.presentation.io.InputReader
-import org.example.presentation.io.Printer
-import org.example.presentation.presenter.task.DeleteTaskCLI
-import com.google.common.truth.Truth.assertThat
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
+
+import io.mockk.*
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.task.DeleteTaskUseCase
-
+import org.example.presentation.io.InputReader
+import org.example.presentation.io.Printer
+import org.example.presentation.task.DeleteTaskCLI
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import utils.TaskMock.validTask
-import java.util.UUID
+import java.util.*
 
 class DeleteTaskCLITest {
 
@@ -39,14 +31,15 @@ class DeleteTaskCLITest {
     fun `should return the deleted task when deleteTask success`() {
         // Given
         val taskId = validTask.taskId
+        every { inputReader.readString() } returns taskId.toString()
         coEvery { deleteTaskUseCase.deleteTask(taskId) } returns validTask
 
         // When
-        val result = deleteTaskCLI.deleteTask(taskId)
+        deleteTaskCLI.start()
 
         // Then
-        assertThat(result).isEqualTo(validTask)
         coVerify(exactly = 1) { deleteTaskUseCase.deleteTask(taskId) }
+        verify { printer.displayLn("Task deleted successfully") }
     }
 
     @Test
@@ -58,10 +51,10 @@ class DeleteTaskCLITest {
         every { printer.displayLn(any()) } just Runs
 
         // When
-        deleteTaskCLI.deleteTaskInput()
+        deleteTaskCLI.start()
 
         // Then
-        verify{ printer.displayLn("Task deleted successfully") }
+        verify { printer.displayLn("Task deleted successfully") }
     }
 
     @Test
@@ -69,11 +62,9 @@ class DeleteTaskCLITest {
         // Given
         val taskId = UUID.randomUUID()
         coEvery { deleteTaskUseCase.deleteTask(taskId) } throws EiffelFlowException.IOException("task not found")
+        deleteTaskCLI.start()
 
-        // when / Then
-        assertThrows<EiffelFlowException.IOException> {
-            deleteTaskCLI.deleteTask(taskId)
-        }
+        verify {printer.displayLn(match { (it as String).contains( "An error occurred:") })}
     }
 
     @Test
@@ -82,7 +73,7 @@ class DeleteTaskCLITest {
         every { printer.displayLn(any()) } just Runs
 
         // When
-        deleteTaskCLI.deleteTaskInput()
+        deleteTaskCLI.start()
 
         // Then
         verify { printer.displayLn("Task ID cannot be empty.") }
@@ -94,7 +85,7 @@ class DeleteTaskCLITest {
         every { inputReader.readString() } returns "   "
         every { printer.displayLn(any()) } just Runs
 
-        deleteTaskCLI.deleteTaskInput()
+        deleteTaskCLI.start()
 
         verify { printer.displayLn("Task ID cannot be empty.") }
     }
@@ -104,9 +95,9 @@ class DeleteTaskCLITest {
         every { inputReader.readString() } returns "uuid"
         every { printer.displayLn(any()) } just Runs
 
-        deleteTaskCLI.deleteTaskInput()
+        deleteTaskCLI.start()
 
-        verify { printer.displayLn("Invalid UUID format.") }
+        verify { printer.displayLn("An error occurred: Invalid UUID string: uuid") }
     }
 
     @Test
@@ -117,10 +108,10 @@ class DeleteTaskCLITest {
         coEvery { deleteTaskUseCase.deleteTask(uuid) } throws EiffelFlowException.NotFoundException("Task not found")
         every { printer.displayLn(any()) } just Runs
 
-        deleteTaskCLI.deleteTaskInput()
+        deleteTaskCLI.start()
 
         // Then
-        verify { printer.displayLn("Failed to delete the task: Task not found") }
+        verify { printer.displayLn("Task not found") }
     }
 
 
@@ -132,11 +123,10 @@ class DeleteTaskCLITest {
         coEvery { deleteTaskUseCase.deleteTask(uuid) } throws IllegalStateException("Unexpected failure")
         every { printer.displayLn(any()) } just Runs
 
-        deleteTaskCLI.deleteTaskInput()
+        deleteTaskCLI.start()
 
         // Then
-        verify { printer.displayLn("Enter Task ID to delete: ") }
-        verify { printer.displayLn("An error occurred while deleting the task: Unexpected failure ") }
+        verify { printer.displayLn("An error occurred: Unexpected failure") }
     }
 
 }

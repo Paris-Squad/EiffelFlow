@@ -2,6 +2,7 @@ package org.example.presentation.audit
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.example.presentation.BaseCli
@@ -25,13 +26,7 @@ class GetProjectAuditLogsCLI(
                 return@tryStartCli
             }
 
-            val projectId = try {
-                UUID.fromString(input.trim())
-            } catch (e: IllegalArgumentException) {
-                printer.displayLn("The format of the Project ID is invalid. Please enter a valid UUID.")
-                return@tryStartCli
-            }
-
+            val projectId = UUID.fromString(input.trim())
             getProjectAuditLogs(projectId)
 
         }

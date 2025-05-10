@@ -1,10 +1,6 @@
 package presentation.presenter.project
 
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import io.mockk.verifySequence
+import io.mockk.*
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.presentation.io.InputReader
@@ -14,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 
 class GetProjectCLITest {
@@ -39,7 +35,7 @@ class GetProjectCLITest {
         coEvery { getProjectUseCase.getProjects() } returns projects
 
         // When
-        getProjectCLI.displayProjects()
+        getProjectCLI.start()
 
         // Then
         verify {
@@ -53,34 +49,26 @@ class GetProjectCLITest {
         coEvery { getProjectUseCase.getProjects() } returns emptyList()
 
         // When
-        getProjectCLI.displayProjects()
+        getProjectCLI.start()
 
         // Then
         verify { printer.displayLn("No projects found.") }
     }
 
     @Test
-    fun `should throw EiffelFlowException when retrieving projects fails`() {
-        // Given
-        coEvery { getProjectUseCase.getProjects() } throws EiffelFlowException.IOException("Server error")
-
-        // Then
-        assertThrows<EiffelFlowException> {
-            getProjectCLI.displayProjects()
-        }
-    }
-
-    @Test
     fun `should throw Exception when unknown exception occurs during retrieving projects`() {
         // Given
-        coEvery { getProjectUseCase.getProjects() } throws RuntimeException("Unexpected")
+        coEvery {
+            getProjectUseCase.getProjects()
+        } throws RuntimeException("Unexpected")
+
+        //When
+        getProjectCLI.start()
 
         // Then
-        val exception = assertThrows<RuntimeException> {
-            getProjectCLI.displayProjects()
+        verify {
+            printer.displayLn("An error occurred: Unexpected")
         }
-
-        assertEquals("An error occurred while retrieving the projects: Unexpected", exception.message)
     }
     // end region
 
@@ -88,15 +76,15 @@ class GetProjectCLITest {
     // region getProjectById
     @Test
     fun `should return Project when project with given id exists`() {
-            // Given
-            val projectId = ProjectsMock.CORRECT_PROJECT.projectId
+        // Given
+        val projectId = ProjectsMock.CORRECT_PROJECT.projectId
         every { inputReader.readString() } returns projectId.toString()
-            coEvery {getProjectUseCase.getProjectById(projectId)} returns ProjectsMock.CORRECT_PROJECT
+        coEvery { getProjectUseCase.getProjectById(projectId) } returns ProjectsMock.CORRECT_PROJECT
 
-            // When
-             getProjectCLI.displayProjectById()
+        // When
+        getProjectCLI.displayProjectById()
 
-            // Then
+        // Then
         verify {
             printer.displayLn("Project details : ${ProjectsMock.CORRECT_PROJECT}")
         }
@@ -141,7 +129,7 @@ class GetProjectCLITest {
         getProjectCLI.displayProjectById()
 
         // Then
-        verify {printer.displayLn("Invalid UUID format.")}
+        verify { printer.displayLn("Invalid UUID format.") }
     }
 
     @Test
