@@ -5,7 +5,7 @@ import org.example.domain.model.RoleType
 import org.example.domain.model.User
 import java.util.UUID
 
-class UserMapper : MongoMapper<MongoUserDto, User> {
+class UserMapper : Mapper<MongoUserDto, User> {
 
     override fun toDto(entity: User) = MongoUserDto(
         _id = entity.userId.toString(),
