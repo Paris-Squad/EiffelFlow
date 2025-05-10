@@ -30,8 +30,7 @@ val mongoModule = module{
     }
     single<ProjectRepository> {
         MongoProjectRepositoryImpl(
-            database = get(),
-            auditRepository = get()
+            database = get()
         )
     }
     single<TaskRepository> {
