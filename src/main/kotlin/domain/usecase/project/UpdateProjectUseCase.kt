@@ -1,13 +1,24 @@
 package org.example.domain.usecase.project
 
+import org.example.data.storage.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.mapper.toAuditLog
+import org.example.domain.model.AuditLogAction
 import org.example.domain.model.Project
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.ProjectRepository
 
-class UpdateProjectUseCase(private val repository: ProjectRepository) {
+class UpdateProjectUseCase(
+    private val repository: ProjectRepository ,
+    private val auditRepository: AuditRepository
+) {
 
     @Throws(EiffelFlowException::class)
     suspend fun updateProject(updatedProject: Project): Project {
+
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Not Allowed, Admin only allowed to update project")
+        }
 
         val project = repository.getProjectById(updatedProject.projectId)
 
@@ -16,11 +27,20 @@ class UpdateProjectUseCase(private val repository: ProjectRepository) {
         }
 
         val changedField = detectChangedField(project, updatedProject)
-        return repository.updateProject(
+        val updated = repository.updateProject(
             project = updatedProject,
             oldProject = project,
             changedField = changedField
         )
+        val auditLog = updated.toAuditLog(
+            editor = SessionManger.getUser(),
+            actionType = AuditLogAction.UPDATE,
+            changedField = changedField,
+            oldValue = project.toString(),
+            newValue = updated.toString()
+        )
+        auditRepository.createAuditLog(auditLog)
+        return updated
     }
 
     private fun detectChangedField(original: Project, updated: Project): String {
