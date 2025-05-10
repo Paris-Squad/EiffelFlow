@@ -1,23 +1,48 @@
 package org.example.presentation
 
+import kotlinx.coroutines.runBlocking
+import org.example.data.utils.SessionManger
+import org.example.domain.usecase.auth.CheckCurrentSessionUseCase
 import org.koin.java.KoinJavaComponent.getKoin
 
 class EiffelFlowConsoleCLI {
     fun start() {
-        println("Welcome to the EiffelFlow.")
+        val currentSessionUseCase = getKoin().get<CheckCurrentSessionUseCase>()
         val uiContainer = getKoin().get<UIContainer>()
+
+        println("Welcome to the EiffelFlow.\nPlease wait Checking the current session...")
+
+        runBlocking {
+           val  currentSession = currentSessionUseCase.getCurrentSessionUser()
+            if (currentSession == null) {
+                println("You are not logged in. Please login First.")
+                loginUI(uiContainer)
+            }else{
+                println("Welcome back ${currentSession.username}")
+                startUI(uiContainer)
+            }
+        }
+    }
+
+    fun loginUI(uiContainer: UIContainer) {
+        while (SessionManger.isLoggedIn().not()){
+            uiContainer.loginCLI.start()
+        }
+        startUI(uiContainer)
+    }
+
+    fun startUI(uiContainer: UIContainer) {
         while (true) {
             println(
                 """
             Choose an option:
-            1. login 
-            2. register
-            3. create project
-            4. create task
-            5. delete project
-            6. get project
-            7. update project
-            8. view project audit logs
+            1. register
+            2. create project
+            3. create task
+            4. delete project
+            5. get project
+            5. update project
+            7. view project audit logs
             0. Exit
             """.trimIndent()
             )
@@ -26,14 +51,13 @@ class EiffelFlowConsoleCLI {
             val input = readlnOrNull()
 
             when (input) {
-                "1" -> uiContainer.loginCLI.start()
-                "2" -> uiContainer.registerCLI.start()
-                "3" -> uiContainer.getProjectCLI.start()
-                "4" -> uiContainer.createTaskCLI.start()
-                "5" -> uiContainer.deleteProjectCLI.start()
-                "6" -> uiContainer.getProjectCLI.start()
-                "7" -> uiContainer.updateProjectCLI.start()
-                "8" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
+                "1" -> uiContainer.registerCLI.start()
+                "2" -> uiContainer.getProjectCLI.start()
+                "3" -> uiContainer.createTaskCLI.start()
+                "4" -> uiContainer.deleteProjectCLI.start()
+                "5" -> uiContainer.getProjectCLI.start()
+                "6" -> uiContainer.updateProjectCLI.start()
+                "7" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
                 "0" -> {
                     println("Thanks for using our app!")
                     break

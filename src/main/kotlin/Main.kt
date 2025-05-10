@@ -16,6 +16,8 @@ fun main() {
 
     val mongoClient = getKoin().get<MongoClient>()
     val eiffelFlowConsoleCLI = getKoin().get<EiffelFlowConsoleCLI>()
+
     eiffelFlowConsoleCLI.start()
+
     mongoClient.close()
 }

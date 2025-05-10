@@ -23,4 +23,5 @@ val useCasesModule = module {
     single { DeleteProjectUseCase(get(),get()) }
     single { UpdateProjectUseCase(get(),get()) }
     single { DeleteTaskUseCase(get(),get()) }
+    single { CheckCurrentSessionUseCase(get()) }
 }
