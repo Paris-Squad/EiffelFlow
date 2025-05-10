@@ -1,34 +1,20 @@
 package org.example.data.repository
 
 import org.example.data.storage.FileDataSource
-import org.example.data.storage.SessionManger
 import org.example.data.storage.parser.TaskCsvParser
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.mapper.toAuditLog
-import org.example.domain.model.AuditLogAction
 import org.example.domain.model.Task
-import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
 class TaskRepositoryImpl(
     private val taskCsvParser: TaskCsvParser,
-    private val fileDataSource: FileDataSource,
-    private val auditRepository: AuditRepository,
+    private val fileDataSource: FileDataSource
 ) : TaskRepository {
     override suspend fun createTask(task: Task): Task {
         return try {
             val csvLine = taskCsvParser.serialize(task)
             fileDataSource.writeLinesToFile(csvLine)
-
-            val auditLog = task.toAuditLog(
-                editor = SessionManger.getUser(),
-                actionType = AuditLogAction.CREATE,
-                changedField = null,
-                oldValue = null,
-                newValue = task.title
-            )
-            auditRepository.createAuditLog(auditLog)
             task
         } catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't create task. ${e.message}")
@@ -40,15 +26,6 @@ class TaskRepositoryImpl(
             val taskCsv = taskCsvParser.serialize(task)
             val oldTaskCsv = taskCsvParser.serialize(oldTask)
             fileDataSource.updateLinesToFile(taskCsv, oldTaskCsv)
-
-            val auditLog = task.toAuditLog(
-                editor = SessionManger.getUser(),
-                actionType = AuditLogAction.UPDATE,
-                changedField = changedField,
-                oldValue = oldTask.toString(),
-                newValue = task.toString()
-            )
-            auditRepository.createAuditLog(auditLog)
             task
         }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't update task. ${e.message}")
@@ -63,15 +40,6 @@ class TaskRepositoryImpl(
 
             val task = taskCsvParser.parseCsvLine(taskLine)
             fileDataSource.deleteLineFromFile(taskLine)
-
-            val auditLog = task.toAuditLog(
-                editor = SessionManger.getUser(),
-                actionType = AuditLogAction.DELETE,
-                changedField = null,
-                oldValue = task.toString(),
-                newValue = ""
-            )
-            auditRepository.createAuditLog(auditLog)
             task
         }catch (e: Exception) {
             throw EiffelFlowException.IOException("Can't delete task with ID: $taskId because ${e.message}")

@@ -16,11 +16,11 @@ val useCasesModule = module {
     factory { HashPasswordUseCase() }
     factory { RegisterUseCase(get(), get()) }
     single { GetProjectUseCase(get()) }
-    single { CreateTaskUseCase(get()) }
+    single { CreateTaskUseCase(get(),get()) }
     single { CreateProjectUseCase(get(),get()) }
     single { LoginUseCase(get()) }
     single { GetProjectAuditUseCase(get()) }
     single { DeleteProjectUseCase(get(),get()) }
     single { UpdateProjectUseCase(get(),get()) }
-    single { DeleteTaskUseCase(get()) }
+    single { DeleteTaskUseCase(get(),get()) }
 }

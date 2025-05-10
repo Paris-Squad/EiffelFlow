@@ -1,23 +1,40 @@
 package org.example.domain.usecase.task
 
+import org.example.data.storage.SessionManger
 import org.example.domain.model.Task
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.mapper.toAuditLog
+import org.example.domain.model.AuditLogAction
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 
-class EditTaskUseCase(private val taskRepository: TaskRepository) {
+class EditTaskUseCase(
+    private val taskRepository: TaskRepository ,
+    private val auditRepository: AuditRepository
+) {
     suspend fun editTask(request: Task): Task {
-        val taskResult = taskRepository.getTaskById(request.taskId)
+        val originalTask = taskRepository.getTaskById(request.taskId)
 
-        val originalTask = taskResult
         if (originalTask == request) throw EiffelFlowException.IOException("No changes detected")
 
         val changedField = detectChangedField(originalTask, request)
 
-        return taskRepository.updateTask(
+        val updatedTask =  taskRepository.updateTask(
             task = request,
             oldTask = originalTask,
             changedField = changedField
         )
+
+        val auditLog = updatedTask.toAuditLog(
+                editor = SessionManger.getUser(),
+                actionType = AuditLogAction.UPDATE,
+                changedField = changedField,
+                oldValue = originalTask.toString(),
+                newValue = updatedTask.toString()
+            )
+
+         auditRepository.createAuditLog(auditLog)
+        return updatedTask
     }
 
     private fun detectChangedField(original: Task, updated: Task): String {
