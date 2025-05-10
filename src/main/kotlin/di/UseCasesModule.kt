@@ -8,6 +8,7 @@ import org.example.domain.usecase.project.GetProjectUseCase
 import org.example.domain.usecase.project.UpdateProjectUseCase
 import org.example.domain.usecase.task.CreateTaskUseCase
 import org.example.domain.usecase.task.DeleteTaskUseCase
+import org.example.domain.usecase.task.EditTaskUseCase
 import org.koin.dsl.module
 
 val useCasesModule = module {
@@ -19,6 +20,7 @@ val useCasesModule = module {
     single { CreateTaskUseCase(get(),get()) }
     single { CreateProjectUseCase(get(),get()) }
     single { LoginUseCase(get()) }
+    single { EditTaskUseCase(get(),get()) }
     single { GetProjectAuditUseCase(get()) }
     single { DeleteProjectUseCase(get(),get()) }
     single { UpdateProjectUseCase(get(),get()) }

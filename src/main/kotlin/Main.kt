@@ -31,10 +31,11 @@ fun start() {
             2. register
             3. create project
             4. create task
-            5. delete project
-            6. get project
-            7. update project
-            8. view project audit logs
+            5. edit task
+            6. delete project
+            7. get project
+            8. update project
+            9. view project audit logs
             0. Exit
             """.trimIndent()
         )
@@ -47,10 +48,11 @@ fun start() {
             "2" -> uiContainer.registerCLI.start()
             "3" -> uiContainer.getProjectCLI.start()
             "4" -> uiContainer.createTaskCLI.start()
-            "5" -> uiContainer.deleteProjectCLI.start()
-            "6" -> uiContainer.getProjectCLI.start()
-            "7" -> uiContainer.updateProjectCLI.start()
-            "8" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
+            "5" -> uiContainer.editTaskCli.start()
+            "6" -> uiContainer.deleteProjectCLI.start()
+            "7" -> uiContainer.getProjectCLI.start()
+            "8" -> uiContainer.updateProjectCLI.start()
+            "9" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
             "0" -> {
                 println("Thanks for using our app!")
                 break
