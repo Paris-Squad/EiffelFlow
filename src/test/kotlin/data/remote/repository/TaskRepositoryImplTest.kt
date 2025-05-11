@@ -1,11 +1,10 @@
-package data.remote.mongorepository
+package data.remote.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.mongodb.MongoException
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import data.mongorepository.MongoTaskRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -27,7 +26,7 @@ import utils.TaskMock
 import utils.UserMock
 import java.util.UUID
 
-class MongoTaskRepositoryImplTest {
+class TaskRepositoryImplTest {
 
     private val taskMapper: TaskMapper = mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
@@ -45,7 +44,7 @@ class MongoTaskRepositoryImplTest {
 
         every { sessionManger.getUser() } returns UserMock.adminUser
 
-        taskRepository = MongoTaskRepositoryImpl(
+        taskRepository = TaskRepositoryImpl(
            database =  mockDatabase,
             taskMapper = taskMapper
         )

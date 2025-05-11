@@ -1,4 +1,4 @@
-package data.mongorepository
+package data.remote.repository
 
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
@@ -14,7 +14,7 @@ import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 
-class MongoAuthRepositoryImpl(
+class AuthRepositoryImpl(
     database: MongoDatabase,
     private val userMapper: UserMapper
 ) : BaseRepository(), AuthRepository {

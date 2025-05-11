@@ -1,4 +1,4 @@
-package data.mongorepository
+package data.remote.repository
 
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.FindOneAndUpdateOptions
@@ -15,7 +15,7 @@ import org.example.domain.model.Task
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
-class MongoTaskRepositoryImpl(
+class TaskRepositoryImpl(
     database: MongoDatabase,
     private val taskMapper: TaskMapper
 ) : BaseRepository(), TaskRepository {

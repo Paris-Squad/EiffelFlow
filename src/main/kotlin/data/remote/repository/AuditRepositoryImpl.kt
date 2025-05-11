@@ -1,4 +1,4 @@
-package data.mongorepository
+package data.remote.repository
 
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
@@ -14,7 +14,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
-class MongoAuditRepositoryImpl(
+class AuditRepositoryImpl(
     database: MongoDatabase,
     taskRepositoryProvider: Lazy<TaskRepository>,
     private val auditLogMapper: AuditLogMapper
