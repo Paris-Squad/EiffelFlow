@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
 import org.example.presentation.BaseCli
-import org.example.presentation.helper.extensions.toDisplayName
 import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
@@ -26,12 +25,7 @@ class GetTaskAuditLogsCLI(
                 return@tryStartCli
             }
 
-            val taskId = try {
-                UUID.fromString(taskIdInput)
-            } catch (e: IllegalArgumentException) {
-                printer.displayLn("Invalid Task ID format. Please enter a valid UUID.")
-                return@tryStartCli
-            }
+            val taskId = UUID.fromString(taskIdInput)
 
             getAuditLogsForTask(taskId)
 
@@ -60,7 +54,7 @@ class GetTaskAuditLogsCLI(
     internal fun displayTaskAuditDetails(auditLog: AuditLog) {
         val paddedLabel = { label: String -> label.padEnd(15) }
 
-        printer.displayLn("[Task] ${auditLog.actionType.toDisplayName()} '${auditLog.itemName}'")
+        printer.displayLn("[Task] ${auditLog.actionType.actionName} '${auditLog.itemName}'")
         printer.displayLn("  ${paddedLabel("Audit ID")} : ${auditLog.auditId}")
         printer.displayLn("  ${paddedLabel("Date & Time")} : ${auditLog.auditTime.toFormattedDateTime()}")
         printer.displayLn("  ${paddedLabel("Modified By")} : ${auditLog.editorName}")

@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetProjectAuditUseCase
 import org.example.presentation.BaseCli
-import org.example.presentation.helper.extensions.toDisplayName
 import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
@@ -57,7 +56,7 @@ class GetProjectAuditLogsCLI(
         val paddedLabel = { label: String -> label.padEnd(15) }
         val logType = if (isProjectLog) "[Project]" else "[Task]"
 
-        printer.displayLn("${logType.padEnd(10)} ${auditLog.actionType.toDisplayName()} '${auditLog.itemName}'")
+        printer.displayLn("${logType.padEnd(10)} ${auditLog.actionType.actionName} '${auditLog.itemName}'")
         displayProjectAuditDetails(auditLog, paddedLabel)
     }
 

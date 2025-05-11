@@ -3,7 +3,6 @@ package org.example.presentation.audit
 import kotlinx.coroutines.runBlocking
 import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetAllAuditLogsUseCase
-import org.example.presentation.helper.extensions.toDisplayName
 import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.Printer
 import org.jetbrains.annotations.VisibleForTesting
@@ -32,7 +31,7 @@ class GetAuditLogsCLI(
     internal fun displayAuditLogs(auditLog: AuditLog) {
         val labelPadded = { label: String -> label.padEnd(15) }
 
-        printer.displayLn("${auditLog.actionType.toDisplayName()} '${auditLog.itemName}'")
+        printer.displayLn("${auditLog.actionType.actionName} '${auditLog.itemName}'")
         printer.displayLn("  ${labelPadded("Audit ID")} : ${auditLog.auditId}")
         printer.displayLn("  ${labelPadded("Date & Time")} : ${auditLog.auditTime.toFormattedDateTime()}")
         printer.displayLn("  ${labelPadded("Modified By")} : ${auditLog.editorName}")

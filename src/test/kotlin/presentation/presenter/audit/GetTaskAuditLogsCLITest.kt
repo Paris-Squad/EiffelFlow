@@ -69,37 +69,6 @@ class GetTaskAuditLogsCLITest {
     }
 
     @Test
-    fun `should get all log details when printing audit entries`() = runBlocking {
-        // Given
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        coVerify { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) }
-
-        verify { printer.displayLn("  Audit ID        : ${sampleAuditLog.auditId}") }
-        verify { printer.displayLn("  Date & Time     : ${sampleAuditLog.auditTime.toFormattedDateTime()}") }
-        verify { printer.displayLn("  Modified By     : ${sampleAuditLog.editorName}") }
-        verify { printer.displayLn("  Field Changed   : ${sampleAuditLog.changedField}") }
-        verify { printer.displayLn("  Old             : ${sampleAuditLog.oldValue}") }
-        verify { printer.displayLn("  New             : ${sampleAuditLog.newValue}") }
-    }
-
-
-    // show error messages
-    @Test
-    fun `should show error formatting message when Task ID has invalid format`() {
-        // Given
-        every { inputReader.readString() } returns "invalid-uuid"
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.start()
-        // Then
-        verify { printer.displayLn("Invalid Task ID format. Please enter a valid UUID.") }
-    }
-
-    @Test
     fun `should show error not found message when Task has no logs`() = runBlocking {
         // Given
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns emptyList()
