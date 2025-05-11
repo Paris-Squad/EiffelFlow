@@ -12,6 +12,6 @@ data class Project(
     val projectDescription: String,
     val createdAt: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
     val adminId: UUID,
-    val taskStates: List<TaskState> = emptyList()
+    var taskStates: List<TaskState> = emptyList()
 )
 
