@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.toList
 import org.example.data.BaseRepository
 import org.example.data.remote.MongoCollections
 import org.example.data.remote.dto.MongoProjectDto
+import org.example.data.remote.dto.MongoTaskDto
 import org.example.data.remote.mapper.ProjectMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
@@ -21,6 +22,7 @@ class MongoProjectRepositoryImpl(
 ) : BaseRepository(), ProjectRepository {
 
     private val projectsCollection = database.getCollection<MongoProjectDto>(collectionName = MongoCollections.PROJECTS)
+    private val tasksCollection = database.getCollection<MongoTaskDto>(collectionName = MongoCollections.TASKS)
 
     override suspend fun createProject(project: Project): Project {
         return wrapInTryCatch {
@@ -61,9 +63,15 @@ class MongoProjectRepositoryImpl(
             if (deletedProjectDto == null) {
                 throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
             }
+            deleteProjectTasks(projectId)
             val deletedProject = projectMapper.fromDto(deletedProjectDto)
             deletedProject
         }
+    }
+
+    private suspend fun deleteProjectTasks(projectId: UUID) {
+        val query = eq(MongoTaskDto::projectId.name, projectId.toString())
+        tasksCollection.deleteMany(query)
     }
 
     override suspend fun getProjectById(projectId: UUID): Project {
