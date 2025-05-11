@@ -16,7 +16,8 @@ class UpdateUserUseCase(
         newPassword: String
     ): User {
 
-        validateAdminAccess()
+        verifySessionActive()
+
         validateCurrentPassword(currentPassword)
 
         val currentUser = SessionManger.getUser()
@@ -29,9 +30,9 @@ class UpdateUserUseCase(
         return userRepository.updateUser(updatedUser)
     }
 
-    private fun validateAdminAccess() {
-        require(SessionManger.isAdmin()) {
-            throw EiffelFlowException.AuthorizationException("Only admins can update users")
+    private fun verifySessionActive() {
+        require(SessionManger.isLoggedIn()) {
+            throw EiffelFlowException.AuthorizationException("You must be logged in to update user")
         }
     }
 

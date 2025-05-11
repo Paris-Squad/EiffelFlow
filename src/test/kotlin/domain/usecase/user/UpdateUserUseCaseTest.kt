@@ -24,7 +24,7 @@ class UpdateUserUseCaseTest {
     fun setUp() {
         mockkObject(SessionManger)
         every { SessionManger.getUser() } returns UserMock.adminUser
-        every { SessionManger.isAdmin() } returns true
+        every { SessionManger.isLoggedIn() } returns true
         updateUserUseCase = UpdateUserUseCase(
             userRepository = userRepository,
             hashPasswordUseCase = hashPasswordUseCase
@@ -57,25 +57,6 @@ class UpdateUserUseCaseTest {
     }
 
     @Test
-    fun `update user should fail when user is not Admin`() {
-        runTest {
-            // Given
-            every { SessionManger.getUser() } returns UserMock.validUser
-            every { SessionManger.isAdmin() } returns false
-
-            // When / Then
-            val result = assertThrows<EiffelFlowException.AuthorizationException> {
-                updateUserUseCase.updateUser(
-                    userName = UserMock.validUser.username,
-                    currentPassword = UserMock.validUser.password,
-                    newPassword = "Updated Password"
-                )
-            }
-            assertThat(result.message).isEqualTo("Only admins can update users")
-        }
-    }
-
-    @Test
     fun `update user should fail when repository createUser fails`() {
         runTest {
             // Given
@@ -101,8 +82,8 @@ class UpdateUserUseCaseTest {
         runTest {
             // Given
             every {
-                SessionManger.isAdmin()
-            } throws EiffelFlowException.AuthorizationException("User is not logged in")
+                SessionManger.isLoggedIn()
+            } returns false
 
             coEvery {
                 userRepository.updateUser(any())
@@ -115,7 +96,7 @@ class UpdateUserUseCaseTest {
                     newPassword = "Updated Password"
                 )
             }
-            assertThat(result.message).isEqualTo("User is not logged in")
+            assertThat(result.message).isEqualTo("You must be logged in to update user")
         }
     }
 
