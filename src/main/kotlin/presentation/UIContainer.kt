@@ -15,6 +15,7 @@ import org.example.presentation.task.DeleteTaskCLI
 import org.example.presentation.task.EditTaskCli
 import org.example.presentation.task.GetTaskCLI
 import org.example.presentation.user.DeleteUserCLI
+import org.example.presentation.user.GetUserCLI
 import org.example.presentation.user.UpdateUserCLI
 
 data class UIContainer(
@@ -33,5 +34,6 @@ data class UIContainer(
     val getAuditLogsCLI: GetAuditLogsCLI,
     val deleteUserCLI: DeleteUserCLI,
     val updateUserCLI: UpdateUserCLI,
-    val getTaskCLI: GetTaskCLI
+    val getTaskCLI: GetTaskCLI,
+    val getUserCLI : GetUserCLI
 )
