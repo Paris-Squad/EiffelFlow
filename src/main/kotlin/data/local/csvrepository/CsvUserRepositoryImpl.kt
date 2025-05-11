@@ -5,29 +5,24 @@ import org.example.data.local.FileDataSource
 import org.example.data.local.parser.UserCsvParser
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.mapper.toAuditLog
-import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
-import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import java.util.UUID
 
 class CsvUserRepositoryImpl(
     private val userCsvParser: UserCsvParser,
     private val fileDataSource: FileDataSource,
-    private val auditRepository: AuditRepository,
 ) : BaseRepository(), UserRepository {
     override suspend fun createUser(user: User): User {
         return wrapInTryCatch {
             validateAdminPermission()
+
             val userAsCsv = userCsvParser.serialize(user)
             val users = getUsers()
 
             validateUsernameUniqueness(users, user.username)
-
             fileDataSource.writeLinesToFile(userAsCsv)
-            val auditLog = user.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
-            auditRepository.createAuditLog(auditLog)
+
             user
         }
     }
@@ -54,14 +49,6 @@ class CsvUserRepositoryImpl(
             val newUserCsv = userCsvParser.serialize(user)
 
             fileDataSource.updateLinesToFile(newUserCsv, oldUserCsv)
-
-            val auditLog = user.toAuditLog(
-                SessionManger.getUser(),
-                AuditLogAction.UPDATE,
-                changedField = "user",
-                oldValue = existingUser.toString()
-            )
-            auditRepository.createAuditLog(auditLog)
             user
         }
     }
@@ -75,11 +62,6 @@ class CsvUserRepositoryImpl(
 
             val userCsv = userCsvParser.serialize(userToDelete)
             fileDataSource.deleteLineFromFile(userCsv)
-
-            val auditLog = userToDelete.toAuditLog(
-                SessionManger.getUser(), AuditLogAction.DELETE, oldValue = userToDelete.toString()
-            )
-            auditRepository.createAuditLog(auditLog)
 
             userToDelete
         }

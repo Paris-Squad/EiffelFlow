@@ -11,6 +11,7 @@ import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.user.CreateUserUseCase
@@ -25,6 +26,8 @@ class RegisterUseCaseTest {
 
     private val userRepository: UserRepository = mockk(relaxed = true)
     private val hashPasswordUseCase: HashPasswordUseCase = mockk(relaxed = true)
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
+
 
     private lateinit var registerUseCase: CreateUserUseCase
 
@@ -34,7 +37,8 @@ class RegisterUseCaseTest {
         every { SessionManger.getUser() } returns adminUser
         every { SessionManger.isAdmin() } returns true
         registerUseCase = CreateUserUseCase(
-            userRepository, hashPasswordUseCase
+            userRepository, hashPasswordUseCase,
+            auditRepository = auditRepository
         )
     }
 

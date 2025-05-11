@@ -42,7 +42,7 @@ val useCasesModule = module {
     factory { ValidateUserNameUseCase() }
 
     //User
-    factory { CreateUserUseCase(get(), get()) }
-    factory { DeleteUserUseCase(get()) }
-    factory { UpdateUserUseCase(get(), get()) }
+    factory { CreateUserUseCase(get(), get(),get()) }
+    factory { DeleteUserUseCase(get(),get()) }
+    factory { UpdateUserUseCase(get(), get(),get()) }
 }

@@ -1,10 +1,7 @@
 package data.local.csvrepository
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.Runs
-import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -14,10 +11,8 @@ import org.example.data.local.FileDataSource
 import org.example.data.utils.SessionManger
 import org.example.data.local.parser.UserCsvParser
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.model.AuditLog
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
-import org.example.domain.repository.AuditRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,13 +33,12 @@ import java.util.*
 class CsvUserRepositoryImplTest {
     private val userMapper: UserCsvParser = mockk(relaxed = true)
     private val csvManager: FileDataSource = mockk(relaxed = true)
-    private val auditRepository: AuditRepository = mockk(relaxed = true)
     private lateinit var userRepository: CsvUserRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         mockkObject(SessionManger)
-        userRepository = CsvUserRepositoryImpl(userMapper, csvManager, auditRepository)
+        userRepository = CsvUserRepositoryImpl(userMapper, csvManager)
     }
 
     @AfterEach
@@ -62,7 +56,6 @@ class CsvUserRepositoryImplTest {
             every { userMapper.serialize(validUser) } returns USER_CSV
             every { csvManager.readLinesFromFile() } returns emptyList()
             every { csvManager.writeLinesToFile(USER_CSV) } returns Unit
-            coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
             val result = userRepository.createUser(user = validUser)
@@ -85,26 +78,7 @@ class CsvUserRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 userRepository.createUser(user = validUser)
             }
-            assertThat(exception.message).contains("Can't Create User")
-        }
-    }
-
-    @Test
-    fun `createUser should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            every { SessionManger.isAdmin() } returns true
-            every { SessionManger.getUser() } returns adminUser
-            every { userMapper.serialize(validUser) } returns USER_CSV
-            every { csvManager.readLinesFromFile() } returns emptyList()
-            every { csvManager.writeLinesToFile(USER_CSV) } just Runs
-            coEvery { auditRepository.createAuditLog(any()) } throws customException
-
-            // When & Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
-                userRepository.createUser(user = validUser)
-            }
-            assertThat(exception.message).contains("Can't Create User")
+            assertThat(exception.message).contains("Can't perform this action because File not found")
         }
     }
 
@@ -161,7 +135,6 @@ class CsvUserRepositoryImplTest {
             every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
             every { userMapper.serialize(updateUser) } returns NEW_USER_CSV
             every { csvManager.updateLinesToFile(NEW_USER_CSV, OLD_USER_CSV) } returns Unit
-            coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
             val result = userRepository.updateUser(updateUser)
@@ -179,10 +152,10 @@ class CsvUserRepositoryImplTest {
             every { userMapper.parseCsvLine(any()) } returns nonMatchingUser
 
             // When & Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
+            val exception = assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.updateUser(user = validUser)
             }
-            assertThat(exception.message).contains("Can't Update User")
+            assertThat(exception.message).contains("User with ID ${validUser.userId} not found")
         }
     }
 
@@ -198,32 +171,13 @@ class CsvUserRepositoryImplTest {
             every { csvManager.updateLinesToFile(NEW_USER_CSV, OLD_USER_CSV) } throws customException
 
             // When & Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
+            val exception = assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.updateUser(user = validUser)
             }
-            assertThat(exception.message).contains("Can't Update User")
+            assertThat(exception.message).contains("User with ID ${validUser.userId} not found")
         }
     }
 
-    @Test
-    fun `updateUser should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            every { SessionManger.getUser() } returns adminUser
-            every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-            every { userMapper.parseCsvLine(any()) } returns existingUser
-            every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
-            every { userMapper.serialize(updateUser) } returns NEW_USER_CSV
-            every { csvManager.updateLinesToFile(NEW_USER_CSV, OLD_USER_CSV) } returns Unit
-            coEvery { auditRepository.createAuditLog(any()) } throws customException
-
-            // When & Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
-                userRepository.updateUser(user = validUser)
-            }
-            assertThat(exception.message).contains("Can't Update User")
-        }
-    }
     //endregion
 
 
@@ -238,7 +192,6 @@ class CsvUserRepositoryImplTest {
             every { userMapper.parseCsvLine(any()) } returns userToDelete
             every { userMapper.serialize(userToDelete) } returns USER_CSV
             every { csvManager.deleteLineFromFile(USER_CSV) } returns Unit
-            coEvery { auditRepository.createAuditLog(any()) } returns mockk<AuditLog>()
 
             // When
             val result = userRepository.deleteUser(userToDelete.userId)
@@ -265,16 +218,17 @@ class CsvUserRepositoryImplTest {
     fun `deleteUser should throw Exception when user is not found`() {
         runTest{
         //Given
+        val nonExistentUserId = UUID.randomUUID()
         every { SessionManger.isAdmin() } returns true
         every { SessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns validUser
 
         // When & Then
-        val exception = assertThrows<EiffelFlowException.IOException> {
-            userRepository.deleteUser(UUID.randomUUID())
+        val exception = assertThrows<EiffelFlowException.NotFoundException> {
+            userRepository.deleteUser(nonExistentUserId)
         }
-        assertThat(exception.message).contains("Can't Delete User")
+        assertThat(exception.message).contains("User with ID $nonExistentUserId not found")
     }
 }
     @Test
@@ -292,29 +246,10 @@ class CsvUserRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 userRepository.deleteUser(userToDelete.userId)
             }
-            assertThat(exception.message).contains("Can't Delete User")
+            assertThat(exception.message).contains("Custom exception")
         }
     }
 
-    @Test
-    fun `deleteUser should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            every { SessionManger.isAdmin() } returns true
-            every { SessionManger.getUser() } returns adminUser
-            every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
-            every { userMapper.parseCsvLine(any()) } returns userToDelete
-            every { userMapper.serialize(userToDelete) } returns USER_CSV
-            every { csvManager.deleteLineFromFile(USER_CSV) } returns Unit
-            coEvery { auditRepository.createAuditLog(any()) } throws customException
-
-            // When & Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
-                userRepository.deleteUser(userToDelete.userId)
-            }
-            assertThat(exception.message).contains("Can't Delete User")
-        }
-    }
     //endregion
 
 
@@ -337,14 +272,15 @@ class CsvUserRepositoryImplTest {
     fun `getUserById should throw Exception when user is not found`() {
         runTest{
         // Given
+        val nonExistentUserId = UUID.randomUUID()
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns validUser
 
         // When & Then
-        val exception = assertThrows<EiffelFlowException.IOException> {
-            userRepository.getUserById(UUID.randomUUID())
+        val exception = assertThrows<EiffelFlowException.NotFoundException> {
+            userRepository.getUserById(nonExistentUserId)
         }
-        assertThat(exception.message).contains("Can't get User")
+        assertThat(exception.message).contains("User with ID $nonExistentUserId not found")
     }
 }
     @Test
@@ -357,7 +293,7 @@ class CsvUserRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 userRepository.getUserById(userById.userId)
             }
-            assertThat(exception.message).contains("Can't get User")
+            assertThat(exception.message).contains("Custom exception")
         }
     }
     @Test
@@ -370,7 +306,7 @@ class CsvUserRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 userRepository.getUserById(UUID.randomUUID())
             }
-            assertThat(exception.message).contains("Can't get User")
+            assertThat(exception.message).contains("Custom exception")
         }
     }
     @Test
@@ -383,7 +319,7 @@ class CsvUserRepositoryImplTest {
             every { userMapper.parseCsvLine("line2") } returns multipleUsers[1]
 
             // When & Then
-            val exception = assertThrows<EiffelFlowException.IOException> {
+            val exception = assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.getUserById(randomId)
             }
             assertThat(exception.message).contains("User with ID $randomId not found")
@@ -433,7 +369,7 @@ class CsvUserRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 userRepository.getUsers()
             }
-            assertThat(exception.message).contains("Can't get Users because ${fileNotFoundException.message}")
+            assertThat(exception.message).contains("Can't perform this action because File not found")
         }
     }
 
@@ -447,7 +383,7 @@ class CsvUserRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 userRepository.getUsers()
             }
-            assertThat(exception.message).contains("Can't get Users ")
+            assertThat(exception.message).contains("Custom exception")
         }
     }
     @Test

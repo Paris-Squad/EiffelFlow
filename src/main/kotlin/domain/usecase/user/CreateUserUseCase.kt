@@ -1,15 +1,30 @@
 package org.example.domain.usecase.user
 
+import org.example.data.utils.SessionManger
+import org.example.domain.mapper.toAuditLog
+import org.example.domain.model.AuditLogAction
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 
 class CreateUserUseCase(
-    private val userRepository: UserRepository, private val hashPasswordUseCase: HashPasswordUseCase
+    private val userRepository: UserRepository,
+    private val hashPasswordUseCase: HashPasswordUseCase,
+    private val auditRepository: AuditRepository
 ) {
-    suspend fun register(username: String, password: String, userRole: RoleType): User {
+    suspend fun register(
+        username: String,
+        password: String,
+        userRole: RoleType
+    ): User {
         val hashedPassword = hashPasswordUseCase.hashPassword(password)
-        return userRepository.createUser(user = User(username = username, password = hashedPassword, role = userRole))
+        val createdUser = userRepository.createUser(
+            user = User(username = username, password = hashedPassword, role = userRole)
+        )
+         val auditLog = createdUser.toAuditLog(SessionManger.getUser(), AuditLogAction.CREATE)
+         auditRepository.createAuditLog(auditLog)
+        return createdUser
     }
 }
