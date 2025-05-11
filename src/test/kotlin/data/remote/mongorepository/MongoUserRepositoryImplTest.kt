@@ -17,9 +17,7 @@ import org.example.data.remote.dto.MongoUserDto
 import org.example.data.remote.mapper.UserMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.model.AuditLog
 import org.example.domain.model.User
-import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,13 +30,11 @@ class MongoUserRepositoryImplTest {
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private val userMapper: UserMapper = mockk(relaxed = true)
     private lateinit var usersCollection: MongoCollection<MongoUserDto>
-    private lateinit var auditRepository: AuditRepository
     private lateinit var userRepository: UserRepository
 
     @BeforeEach
     fun setup() {
         usersCollection = mockk(relaxed = true)
-        auditRepository = mockk(relaxed = true)
 
         val mockDatabase = mockk<MongoDatabase>()
         every {
@@ -47,7 +43,6 @@ class MongoUserRepositoryImplTest {
         every { sessionManger.getUser() } returns UserMock.adminUser
         userRepository = MongoUserRepositoryImpl(
             database = mockDatabase,
-            auditRepository = auditRepository,
             userMapper = userMapper
         )
     }
@@ -56,10 +51,6 @@ class MongoUserRepositoryImplTest {
     @Test
     fun `createUser should insert user if not exists`() = runTest {
         //Given
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
-
         coEvery {
             usersCollection.insertOne(any())
         } returns mockk()
@@ -72,40 +63,8 @@ class MongoUserRepositoryImplTest {
     }
 
     @Test
-    fun `createUser should throw Exception when audit log creation fails`() = runTest {
-        //Given
-        coEvery {
-            usersCollection.insertOne(document = any(), options = any())
-        } returns mockk()
-
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } throws EiffelFlowException.IOException("Custom exception")//mockk<AuditLog>()
-
-        //When then
-        assertThrows<EiffelFlowException.IOException> {
-            userRepository.createUser(user = UserMock.validUser)
-        }
-
-    }
-
-    @Test
-    fun `createUser should throw Exception when user is not admin`() = runTest {
-        // Given
-        every { sessionManger.getUser() } returns UserMock.validUser
-
-        // When/Then
-        assertThrows<EiffelFlowException.AuthorizationException> {
-            userRepository.createUser(user = UserMock.validUser)
-        }
-    }
-
-    @Test
     fun `createUser should throw Exception when write to mongodb fails`() = runTest {
         //Given
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
 
         coEvery {
             usersCollection.insertOne(document = any(), options = any())
@@ -160,7 +119,7 @@ class MongoUserRepositoryImplTest {
             } returns null
 
             // When & Then
-            assertThrows<EiffelFlowException.IOException> {
+            assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.updateUser(user = UserMock.validUser)
             }
         }
@@ -185,20 +144,6 @@ class MongoUserRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `updateUser should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            coEvery {
-                auditRepository.createAuditLog(any())
-            } throws Throwable("Can't Update User")
-
-            // When & Then
-            assertThrows<EiffelFlowException.IOException> {
-                userRepository.updateUser(user = UserMock.validUser)
-            }
-        }
-    }
     //endregion
 
     //region deleteUser
@@ -210,9 +155,6 @@ class MongoUserRepositoryImplTest {
                 any()
             )
         } returns UserMock.ADMIN_USER_DTO
-        coEvery {
-            auditRepository.createAuditLog(any())
-        } returns mockk<AuditLog>()
 
         every {
             userMapper.fromDto(UserMock.ADMIN_USER_DTO)
@@ -223,19 +165,6 @@ class MongoUserRepositoryImplTest {
 
         // Then
         assertThat(result).isEqualTo(UserMock.adminUser)
-    }
-
-    @Test
-    fun `deleteUser should throw Exception when user is not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When & Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.deleteUser(UUID.randomUUID())
-            }
-        }
     }
 
     @Test
@@ -250,7 +179,7 @@ class MongoUserRepositoryImplTest {
             } returns null
 
             // When & Then
-            assertThrows<EiffelFlowException.IOException> {
+            assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.deleteUser(UUID.randomUUID())
             }
         }
@@ -274,20 +203,6 @@ class MongoUserRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `deleteUser should throw Exception when audit log creation fails`() {
-        runTest {
-            // Given
-            coEvery {
-                auditRepository.createAuditLog(any())
-            } throws Throwable("Can't Delete User")
-
-            // When & Then
-            assertThrows<EiffelFlowException.IOException> {
-                userRepository.deleteUser(UserMock.userToDelete.userId)
-            }
-        }
-    }
     //endregion
 
 
@@ -338,7 +253,7 @@ class MongoUserRepositoryImplTest {
             } returns mockFindFlow
 
             // When & Then
-            assertThrows<EiffelFlowException.IOException> {
+            assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.getUserById(UUID.randomUUID())
             }
         }
@@ -353,24 +268,12 @@ class MongoUserRepositoryImplTest {
             } throws MongoException("Can't get User")
 
             // When & Then
-            assertThrows<EiffelFlowException.IOException> {
+            assertThrows<EiffelFlowException.NotFoundException> {
                 userRepository.getUserById(UserMock.validUser.userId)
             }
         }
     }
 
-    @Test
-    fun `getUserById should throw Exception when when user is not admin `() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When & Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.getUserById(UUID.randomUUID())
-            }
-        }
-    }
     //endregion
 
 
@@ -444,18 +347,6 @@ class MongoUserRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `getUsers should throw Exception when when user is not admin `() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When & Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.getUsers()
-            }
-        }
-    }
     //endregion
 
 }
