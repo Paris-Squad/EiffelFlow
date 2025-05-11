@@ -12,6 +12,7 @@ import org.example.domain.usecase.task.CreateTaskUseCase
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.example.domain.usecase.task.EditTaskUseCase
 import org.example.domain.usecase.user.CreateUserUseCase
+import org.example.domain.usecase.user.DeleteUserUseCase
 import org.example.domain.usecase.user.UpdateUserUseCase
 import org.koin.dsl.module
 
@@ -42,5 +43,6 @@ val useCasesModule = module {
 
     //User
     factory { CreateUserUseCase(get(), get()) }
+    factory { DeleteUserUseCase(get()) }
     factory { UpdateUserUseCase(get(), get()) }
 }

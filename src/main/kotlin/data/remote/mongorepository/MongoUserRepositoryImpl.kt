@@ -6,6 +6,7 @@ import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import org.example.data.BaseRepository
 import org.example.data.remote.MongoCollections
 import org.example.data.remote.dto.MongoUserDto
 import org.example.data.remote.mapper.UserMapper
@@ -23,24 +24,22 @@ class MongoUserRepositoryImpl(
     database: MongoDatabase,
     private val auditRepository: AuditRepository,
     private val userMapper: UserMapper
-) : UserRepository {
+) : BaseRepository(), UserRepository {
 
     private val usersCollection = database.getCollection<MongoUserDto>(collectionName = MongoCollections.USERS)
 
     override suspend fun createUser(user: User): User {
         validateAdminPermission()
-        try {
+        return wrapInTryCatch {
             val userDto = userMapper.toDto(user)
             usersCollection.insertOne(userDto)
             logAction(user, AuditLogAction.CREATE)
-            return user
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't create User because ${exception.message}")
+            user
         }
     }
 
     override suspend fun updateUser(user: User): User {
-        try {
+        return wrapInTryCatch {
             val userDto = userMapper.toDto(user)
             val updates = Updates.combine(
                 Updates.set(MongoUserDto::username.name, userDto.username),
@@ -66,15 +65,13 @@ class MongoUserRepositoryImpl(
                 oldValue = oldValues.toString(),
                 newValue = newValues.toString(),
             )
-            return user
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't update User with id ${user.userId} because ${exception.message}")
+            user
         }
     }
 
     override suspend fun deleteUser(userId: UUID): User {
         validateAdminPermission()
-        try {
+        return wrapInTryCatch {
             val query = eq(MongoUserDto::_id.name, userId.toString())
             val deletedUserDto = usersCollection.findOneAndDelete(query)
 
@@ -86,32 +83,26 @@ class MongoUserRepositoryImpl(
                 user = deletedUser,
                 actionType = AuditLogAction.DELETE
             )
-            return deletedUser
-
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't delete User with id $userId because ${exception.message}")
+            deletedUser
         }
     }
 
     override suspend fun getUserById(userId: UUID): User {
         validateAdminPermission()
-        try {
+        return wrapInTryCatch {
             val query = eq(MongoUserDto::_id.name, userId.toString())
             val userDto = usersCollection.find(query).firstOrNull()
-            val user = userDto?.let { userMapper.fromDto(it) }
-            return user ?: throw EiffelFlowException.NotFoundException("User with _id $userId not found")
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't get User with id $userId because ${exception.message}")
+            userDto ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
+            val user = userMapper.fromDto(userDto)
+            user
         }
     }
 
     override suspend fun getUsers(): List<User> {
         validateAdminPermission()
-        try {
+        return wrapInTryCatch {
             val usersDto = usersCollection.find().toList()
-            return usersDto.map { userMapper.fromDto(it) }
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't get Users because ${exception.message}")
+            usersDto.map { userMapper.fromDto(it) }
         }
     }
 

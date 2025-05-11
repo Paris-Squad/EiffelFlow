@@ -6,6 +6,7 @@ import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
+import org.example.data.BaseRepository
 import org.example.data.remote.MongoCollections
 import org.example.data.remote.dto.MongoTaskDto
 import org.example.data.remote.mapper.TaskMapper
@@ -17,17 +18,15 @@ import java.util.UUID
 class MongoTaskRepositoryImpl(
     database: MongoDatabase,
     private val taskMapper: TaskMapper
-) : TaskRepository {
+) : BaseRepository(), TaskRepository {
 
     private val tasksCollection = database.getCollection<MongoTaskDto>(collectionName = MongoCollections.TASKS)
 
     override suspend fun createTask(task: Task): Task {
-        try {
+        return wrapInTryCatch {
             val taskDto = taskMapper.toDto(task)
             tasksCollection.insertOne(taskDto)
-            return task
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't create Task because ${exception.message}")
+            task
         }
     }
 
@@ -36,7 +35,7 @@ class MongoTaskRepositoryImpl(
         oldTask: Task,
         changedField: String
     ): Task {
-        try {
+        return wrapInTryCatch {
             val taskDto = taskMapper.toDto(task)
             val updates = Updates.combine(
                 Updates.set(MongoTaskDto::title.name, taskDto.title),
@@ -54,45 +53,34 @@ class MongoTaskRepositoryImpl(
             val oldTaskDto = tasksCollection.findOneAndUpdate(query, updates, options)
 
             oldTaskDto ?: throw EiffelFlowException.NotFoundException("Task with id ${task.projectId} not found")
-            return task
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't update Task with id ${task.projectId} because ${exception.message}")
+            task
         }
     }
 
     override suspend fun deleteTask(taskId: UUID): Task {
-        try {
+        return wrapInTryCatch {
             val query = eq(MongoTaskDto::_id.name, taskId.toString())
             val deletedTaskDto = tasksCollection.findOneAndDelete(query)
             deletedTaskDto ?: throw EiffelFlowException.NotFoundException("Task with id $taskId not found")
 
             val deletedTask = taskMapper.fromDto(deletedTaskDto)
-
-            return deletedTask
-
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't delete Task with id $taskId because ${exception.message}")
+            deletedTask
         }
     }
 
     override suspend fun getTaskById(taskId: UUID): Task {
-        try {
+        return wrapInTryCatch {
             val query = eq(MongoTaskDto::_id.name, taskId.toString())
             val taskDto = tasksCollection.find(query).firstOrNull()
             taskDto ?: throw EiffelFlowException.NotFoundException("Task with id $taskId not found")
-            return taskMapper.fromDto(taskDto)
-
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't get Task with id $taskId because ${exception.message}")
+            taskMapper.fromDto(taskDto)
         }
     }
 
     override suspend fun getTasks(): List<Task> {
-        try {
+        return wrapInTryCatch {
             val tasksDto = tasksCollection.find().toList()
-            return tasksDto.map { taskMapper.fromDto(it) }
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't get Tasks because ${exception.message}")
+            tasksDto.map { taskMapper.fromDto(it) }
         }
     }
 
