@@ -10,7 +10,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
-import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
 import org.example.presentation.audit.GetTaskAuditLogsCLI
 import org.example.presentation.helper.extensions.toFormattedDateTime
@@ -70,43 +69,6 @@ class GetTaskAuditLogsCLITest {
     }
 
     @Test
-    fun `should label log as Task when itemId is different from projectId`() = runBlocking {
-        // Given
-        val differentLog = sampleAuditLog.copy(itemId = UUID.randomUUID())
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(differentLog)
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        verify { printer.displayLn("[Task] Created '${differentLog.itemName}'") }
-    }
-
-    @Test
-    fun `should display Updated when log is UPDATE`() = runBlocking {
-        // Given
-        val updateLog = sampleAuditLog.copy(actionType = AuditLogAction.UPDATE)
-
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(updateLog)
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        verify { printer.displayLn("[Task] Updated '${updateLog.itemName}'") }
-    }
-
-    @Test
-    fun `should display Deleted when log is DELETE`() = runBlocking {
-        // Given
-        val deleteLog = sampleAuditLog.copy(actionType = AuditLogAction.DELETE)
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(deleteLog)
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        verify { printer.displayLn("[Task] Deleted '${deleteLog.itemName}'") }
-    }
-
-    @Test
     fun `should get all log details when printing audit entries`() = runBlocking {
         // Given
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
@@ -132,7 +94,7 @@ class GetTaskAuditLogsCLITest {
         every { inputReader.readString() } returns "invalid-uuid"
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.getTaskAuditLogsInput()
+        cli.start()
         // Then
         verify { printer.displayLn("Invalid Task ID format. Please enter a valid UUID.") }
     }

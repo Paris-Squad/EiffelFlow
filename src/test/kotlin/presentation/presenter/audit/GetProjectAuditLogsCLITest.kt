@@ -12,7 +12,6 @@ import org.example.presentation.io.Printer
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
 import java.util.UUID
-import kotlin.test.assertEquals
 
 class GetProjectAuditLogsCLITest {
 
@@ -91,22 +90,6 @@ class GetProjectAuditLogsCLITest {
         verify { printer.displayLn("[Project]  Created ''") }
     }
 
-
-
-    @Test
-    fun `should label log as Task when itemId is different from projectId`() = runBlocking {
-        // Given
-        val differentLog = sampleAuditLog.copy(itemId = UUID.randomUUID())
-        coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns listOf(differentLog)
-        every { printer.displayLn(any()) } just Runs
-
-        // When
-        cli.showProjectAuditLogs(validProjectId)
-
-        // Then
-        verify { printer.displayLn("[Task]     Created '${differentLog.itemName}'") }
-    }
-
     @Test
     fun `should show Not Available when changedField, oldValue and newValue are null`() = runBlocking {
         // Given
@@ -124,6 +107,19 @@ class GetProjectAuditLogsCLITest {
         verify { printer.displayLn("  Field Changed   : Not Available") }
         verify { printer.displayLn("  Old             : Not Available") }
         verify { printer.displayLn("  New             : Not Available") }
+    }
+    @Test
+    fun `should label log as Task when itemId is different from projectId`() = runBlocking {
+        // Given
+        val differentLog = sampleAuditLog.copy(itemId = UUID.randomUUID())
+        coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns listOf(differentLog)
+        every { printer.displayLn(any()) } just Runs
+
+        // When
+        cli.showProjectAuditLogs(validProjectId)
+
+        // Then
+        verify { printer.displayLn("[Task]     Created '${differentLog.itemName}'") }
     }
 
     @Test
