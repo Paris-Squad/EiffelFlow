@@ -118,4 +118,23 @@ class UpdateUserUseCaseTest {
             assertThat(result.message).isEqualTo("User is not logged in")
         }
     }
+
+    @Test
+    fun `update user should fail when current password entered by the user not matching the current password in the records`() {
+        runTest {
+            // Given
+            coEvery {
+                userRepository.updateUser(any())
+            } returns UserMock.validUser
+            // When / Then
+            val result = assertThrows<EiffelFlowException.AuthorizationException> {
+                updateUserUseCase.updateUser(
+                    userName = UserMock.validUser.username,
+                    currentPassword = "UserMock.validUser.password",
+                    newPassword = "Updated Password"
+                )
+            }
+            assertThat(result.message).isEqualTo("Current password is not correct")
+        }
+    }
 }
