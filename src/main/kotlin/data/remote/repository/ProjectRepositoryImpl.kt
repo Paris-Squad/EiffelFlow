@@ -1,4 +1,4 @@
-package data.mongorepository
+package data.remote.repository
 
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.FindOneAndUpdateOptions
@@ -13,10 +13,11 @@ import org.example.data.remote.dto.MongoTaskDto
 import org.example.data.remote.mapper.ProjectMapper
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Project
+import org.example.domain.model.TaskState
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
-class MongoProjectRepositoryImpl(
+class ProjectRepositoryImpl(
     database: MongoDatabase,
     private val projectMapper: ProjectMapper
 ) : BaseRepository(), ProjectRepository {
@@ -26,6 +27,10 @@ class MongoProjectRepositoryImpl(
 
     override suspend fun createProject(project: Project): Project {
         return wrapInTryCatch {
+            if (project.taskStates.isEmpty()){
+                val defaultState = TaskState(name = "To Do")
+                project.taskStates = listOf(defaultState)
+            }
             val projectDto = projectMapper.toDto(project)
             projectsCollection.insertOne(projectDto)
             project

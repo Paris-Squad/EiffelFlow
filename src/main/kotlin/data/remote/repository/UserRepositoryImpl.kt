@@ -1,4 +1,4 @@
-package data.mongorepository
+package data.remote.repository
 
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.FindOneAndUpdateOptions
@@ -15,7 +15,7 @@ import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
 import java.util.UUID
 
-class MongoUserRepositoryImpl(
+class UserRepositoryImpl(
     database: MongoDatabase,
     private val userMapper: UserMapper
 ) : BaseRepository(), UserRepository {

@@ -9,7 +9,7 @@ import org.example.domain.model.User
 import org.example.domain.repository.AuthRepository
 import org.example.domain.utils.ValidationErrorMessage
 
-class CsvAuthRepositoryImpl(
+class AuthRepositoryImpl(
     private val authFileDataSource: FileDataSource,
     private val usersFileDataSource: FileDataSource,
     private val userCsvParser: UserCsvParser
