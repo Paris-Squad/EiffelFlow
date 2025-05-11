@@ -20,6 +20,7 @@ import org.example.presentation.project.UpdateProjectCLI
 import org.example.presentation.task.CreateTaskCLI
 import org.example.presentation.task.DeleteTaskCLI
 import org.example.presentation.task.EditTaskCli
+import org.example.presentation.user.DeleteUserCLI
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -41,6 +42,7 @@ val uiModule = module {
 
     //User
     singleOf(::CreateUserCLI)
+    singleOf(::DeleteUserCLI)
 
     //Project
     singleOf(::CreateProjectCLI)

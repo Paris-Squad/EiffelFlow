@@ -12,6 +12,7 @@ import org.example.presentation.io.Printer
 import org.junit.jupiter.api.Test
 import utils.MockAuditLog
 import java.util.UUID
+import kotlin.test.assertEquals
 
 class GetProjectAuditLogsCLITest {
 

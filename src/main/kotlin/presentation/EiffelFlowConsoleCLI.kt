@@ -85,7 +85,7 @@ class EiffelFlowConsoleCLI {
                 "13" -> uiContainer.getTaskAuditLogsCLI.start()
                 "14" -> uiContainer.getAuditLogsCLI.start()
                 "15" -> TODO("Update profile")
-                "16" -> TODO("Delete User")
+                "16" -> uiContainer.deleteUserCLI.start()
                 "17" -> TODO("View all users")
                 "18" -> uiContainer.logoutCLI.start()
                 "0" -> {

@@ -5,10 +5,10 @@ import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.example.data.BaseRepository
 import org.example.data.remote.MongoCollections
 import org.example.data.remote.dto.MongoAuditLogDto
 import org.example.data.remote.mapper.AuditLogMapper
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.AuditLog
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
@@ -18,37 +18,31 @@ class MongoAuditRepositoryImpl(
     database: MongoDatabase,
     taskRepositoryProvider: Lazy<TaskRepository>,
     private val auditLogMapper: AuditLogMapper
-) : AuditRepository {
+) : BaseRepository(), AuditRepository {
 
     private val taskRepository: TaskRepository by taskRepositoryProvider
-    private val auditLogsCollection = database.getCollection<MongoAuditLogDto>(collectionName = MongoCollections.AUDIT_LOGS)
+    private val auditLogsCollection =
+        database.getCollection<MongoAuditLogDto>(collectionName = MongoCollections.AUDIT_LOGS)
 
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
-        try {
+        return wrapInTryCatch {
             val auditLogDto = auditLogMapper.toDto(auditLog)
             auditLogsCollection.insertOne(auditLogDto)
-            return auditLog
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't create AuditLog because ${exception.message}")
+            auditLog
         }
     }
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        try {
-            return findAuditLogsByItemId(taskId).toList().sortedByDescending { it.auditTime }
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Unexpected error fetching audit logs ${exception.message}")
+        return wrapInTryCatch {
+            findAuditLogsByItemId(taskId).toList().sortedByDescending { it.auditTime }
         }
     }
 
     override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
-        try {
+        return wrapInTryCatch {
             val projectLogs = findAuditLogsByItemId(projectId).toList()
             val auditLogsForProjectTasks = getAuditProjectTasks(projectId, getAuditLogs())
-
-            return (projectLogs + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Unexpected error fetching audit logs ${exception.message}")
+            (projectLogs + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
         }
     }
 
@@ -70,11 +64,9 @@ class MongoAuditRepositoryImpl(
     }
 
     override suspend fun getAuditLogs(): List<AuditLog> {
-        try {
+        return wrapInTryCatch {
             val auditLogsDto = auditLogsCollection.find().toList()
-            return auditLogsDto.map { auditLogMapper.fromDto(it) }
-        } catch (exception: Throwable) {
-            throw EiffelFlowException.IOException("Can't get AuditLogs because ${exception.message}")
+            auditLogsDto.map { auditLogMapper.fromDto(it) }
         }
     }
 }

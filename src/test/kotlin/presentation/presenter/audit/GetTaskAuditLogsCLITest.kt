@@ -1,4 +1,4 @@
-package presentation.presenter.audit
+package presentation.audit
 
 import io.mockk.Runs
 import io.mockk.clearMocks
@@ -132,7 +132,7 @@ class GetTaskAuditLogsCLITest {
         every { inputReader.readString() } returns "invalid-uuid"
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.start()
+        cli.getTaskAuditLogsInput()
         // Then
         verify { printer.displayLn("Invalid Task ID format. Please enter a valid UUID.") }
     }
