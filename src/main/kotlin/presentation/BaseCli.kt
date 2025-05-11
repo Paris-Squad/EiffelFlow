@@ -36,4 +36,16 @@ abstract class BaseCli(private val printer: Printer) {
         }
         return Pair(name, password)
     }
+
+    protected fun readNonBlankInput(
+        inputReader: InputReader,
+        prompt: String, errorMessage: String
+    ): String? {
+        printer.displayLn(prompt)
+        val input = inputReader.readString()?.trim()
+        return if (input.isNullOrBlank()) {
+            printer.displayLn(errorMessage)
+            null
+        } else input
+    }
 }

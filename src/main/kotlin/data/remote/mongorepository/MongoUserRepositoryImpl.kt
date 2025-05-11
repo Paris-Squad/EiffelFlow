@@ -44,16 +44,14 @@ class MongoUserRepositoryImpl(
             val updates = Updates.combine(
                 Updates.set(MongoUserDto::username.name, userDto.username),
                 Updates.set(MongoUserDto::password.name, userDto.password),
-                Updates.set(MongoUserDto::role.name, userDto.role),
+                Updates.set(MongoUserDto::role.name, userDto.role)
             )
 
             val options = FindOneAndUpdateOptions().upsert(false)
             val query = eq(MongoUserDto::_id.name, userDto._id)
             val oldUserDto = usersCollection.findOneAndUpdate(query, updates, options)
 
-            if (oldUserDto == null) {
-                throw EiffelFlowException.NotFoundException("User with _id ${user.userId} not found")
-            }
+            oldUserDto ?: throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
 
             val oldUser = userMapper.fromDto(oldUserDto)
             val fieldChanges = oldUser.getFieldChanges(user)
