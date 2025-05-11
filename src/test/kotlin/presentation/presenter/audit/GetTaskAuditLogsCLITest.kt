@@ -1,23 +1,30 @@
-package presentation.audit
+package presentation.presenter.audit
 
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import org.example.domain.model.AuditLogAction
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
 import org.example.presentation.audit.GetTaskAuditLogsCLI
+import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
+import org.junit.jupiter.api.Test
 import utils.MockAuditLog
 import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class GetTaskAuditLogsCLITest {
     private val getTaskAuditLogsUseCase: GetTaskAuditUseCase = mockk()
     private val inputReader: InputReader = mockk()
     private val printer: Printer = mockk()
-    private val cli = GetTaskAuditLogsCLI(getTaskAuditLogsUseCase,inputReader,printer)
+    private val cli = GetTaskAuditLogsCLI(getTaskAuditLogsUseCase, inputReader, printer)
 
     private val validTaskId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000")
     private val sampleAuditLog = MockAuditLog.AUDIT_LOG.copy(
@@ -25,19 +32,21 @@ class GetTaskAuditLogsCLITest {
         itemName = "Test Task",
         auditTime = LocalDateTime(2023, 1, 1, 14, 30)
     )
+
     // success
     @Test
-    fun `should display task audit logs for valid task ID`(){
+    fun `should display task audit logs for valid task ID`() {
         // Given
         every { inputReader.readString() } returns validTaskId.toString()
         every { printer.displayLn(any()) } just Runs
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
         // When
-        cli.getTaskAuditLogsInput()
+        cli.start()
         // Then
         verify { printer.displayLn("Enter Task ID to retrieve audit logs:") }
-        verify { printer.displayLn("[Task] Created Test Task") }
-        verify { printer.displayLn("  Date         : 2023-01-01 / Time: 2:30 PM") }
+        verify { printer.displayLn("[Task] Created 'Test Task'") }
+        verify { printer.displayLn("  Date & Time     : ${sampleAuditLog.auditTime.toFormattedDateTime()}")
+        }
     }
 
     @Test
@@ -46,16 +55,16 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
         verify {
-            printer.displayLn("[Task] Created Test Task")
-            printer.displayLn("  Audit ID     : ${sampleAuditLog.auditId}")
-            printer.displayLn("  Date         : 2023-01-01 / Time: 2:30 PM")
-            printer.displayLn("  Modified By  : ${sampleAuditLog.editorName}")
-            printer.displayLn("  Field Changed: ${sampleAuditLog.changedField ?: "Not Available"}")
-            printer.displayLn("    Old        : ${sampleAuditLog.oldValue ?: "Not Available"}")
-            printer.displayLn("    New        : ${sampleAuditLog.newValue ?: "Not Available"}")
+            printer.displayLn("[Task] Created 'Test Task'")
+            printer.displayLn("  Audit ID        : ${sampleAuditLog.auditId}")
+            printer.displayLn("  Date & Time     : ${sampleAuditLog.auditTime.toFormattedDateTime()}")
+            printer.displayLn("  Modified By     : ${sampleAuditLog.editorName}")
+            printer.displayLn("  Field Changed   : ${sampleAuditLog.changedField ?: "Not Available"}")
+            printer.displayLn("  Old             : ${sampleAuditLog.oldValue ?: "Not Available"}")
+            printer.displayLn("  New             : ${sampleAuditLog.newValue ?: "Not Available"}")
             printer.displayLn("-".repeat(50))
         }
     }
@@ -67,9 +76,9 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(differentLog)
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
-        verify { printer.displayLn("[Task] Created ${differentLog.itemName}") }
+        verify { printer.displayLn("[Task] Created '${differentLog.itemName}'") }
     }
 
     @Test
@@ -80,9 +89,9 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(updateLog)
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
-        verify { printer.displayLn("[Task] Updated ${updateLog.itemName}") }
+        verify { printer.displayLn("[Task] Updated '${updateLog.itemName}'") }
     }
 
     @Test
@@ -92,9 +101,9 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(deleteLog)
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
-        verify { printer.displayLn("[Task] Deleted ${deleteLog.itemName}") }
+        verify { printer.displayLn("[Task] Deleted '${deleteLog.itemName}'") }
     }
 
     @Test
@@ -103,16 +112,16 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
         coVerify { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) }
 
-        verify { printer.displayLn("  Audit ID     : ${sampleAuditLog.auditId}") }
-        verify { printer.displayLn("  Date         : ${sampleAuditLog.auditTime.date} / Time: ${cli.formatTime(sampleAuditLog.auditTime)}") }
-        verify { printer.displayLn("  Modified By  : ${sampleAuditLog.editorName}") }
-        verify { printer.displayLn("  Field Changed: ${sampleAuditLog.changedField}") }
-        verify { printer.displayLn("    Old        : ${sampleAuditLog.oldValue}") }
-        verify { printer.displayLn("    New        : ${sampleAuditLog.newValue}") }
+        verify { printer.displayLn("  Audit ID        : ${sampleAuditLog.auditId}") }
+        verify { printer.displayLn("  Date & Time     : ${sampleAuditLog.auditTime.toFormattedDateTime()}") }
+        verify { printer.displayLn("  Modified By     : ${sampleAuditLog.editorName}") }
+        verify { printer.displayLn("  Field Changed   : ${sampleAuditLog.changedField}") }
+        verify { printer.displayLn("  Old             : ${sampleAuditLog.oldValue}") }
+        verify { printer.displayLn("  New             : ${sampleAuditLog.newValue}") }
     }
 
 
@@ -123,7 +132,7 @@ class GetTaskAuditLogsCLITest {
         every { inputReader.readString() } returns "invalid-uuid"
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.getTaskAuditLogsInput()
+        cli.start()
         // Then
         verify { printer.displayLn("Invalid Task ID format. Please enter a valid UUID.") }
     }
@@ -134,7 +143,7 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns emptyList()
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
         verify { printer.displayLn("No audit logs found for Task ID: $validTaskId.") }
     }
@@ -151,11 +160,11 @@ class GetTaskAuditLogsCLITest {
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(logWithNulls)
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
-        verify { printer.displayLn("  Field Changed: Not Available") }
-        verify { printer.displayLn("    Old        : Not Available") }
-        verify { printer.displayLn("    New        : Not Available") }
+        verify { printer.displayLn("  Field Changed   : Not Available") }
+        verify { printer.displayLn("  Old             : Not Available") }
+        verify { printer.displayLn("  New             : Not Available") }
     }
 
     @Test
@@ -165,52 +174,22 @@ class GetTaskAuditLogsCLITest {
             every { inputReader.readString() } returns it
             every { printer.displayLn(any()) } just Runs
             // When
-            cli.getTaskAuditLogsInput()
+            cli.start()
             // Then
             verify { printer.displayLn("Task ID cannot be empty. Please provide a valid UUID.") }
             clearMocks(printer)
         }
     }
+
     @Test
     fun `should handle empty audit logs gracefully`() = runBlocking {
         // Given
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns emptyList()
         every { printer.displayLn(any()) } just Runs
         // When
-        cli.displayAuditLogsForTask(validTaskId)
+        cli.getAuditLogsForTask(validTaskId)
         // Then
         coVerify { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) }
         verify { printer.displayLn("No audit logs found for Task ID: $validTaskId.") }
     }
-    // helper function
-    @Test
-    fun `should return formatted time in 12-hour format when given 24-hour time`() {
-        // Given
-        val time = LocalDateTime(2023, 1, 1, 14, 30)
-        // When
-        val result = cli.formatTime(time)
-        // Then
-        assertEquals("2:30 PM", result)
-    }
-
-    @Test
-    fun `should return 12-00 AM when given midnight (00-00)`() {
-        // Given
-        val time = LocalDateTime(2023, 1, 1, 0, 0)
-        // When
-        val result = cli.formatTime(time)
-        // Then
-        assertEquals("12:00 AM", result)
-    }
-
-    @Test
-    fun `should return 12-00 PM when given noon (12-00)`() {
-        // Given
-        val time = LocalDateTime(2023, 1, 1, 12, 0)
-        // When
-        val result = cli.formatTime(time)
-        // Then
-        assertEquals("12:00 PM", result)
-    }
-
 }
