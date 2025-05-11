@@ -7,7 +7,6 @@ import org.example.presentation.BaseCli
 import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import org.jetbrains.annotations.VisibleForTesting
 import java.util.UUID
 
 class GetTaskAuditLogsCLI(
@@ -32,8 +31,7 @@ class GetTaskAuditLogsCLI(
         }
     }
 
-    @VisibleForTesting
-    internal fun getAuditLogsForTask(taskId: UUID) {
+    private fun getAuditLogsForTask(taskId: UUID) {
         runBlocking {
             val taskAuditLogs = getTaskAuditLogsUseCase.getTaskAuditLogsById(taskId)
             if (taskAuditLogs.isEmpty()) {
@@ -50,8 +48,7 @@ class GetTaskAuditLogsCLI(
     }
 
 
-    @VisibleForTesting
-    internal fun displayTaskAuditDetails(auditLog: AuditLog) {
+    private fun displayTaskAuditDetails(auditLog: AuditLog) {
         val paddedLabel = { label: String -> label.padEnd(15) }
 
         printer.displayLn("[Task] ${auditLog.actionType.actionName} '${auditLog.itemName}'")

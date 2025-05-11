@@ -5,7 +5,6 @@ import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetAllAuditLogsUseCase
 import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.Printer
-import org.jetbrains.annotations.VisibleForTesting
 
 class GetAuditLogsCLI(
     private val getAuditLogsUseCase: GetAllAuditLogsUseCase,
@@ -27,8 +26,7 @@ class GetAuditLogsCLI(
         }
     }
 
-    @VisibleForTesting
-    internal fun displayAuditLogs(auditLog: AuditLog) {
+    private fun displayAuditLogs(auditLog: AuditLog) {
         val labelPadded = { label: String -> label.padEnd(15) }
 
         printer.displayLn("${auditLog.actionType.actionName} '${auditLog.itemName}'")

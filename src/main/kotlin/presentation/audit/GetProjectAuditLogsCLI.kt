@@ -7,7 +7,6 @@ import org.example.presentation.BaseCli
 import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import org.jetbrains.annotations.VisibleForTesting
 import java.util.*
 
 class GetProjectAuditLogsCLI(
@@ -31,8 +30,7 @@ class GetProjectAuditLogsCLI(
         }
     }
 
-    @VisibleForTesting
-    internal fun showProjectAuditLogs(projectId: UUID) {
+        private fun showProjectAuditLogs(projectId: UUID) {
         runBlocking {
             val projectAuditLogs = getProjectAuditUseCase.getProjectAuditLogsById(projectId)
             if (projectAuditLogs.isEmpty()) {
@@ -51,8 +49,7 @@ class GetProjectAuditLogsCLI(
         }
     }
 
-    @VisibleForTesting
-    internal fun preparingAuditLogToDisplay(auditLog: AuditLog, isProjectLog: Boolean) {
+        private fun preparingAuditLogToDisplay(auditLog: AuditLog, isProjectLog: Boolean) {
         val paddedLabel = { label: String -> label.padEnd(15) }
         val logType = if (isProjectLog) "[Project]" else "[Task]"
 
@@ -60,8 +57,7 @@ class GetProjectAuditLogsCLI(
         displayProjectAuditDetails(auditLog, paddedLabel)
     }
 
-    @VisibleForTesting
-    internal fun displayProjectAuditDetails(auditLog: AuditLog, paddedLabel: (String) -> String) {
+        private fun displayProjectAuditDetails(auditLog: AuditLog, paddedLabel: (String) -> String) {
         printer.displayLn("  ${paddedLabel("Audit ID")} : ${auditLog.auditId}")
         printer.displayLn("  ${paddedLabel("Date & Time")} : ${auditLog.auditTime.toFormattedDateTime()}")
         printer.displayLn("  ${paddedLabel("Modified By")} : ${auditLog.editorName}")
@@ -71,8 +67,7 @@ class GetProjectAuditLogsCLI(
         printer.displayLn("-".repeat(50))
     }
 
-    @VisibleForTesting
-    internal fun getProjectNameFromLogs(projectAuditLogs: List<AuditLog>, projectId: UUID): String {
+        private fun getProjectNameFromLogs(projectAuditLogs: List<AuditLog>, projectId: UUID): String {
         val projectLog = projectAuditLogs.firstOrNull { it.itemId == projectId }
         return projectLog?.itemName?.takeIf { it.isNotBlank() } ?: "Unnamed Project"
     }

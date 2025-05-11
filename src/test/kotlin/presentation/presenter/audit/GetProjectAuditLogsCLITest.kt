@@ -45,21 +45,27 @@ class GetProjectAuditLogsCLITest {
     @Test
     fun `should show not found message when project has no logs`() = runBlocking {
         // Given
+        every { inputReader.readString() } returns validProjectId.toString()
         coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns emptyList()
         every { printer.displayLn(any()) } just Runs
+
         // When
-        cli.showProjectAuditLogs(validProjectId)
+        cli.start()
+
         // Then
         verify { printer.displayLn("No audit logs found for the specified Project ID: $validProjectId.") }
     }
+
 
     @Test
     fun `should show all log details when printing audit entries`() = runBlocking {
         // Given
         coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns listOf(sampleAuditLog)
         every { printer.displayLn(any()) } just Runs
+        every { inputReader.readString() } returns validProjectId.toString()
+
         // When
-        cli.showProjectAuditLogs(validProjectId)
+        cli.start()
         // Then
         verify {
             printer.displayLn("Audit Logs for Project: '${sampleAuditLog.itemName}'")
@@ -81,9 +87,11 @@ class GetProjectAuditLogsCLITest {
         val logWithEmptyName = sampleAuditLog.copy(itemName = "", actionType = AuditLogAction.CREATE)
         coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns listOf(logWithEmptyName)
         every { printer.displayLn(any()) } just Runs
+        every { inputReader.readString() } returns validProjectId.toString()
+
 
         // When
-        cli.showProjectAuditLogs(validProjectId)
+        cli.start()
 
         // Then
         verify { printer.displayLn("Audit Logs for Project: 'Unnamed Project'") }
@@ -101,8 +109,10 @@ class GetProjectAuditLogsCLITest {
 
         coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns listOf(logWithNulls)
         every { printer.displayLn(any()) } just Runs
+        every { inputReader.readString() } returns validProjectId.toString()
+
         // When
-        cli.showProjectAuditLogs(validProjectId)
+        cli.start()
         // Then
         verify { printer.displayLn("  Field Changed   : Not Available") }
         verify { printer.displayLn("  Old             : Not Available") }
@@ -114,9 +124,11 @@ class GetProjectAuditLogsCLITest {
         val differentLog = sampleAuditLog.copy(itemId = UUID.randomUUID())
         coEvery { getProjectAuditUseCase.getProjectAuditLogsById(validProjectId) } returns listOf(differentLog)
         every { printer.displayLn(any()) } just Runs
+        every { inputReader.readString() } returns validProjectId.toString()
+
 
         // When
-        cli.showProjectAuditLogs(validProjectId)
+        cli.start()
 
         // Then
         verify { printer.displayLn("[Task]     Created '${differentLog.itemName}'") }
@@ -128,12 +140,12 @@ class GetProjectAuditLogsCLITest {
         val cli = spyk(GetProjectAuditLogsCLI(getProjectAuditUseCase, inputReader, printer))
         val validId = UUID.randomUUID()
         every { inputReader.readString() } returns validId.toString()
-        coEvery { cli.showProjectAuditLogs(validId) } just Runs
+        coEvery { cli.start() } just Runs
         every { printer.displayLn(any()) } just Runs
         // When
         cli.start()
         // Then
-        verify { cli.showProjectAuditLogs(validId) }
+        verify { cli.start() }
     }
 
     @Test

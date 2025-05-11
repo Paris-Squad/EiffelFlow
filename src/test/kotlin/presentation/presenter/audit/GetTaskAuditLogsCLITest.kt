@@ -1,13 +1,6 @@
 package presentation.audit
 
-import io.mockk.Runs
-import io.mockk.clearMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
@@ -16,8 +9,10 @@ import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import utils.MockAuditLog
-import java.util.UUID
+import java.util.*
 
 class GetTaskAuditLogsCLITest {
     private val getTaskAuditLogsUseCase: GetTaskAuditUseCase = mockk()
@@ -32,31 +27,21 @@ class GetTaskAuditLogsCLITest {
         auditTime = LocalDateTime(2023, 1, 1, 14, 30)
     )
 
-    // success
-    @Test
-    fun `should display task audit logs for valid task ID`() {
-        // Given
-        every { inputReader.readString() } returns validTaskId.toString()
-        every { printer.displayLn(any()) } just Runs
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
-        // When
-        cli.start()
-        // Then
-        verify { printer.displayLn("Enter Task ID to retrieve audit logs:") }
-        verify { printer.displayLn("[Task] Created 'Test Task'") }
-        verify { printer.displayLn("  Date & Time     : ${sampleAuditLog.auditTime.toFormattedDateTime()}")
-        }
-    }
 
     @Test
-    fun `should show all log details when printing audit entries`() = runBlocking {
+    fun `should display task audit logs for valid task ID`() = runBlocking {
         // Given
+        every { inputReader.readString() } returns validTaskId.toString()
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(sampleAuditLog)
         every { printer.displayLn(any()) } just Runs
+
         // When
-        cli.getAuditLogsForTask(validTaskId)
+        cli.start()
+
         // Then
-        verify {
+        verifySequence {
+            printer.displayLn("Enter Task ID to retrieve audit logs:")
+            printer.displayLn("=== Audit Logs on Task: $validTaskId ===")
             printer.displayLn("[Task] Created 'Test Task'")
             printer.displayLn("  Audit ID        : ${sampleAuditLog.auditId}")
             printer.displayLn("  Date & Time     : ${sampleAuditLog.auditTime.toFormattedDateTime()}")
@@ -65,62 +50,66 @@ class GetTaskAuditLogsCLITest {
             printer.displayLn("  Old             : ${sampleAuditLog.oldValue ?: "Not Available"}")
             printer.displayLn("  New             : ${sampleAuditLog.newValue ?: "Not Available"}")
             printer.displayLn("-".repeat(50))
+            printer.displayLn("=== End of Audit Logs ===")
+        }
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", " ", "null"])
+    fun `should show error when Task ID is empty or blank`(input: String) {
+        // Given
+        every { inputReader.readString() } returns if (input == "null") null else input
+        every { printer.displayLn(any()) } just Runs
+
+        // When
+        cli.start()
+
+        // Then
+        verify {
+            printer.displayLn("Task ID cannot be empty. Please provide a valid UUID.")
+        }
+        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(any()) }
+    }
+
+
+    @Test
+    fun `should show message when no audit logs found`() = runBlocking {
+        // Given
+        every { inputReader.readString() } returns validTaskId.toString()
+        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns emptyList()
+        every { printer.displayLn(any()) } just Runs
+
+        // When
+        cli.start()
+
+        // Then
+        verify {
+            printer.displayLn("No audit logs found for Task ID: $validTaskId.")
         }
     }
 
     @Test
-    fun `should show error not found message when Task has no logs`() = runBlocking {
-        // Given
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns emptyList()
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        verify { printer.displayLn("No audit logs found for Task ID: $validTaskId.") }
-    }
-
-    @Test
-    fun `should show Not Available when changedField, oldValue and newValue are null`() = runBlocking {
+    fun `should display Not Available for null optional fields`() = runBlocking {
         // Given
         val logWithNulls = sampleAuditLog.copy(
             changedField = null,
             oldValue = null,
             newValue = null
         )
-
+        every { inputReader.readString() } returns validTaskId.toString()
         coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns listOf(logWithNulls)
         every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        verify { printer.displayLn("  Field Changed   : Not Available") }
-        verify { printer.displayLn("  Old             : Not Available") }
-        verify { printer.displayLn("  New             : Not Available") }
-    }
 
-    @Test
-    fun `should show error invalid UUID message when Task ID is empty or null or blank`() {
-        listOf(null, "", "   ").forEach {
-            // Given
-            every { inputReader.readString() } returns it
-            every { printer.displayLn(any()) } just Runs
-            // When
-            cli.start()
-            // Then
-            verify { printer.displayLn("Task ID cannot be empty. Please provide a valid UUID.") }
-            clearMocks(printer)
+        // When
+        cli.start()
+
+        // Then
+        verify {
+            printer.displayLn("  Field Changed   : Not Available")
+            printer.displayLn("  Old             : Not Available")
+            printer.displayLn("  New             : Not Available")
         }
     }
 
-    @Test
-    fun `should handle empty audit logs gracefully`() = runBlocking {
-        // Given
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) } returns emptyList()
-        every { printer.displayLn(any()) } just Runs
-        // When
-        cli.getAuditLogsForTask(validTaskId)
-        // Then
-        coVerify { getTaskAuditLogsUseCase.getTaskAuditLogsById(validTaskId) }
-        verify { printer.displayLn("No audit logs found for Task ID: $validTaskId.") }
-    }
 }
