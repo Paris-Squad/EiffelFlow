@@ -16,9 +16,12 @@ class DeleteProjectCLI(
 ) : BaseCli(printer) {
     fun start() {
         tryStartCli {
-            printer.displayLn("Enter project ID to delete: ")
+            printer.displayLn("Deleting a Project will delete all tasks associated with it:")
+            printer.displayLn("Please confirm by entering the Project ID or 'exit' to cancel:")
             val input = inputReader.readString()
-
+            if (input == "exit") {
+                return@tryStartCli
+            }
             if (input.isNullOrBlank()) {
                 printer.displayLn("Project ID cannot be empty.")
                 return@tryStartCli
