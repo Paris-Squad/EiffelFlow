@@ -19,7 +19,7 @@ class GetTaskCLI(
         tryStartCli {
             val tasks = getTasks()
             if(tasks.isEmpty()){
-                printer.displayLn("No projects found.")
+                printer.displayLn("No Tasks found.")
             }else{
                 tasks.forEachIndexed { index, task ->
                     printer.displayLn("${index + 1}.${task.title} - ${task.description}")
