@@ -48,7 +48,7 @@ class RegisterUseCaseTest {
     }
 
     @Test
-    fun `register with admin caller role should succeed when all validations pass`() {
+    fun `register with admin role should succeed when all validations pass`() {
         runTest {
             // Given
             val createdUser = User(username = username, password = hashedPassword, role = mateRole)
@@ -95,6 +95,20 @@ class RegisterUseCaseTest {
                 registerUseCase.register(username, password, mateRole)
             }
             assertThat(exception.message).contains("User creation failed")
+        }
+    }
+
+    @Test
+    fun `register should throw AuthorizationException when user is not admin`() {
+        runTest {
+            // Given
+            every { SessionManger.isAdmin() } returns false
+
+            // When / Then
+            val exception = assertThrows<EiffelFlowException.AuthorizationException> {
+                registerUseCase.register(username, password, mateRole)
+            }
+            assertThat(exception.message).contains("Only admin can create or update user")
         }
     }
 

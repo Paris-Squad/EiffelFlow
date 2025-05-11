@@ -1,6 +1,7 @@
 package org.example.domain.usecase.user
 
 import org.example.data.utils.SessionManger
+import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.RoleType
@@ -19,6 +20,10 @@ class CreateUserUseCase(
         password: String,
         userRole: RoleType
     ): User {
+        if (SessionManger.isAdmin().not()) {
+            throw EiffelFlowException.AuthorizationException("Only admin can create or update user")
+        }
+
         val hashedPassword = hashPasswordUseCase.hashPassword(password)
         val createdUser = userRepository.createUser(
             user = User(username = username, password = hashedPassword, role = userRole)

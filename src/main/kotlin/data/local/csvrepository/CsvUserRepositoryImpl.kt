@@ -3,7 +3,6 @@ package org.example.data.local.csvrepository
 import org.example.data.BaseRepository
 import org.example.data.local.FileDataSource
 import org.example.data.local.parser.UserCsvParser
-import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
@@ -15,8 +14,6 @@ class CsvUserRepositoryImpl(
 ) : BaseRepository(), UserRepository {
     override suspend fun createUser(user: User): User {
         return wrapInTryCatch {
-            validateAdminPermission()
-
             val userAsCsv = userCsvParser.serialize(user)
             val users = getUsers()
 
@@ -30,12 +27,6 @@ class CsvUserRepositoryImpl(
     private fun validateUsernameUniqueness(users: List<User>, username: String) {
         if (users.any { it.username.equals(username, ignoreCase = true) }) {
             throw EiffelFlowException.AuthorizationException("Username '$username' is already taken. Please choose another username.")
-        }
-    }
-
-    private fun validateAdminPermission() {
-        if (SessionManger.isAdmin().not()) {
-            throw EiffelFlowException.AuthorizationException("Only admin can create or update user")
         }
     }
 
@@ -55,7 +46,6 @@ class CsvUserRepositoryImpl(
 
     override suspend fun deleteUser(userId: UUID): User {
         return wrapInTryCatch {
-            validateAdminPermission()
             val users = getUsers()
             val userToDelete = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")

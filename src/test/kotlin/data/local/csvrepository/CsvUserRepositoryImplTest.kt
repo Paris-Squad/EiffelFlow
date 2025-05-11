@@ -106,20 +106,6 @@ class CsvUserRepositoryImplTest {
     }
     }
 
-    @Test
-    fun `createUser should throw Exception when user is not admin`() {
-        runTest {
-            // Given
-            every { SessionManger.isAdmin() } returns false
-            every { csvManager.readLinesFromFile() } returns emptyList()
-
-            // When/Then
-            val exception = assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.createUser(user = validUser)
-            }
-            assertThat(exception.message).contains("Only admin can create or update user")
-        }
-    }
     //endregion
 
 
@@ -200,20 +186,7 @@ class CsvUserRepositoryImplTest {
             assertThat(result).isEqualTo(userToDelete)
         }
     }
-
-    @Test
-    fun `deleteUser should throw Exception when user is not admin`() {
-        runTest {
-            // Given
-            every { SessionManger.isAdmin() } returns false
-
-            // When & Then
-            val exception = assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.deleteUser(UUID.randomUUID())
-            }
-            assertThat(exception.message).contains("Only admin can create or update user")
-        }
-    }
+    
     @Test
     fun `deleteUser should throw Exception when user is not found`() {
         runTest{
