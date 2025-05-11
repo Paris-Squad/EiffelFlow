@@ -63,17 +63,6 @@ class MongoUserRepositoryImplTest {
     }
 
     @Test
-    fun `createUser should throw Exception when user is not admin`() = runTest {
-        // Given
-        every { sessionManger.getUser() } returns UserMock.validUser
-
-        // When/Then
-        assertThrows<EiffelFlowException.AuthorizationException> {
-            userRepository.createUser(user = UserMock.validUser)
-        }
-    }
-
-    @Test
     fun `createUser should throw Exception when write to mongodb fails`() = runTest {
         //Given
 
@@ -176,19 +165,6 @@ class MongoUserRepositoryImplTest {
 
         // Then
         assertThat(result).isEqualTo(UserMock.adminUser)
-    }
-
-    @Test
-    fun `deleteUser should throw Exception when user is not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When & Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.deleteUser(UUID.randomUUID())
-            }
-        }
     }
 
     @Test
@@ -298,18 +274,6 @@ class MongoUserRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `getUserById should throw Exception when when user is not admin `() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When & Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.getUserById(UUID.randomUUID())
-            }
-        }
-    }
     //endregion
 
 
@@ -383,18 +347,6 @@ class MongoUserRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `getUsers should throw Exception when when user is not admin `() {
-        runTest {
-            // Given
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When & Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                userRepository.getUsers()
-            }
-        }
-    }
     //endregion
 
 }

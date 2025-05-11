@@ -10,7 +10,6 @@ import org.example.data.BaseRepository
 import org.example.data.remote.MongoCollections
 import org.example.data.remote.dto.MongoUserDto
 import org.example.data.remote.mapper.UserMapper
-import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.repository.UserRepository
@@ -24,7 +23,6 @@ class MongoUserRepositoryImpl(
     private val usersCollection = database.getCollection<MongoUserDto>(collectionName = MongoCollections.USERS)
 
     override suspend fun createUser(user: User): User {
-        validateAdminPermission()
         return wrapInTryCatch {
             val userDto = userMapper.toDto(user)
             usersCollection.insertOne(userDto)
@@ -51,7 +49,6 @@ class MongoUserRepositoryImpl(
     }
 
     override suspend fun deleteUser(userId: UUID): User {
-        validateAdminPermission()
         return wrapInTryCatch {
             val query = eq(MongoUserDto::_id.name, userId.toString())
             val deletedUserDto = usersCollection.findOneAndDelete(query)
@@ -65,7 +62,6 @@ class MongoUserRepositoryImpl(
     }
 
     override suspend fun getUserById(userId: UUID): User {
-        validateAdminPermission()
         return wrapInTryCatch {
             val query = eq(MongoUserDto::_id.name, userId.toString())
             val userDto = usersCollection.find(query).firstOrNull()
@@ -76,17 +72,11 @@ class MongoUserRepositoryImpl(
     }
 
     override suspend fun getUsers(): List<User> {
-        validateAdminPermission()
         return wrapInTryCatch {
             val usersDto = usersCollection.find().toList()
             usersDto.map { userMapper.fromDto(it) }
         }
     }
 
-    private fun validateAdminPermission() {
-        require(SessionManger.isAdmin()) {
-            throw EiffelFlowException.AuthorizationException("Only admin can create user")
-        }
-    }
 
 }
