@@ -1,15 +1,12 @@
 package domain.usecase.user
 
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.UserRepository
+import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.user.UpdateUserUseCase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -20,6 +17,7 @@ import utils.UserMock
 class UpdateUserUseCaseTest {
 
     private val userRepository: UserRepository = mockk(relaxed = true)
+    private val hashPasswordUseCase: HashPasswordUseCase = mockk(relaxed = true)
     private lateinit var updateUserUseCase: UpdateUserUseCase
 
     @BeforeEach
@@ -27,7 +25,10 @@ class UpdateUserUseCaseTest {
         mockkObject(SessionManger)
         every { SessionManger.getUser() } returns UserMock.adminUser
         every { SessionManger.isAdmin() } returns true
-        updateUserUseCase = UpdateUserUseCase(userRepository)
+        updateUserUseCase = UpdateUserUseCase(
+            userRepository = userRepository,
+            hashPasswordUseCase = hashPasswordUseCase
+        )
     }
 
     @AfterEach
@@ -41,13 +42,17 @@ class UpdateUserUseCaseTest {
             // Given
             coEvery {
                 userRepository.updateUser(any())
-            } returns UserMock.validUser
+            } returns UserMock.adminUser
 
             // When
-            val result = updateUserUseCase.updateUser(UserMock.validUser)
+            val result = updateUserUseCase.updateUser(
+                userName = UserMock.adminUser.username,
+                currentPassword = UserMock.adminUser.password,
+                newPassword = "Updated Password"
+            )
 
             // Then
-            assertThat(result).isEqualTo(UserMock.validUser)
+            assertThat(result).isEqualTo(UserMock.adminUser)
         }
     }
 
@@ -60,7 +65,11 @@ class UpdateUserUseCaseTest {
 
             // When / Then
             val result = assertThrows<EiffelFlowException.AuthorizationException> {
-                updateUserUseCase.updateUser(UserMock.validUser)
+                updateUserUseCase.updateUser(
+                    userName = UserMock.validUser.username,
+                    currentPassword = UserMock.validUser.password,
+                    newPassword = "Updated Password"
+                )
             }
             assertThat(result.message).isEqualTo("Only admins can update users")
         }
@@ -77,7 +86,11 @@ class UpdateUserUseCaseTest {
 
             // When / Then
             val result = assertThrows<EiffelFlowException.IOException> {
-                updateUserUseCase.updateUser(UserMock.validUser)
+                updateUserUseCase.updateUser(
+                    userName = UserMock.adminUser.username,
+                    currentPassword = UserMock.adminUser.password,
+                    newPassword = "Updated Password"
+                )
             }
             assertThat(result.message).contains("User deletion failed")
         }
@@ -96,7 +109,11 @@ class UpdateUserUseCaseTest {
             } returns UserMock.validUser
             // When / Then
             val result = assertThrows<EiffelFlowException.AuthorizationException> {
-                updateUserUseCase.updateUser(UserMock.validUser)
+                updateUserUseCase.updateUser(
+                    userName = UserMock.validUser.username,
+                    currentPassword = UserMock.validUser.password,
+                    newPassword = "Updated Password"
+                )
             }
             assertThat(result.message).isEqualTo("User is not logged in")
         }
