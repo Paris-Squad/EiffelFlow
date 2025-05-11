@@ -13,7 +13,7 @@ object SessionManger {
         return user ?: throw EiffelFlowException.AuthorizationException("User is not logged in")
     }
 
-    fun isAdmin(): Boolean = user?.role == RoleType.ADMIN
+    fun isAdmin(): Boolean = getUser().role == RoleType.ADMIN
 
     fun isLoggedIn(): Boolean = user != null
 
