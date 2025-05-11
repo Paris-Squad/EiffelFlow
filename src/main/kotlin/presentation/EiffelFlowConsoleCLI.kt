@@ -33,10 +33,9 @@ class EiffelFlowConsoleCLI {
 
     fun logout(uiContainer: UIContainer) {
         uiContainer.logoutCLI.start()
-        while (SessionManger.isLoggedIn()){
-            startUI(uiContainer)
+        if (!SessionManger.isLoggedIn()) {
+            loginUI(uiContainer)
         }
-        loginUI(uiContainer)
     }
 
     fun startUI(uiContainer: UIContainer) {
@@ -61,8 +60,7 @@ class EiffelFlowConsoleCLI {
             15. Update profile
             16. Delete User
             17. View all users
-            18. view user by ID
-            19. Logout
+            18. Logout
             0. Exit
             """.trimIndent()
             )
@@ -87,15 +85,17 @@ class EiffelFlowConsoleCLI {
                 "14" -> uiContainer.getAuditLogsCLI.getAllAuditLogs()
                 "15" -> uiContainer.updateUserCLI.start()
                 "16" -> uiContainer.deleteUserCLI.start()
-                "17" -> uiContainer.getUserCLI.viewAllUsers()
-                "18" -> uiContainer.getUserCLI.displayUserById()
-                "19" -> uiContainer.logoutCLI.start()
+                "17" -> TODO("View all users")
+                "18" -> {
+                    logout(uiContainer)
+                    break
+                }
                 "0" -> {
                     println("Thanks for using our app!")
                     break
                 }
 
-                else -> println("Invalid input. Please enter a number from 0 to 8.")
+                else -> println("Invalid input. Please enter a number from 0 to 18.")
             }
 
             println("\n-------------------------------\n")

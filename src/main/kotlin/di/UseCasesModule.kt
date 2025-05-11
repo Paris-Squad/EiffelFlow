@@ -39,7 +39,7 @@ val useCasesModule = module {
     //Auth
     single { CheckCurrentSessionUseCase(get()) }
     factory { HashPasswordUseCase() }
-    single { LoginUseCase(get()) }
+    single { LoginUseCase(get(),get()) }
     single { LogoutUseCase(get()) }
     factory { ValidatePasswordUseCase() }
     factory { ValidateUserNameUseCase() }
