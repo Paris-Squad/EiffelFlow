@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.example.data.local.csvrepository.AuthRepositoryImpl
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.auth.LoginUseCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,11 +15,12 @@ import utils.UserMock
 
 class LoginUseCaseTest {
     private val authRepositoryImpl: AuthRepositoryImpl = mockk(relaxed = true)
+    private val hashPasswordUseCase: HashPasswordUseCase = mockk()
     private lateinit var loginUseCase: LoginUseCase
 
     @BeforeEach
     fun setup() {
-        loginUseCase = LoginUseCase(authRepositoryImpl)
+        loginUseCase = LoginUseCase(authRepositoryImpl, hashPasswordUseCase)
     }
 
     @Test
