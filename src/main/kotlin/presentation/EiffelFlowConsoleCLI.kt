@@ -79,7 +79,7 @@ class EiffelFlowConsoleCLI {
                 "7" -> uiContainer.createTaskCLI.start()
                 "8" -> uiContainer.editTaskCli.start()
                 "9" -> uiContainer.deleteTaskCLI.start()
-                "10" -> uiContainer.getTaskCLI.start()
+                "10" -> uiContainer.getTaskCLI.viewTasks()
                 "11" -> uiContainer.getTaskCLI.displayTaskById()
                 "12" -> uiContainer.getProjectAuditLogsCLI.getProjectAuditLogsInput()
                 "13" -> uiContainer.getTaskAuditLogsCLI.getTaskAuditLogsInput()

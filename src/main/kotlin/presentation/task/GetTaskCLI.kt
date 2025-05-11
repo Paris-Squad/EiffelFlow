@@ -1,7 +1,6 @@
 package org.example.presentation.task
 
 import kotlinx.coroutines.runBlocking
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.Task
 import org.example.domain.usecase.task.GetTaskUseCase
 import org.example.presentation.BaseCli
@@ -15,7 +14,7 @@ class GetTaskCLI(
     private val printer: Printer
 ): BaseCli(printer) {
 
-    fun start(){
+    fun viewTasks(){
         tryStartCli {
             val tasks = getTasks()
             if(tasks.isEmpty()){
@@ -35,28 +34,21 @@ class GetTaskCLI(
     }
 
     fun displayTaskById() {
-        try {
+        tryStartCli {
             printer.displayLn("Enter Task ID : ")
             val input = inputReader.readString()
 
             if (input.isNullOrBlank()) {
                 printer.displayLn("Task ID cannot be empty.")
-                return
+                return@tryStartCli
             }
 
             val taskId = UUID.fromString(input.trim())
-            val task = getProjectById(taskId)
+            val task = getTaskById(taskId)
             printer.displayLn("Task details : $task")
-
-        } catch (_: IllegalArgumentException) {
-            printer.displayLn("Invalid UUID format.")
-        } catch (e: EiffelFlowException) {
-            throw e
-        } catch (e: Exception) {
-            throw RuntimeException("An error occurred while retrieving the Task: ${e.message}", e)
         }
     }
-    private fun getProjectById(taskId: UUID): Task{
+    private fun getTaskById(taskId: UUID): Task{
         return runBlocking {
             getTaskUseCase.getTaskByID(taskId)
         }

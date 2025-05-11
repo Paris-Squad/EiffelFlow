@@ -1,4 +1,4 @@
-package presentation.task
+package presentation.presenter.task
 
 import io.mockk.coEvery
 import io.mockk.every
@@ -32,7 +32,7 @@ class GetTaskCLITest {
         coEvery { getTaskUseCase.getTasks() } returns tasks
 
         // When
-        getTaskCLI.start()
+        getTaskCLI.viewTasks()
 
         // Then
         verify {
@@ -45,7 +45,7 @@ class GetTaskCLITest {
         coEvery { getTaskUseCase.getTasks() } returns emptyList()
 
         // When
-        getTaskCLI.start()
+        getTaskCLI.viewTasks()
 
         // Then
         verify { printer.displayLn("No Tasks found.") }
@@ -59,7 +59,7 @@ class GetTaskCLITest {
         } throws RuntimeException("Unexpected")
 
         //When
-        getTaskCLI.start()
+        getTaskCLI.viewTasks()
 
         // Then
         verify {
@@ -108,16 +108,5 @@ class GetTaskCLITest {
             printer.displayLn("Enter Task ID : ")
             printer.displayLn("Task ID cannot be empty.")
         }
-    }
-    @Test
-    fun `should display error on invalid UUID format`() {
-        // Given
-        every { inputReader.readString() } returns "invalid-uuid"
-
-        // When
-        getTaskCLI.displayTaskById()
-
-        // Then
-        verify { printer.displayLn("Invalid UUID format.") }
     }
 }
