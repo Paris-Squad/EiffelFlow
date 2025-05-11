@@ -37,7 +37,6 @@ val mongoModule = module {
     single<UserRepository> {
         MongoUserRepositoryImpl(
             database = get(),
-            auditRepository = get(),
             userMapper = get()
         )
     }

@@ -12,17 +12,12 @@ import org.example.data.remote.dto.MongoUserDto
 import org.example.data.remote.mapper.UserMapper
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
-import org.example.domain.mapper.toAuditLog
-import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
-import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
-import org.example.domain.utils.getFieldChanges
 import java.util.UUID
 
 class MongoUserRepositoryImpl(
     database: MongoDatabase,
-    private val auditRepository: AuditRepository,
     private val userMapper: UserMapper
 ) : BaseRepository(), UserRepository {
 
@@ -33,7 +28,6 @@ class MongoUserRepositoryImpl(
         return wrapInTryCatch {
             val userDto = userMapper.toDto(user)
             usersCollection.insertOne(userDto)
-            logAction(user, AuditLogAction.CREATE)
             user
         }
     }
@@ -52,19 +46,6 @@ class MongoUserRepositoryImpl(
             val oldUserDto = usersCollection.findOneAndUpdate(query, updates, options)
 
             oldUserDto ?: throw EiffelFlowException.NotFoundException("User with id ${user.userId} not found")
-
-            val oldUser = userMapper.fromDto(oldUserDto)
-            val fieldChanges = oldUser.getFieldChanges(user)
-            val changedFieldsNames = fieldChanges.map { it.fieldName }
-            val oldValues = fieldChanges.map { it.oldValue }
-            val newValues = fieldChanges.map { it.newValue }
-            logAction(
-                user = user,
-                actionType = AuditLogAction.UPDATE,
-                changedField = changedFieldsNames.toString(),
-                oldValue = oldValues.toString(),
-                newValue = newValues.toString(),
-            )
             user
         }
     }
@@ -79,10 +60,6 @@ class MongoUserRepositoryImpl(
                 throw EiffelFlowException.NotFoundException("User with id $userId not found")
             }
             val deletedUser = userMapper.fromDto(deletedUserDto)
-            logAction(
-                user = deletedUser,
-                actionType = AuditLogAction.DELETE
-            )
             deletedUser
         }
     }
@@ -112,20 +89,4 @@ class MongoUserRepositoryImpl(
         }
     }
 
-    private suspend fun logAction(
-        user: User,
-        actionType: AuditLogAction,
-        changedField: String? = null,
-        oldValue: String? = null,
-        newValue: String = user.toString()
-    ) {
-        val auditLog = user.toAuditLog(
-            editor = SessionManger.getUser(),
-            actionType = actionType,
-            changedField = changedField,
-            oldValue = oldValue,
-            newValue = newValue,
-        )
-        auditRepository.createAuditLog(auditLog)
-    }
 }
