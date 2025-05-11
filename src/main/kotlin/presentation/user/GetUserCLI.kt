@@ -1,7 +1,6 @@
 package org.example.presentation.user
 
 import kotlinx.coroutines.runBlocking
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.User
 import org.example.domain.usecase.user.GetUserUseCase
 import org.example.presentation.BaseCli
@@ -15,7 +14,7 @@ class GetUserCLI(
     private val printer: Printer
 ) : BaseCli(printer) {
 
-    fun start() {
+    fun viewAllUsers() {
         tryStartCli {
             val users = getUsers()
             if (users.isEmpty()) {
@@ -36,25 +35,19 @@ class GetUserCLI(
     }
 
     fun displayUserById() {
-        try {
+        tryStartCli {
             printer.displayLn("Enter User ID : ")
             val input = inputReader.readString()
 
             if (input.isNullOrBlank()) {
                 printer.displayLn("user ID cannot be empty.")
-                return
+                return@tryStartCli
             }
 
             val userId = UUID.fromString(input.trim())
             val user = getUserById(userId)
             printer.displayLn("user details : ${user.userId} - ${user.username} - ${user.role} ")
 
-        } catch (_: IllegalArgumentException) {
-            printer.displayLn("Invalid UUID format.")
-        } catch (e: EiffelFlowException) {
-            throw e
-        } catch (e: Exception) {
-            throw RuntimeException("An error occurred while retrieving user: ${e.message}", e)
         }
     }
 

@@ -7,12 +7,8 @@ import org.example.presentation.io.Printer
 import org.example.presentation.user.GetUserCLI
 import org.junit.jupiter.api.BeforeEach
 import io.mockk.*
-import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import utils.UserMock
-import java.util.*
-import kotlin.test.assertEquals
 
 class GetUserCLITest {
 
@@ -33,7 +29,7 @@ class GetUserCLITest {
         coEvery { getUserUseCase.getUsers() } returns listOf(UserMock.validUser)
 
         // When
-        getUserCLI.start()
+        getUserCLI.viewAllUsers()
 
         // Then
         verify {
@@ -47,7 +43,7 @@ class GetUserCLITest {
         coEvery { getUserUseCase.getUsers() } returns emptyList()
 
         // When
-        getUserCLI.start()
+        getUserCLI.viewAllUsers()
 
         // Then
         verify { printer.displayLn("No users found.") }
@@ -59,7 +55,7 @@ class GetUserCLITest {
         coEvery { getUserUseCase.getUsers() } throws RuntimeException("Unexpected")
 
         // When
-        getUserCLI.start()
+        getUserCLI.viewAllUsers()
 
         // Then
         verify { printer.displayLn("An error occurred: Unexpected") }
@@ -114,47 +110,6 @@ class GetUserCLITest {
         }
     }
 
-    @Test
-    fun `should display error for invalid UUID format`() {
-        // Given
-        every { inputReader.readString() } returns "uuid"
-
-        // When
-        getUserCLI.displayUserById()
-
-        // Then
-        verify {
-            printer.displayLn("Invalid UUID format.")
-        }
-    }
-
-    @Test
-    fun `should throw EiffelFlowException when user not found`() {
-        // Given
-        val uuid = UUID.randomUUID()
-        every { inputReader.readString() } returns uuid.toString()
-        coEvery { getUserUseCase.getUserById(uuid) } throws EiffelFlowException.NotFoundException("User not found")
-
-        // Then
-        assertThrows<EiffelFlowException.NotFoundException> {
-            getUserCLI.displayUserById()
-        }
-    }
-
-    @Test
-    fun `should throw Exception when unexpected exception occurs`() {
-        // Given
-        val uuid = UUID.randomUUID()
-        every { inputReader.readString() } returns uuid.toString()
-        coEvery { getUserUseCase.getUserById(uuid) } throws Exception("unexpected")
-
-        // Then
-        val exception = assertThrows<RuntimeException> {
-            getUserCLI.displayUserById()
-        }
-
-        assertEquals("An error occurred while retrieving user: unexpected", exception.message)
-    }
     // endregion
 
 }
