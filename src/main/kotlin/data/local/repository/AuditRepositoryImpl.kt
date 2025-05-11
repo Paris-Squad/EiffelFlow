@@ -8,7 +8,7 @@ import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
-class CsvAuditRepositoryImpl(
+class AuditRepositoryImpl(
     private val auditCsvParser: AuditCsvParser,
     private val fileDataSource: FileDataSource,
     taskRepositoryProvider: Lazy<TaskRepository>

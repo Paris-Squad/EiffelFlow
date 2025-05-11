@@ -1,4 +1,4 @@
-package data.local.csvrepository
+package data.local.repository
 
 import com.google.common.truth.Truth.assertThat
 
@@ -12,24 +12,24 @@ import org.junit.jupiter.api.Test
 import utils.TaskMock
 import java.io.IOException
 import java.util.UUID
-import org.example.data.local.csvrepository.CsvTaskRepositoryImpl
+import org.example.data.local.csvrepository.TaskRepositoryImpl
 import org.example.data.local.FileDataSource
 import org.example.data.local.parser.TaskCsvParser
 import org.example.domain.exception.EiffelFlowException
 import org.junit.jupiter.api.assertThrows
 
 
-class CsvTaskRepositoryImplTest {
+class TaskRepositoryImplTest {
 
     private val fileDataSource: FileDataSource = mockk(relaxed = true)
     private val taskMapper: TaskCsvParser = mockk(relaxed = true)
-    private lateinit var taskRepository: CsvTaskRepositoryImpl
+    private lateinit var taskRepository: TaskRepositoryImpl
 
     private val changedField = "title"
 
     @BeforeEach
     fun setUp() {
-        taskRepository = CsvTaskRepositoryImpl(
+        taskRepository = TaskRepositoryImpl(
             taskCsvParser = taskMapper,
             fileDataSource = fileDataSource
         )

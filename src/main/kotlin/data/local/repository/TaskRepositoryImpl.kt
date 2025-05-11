@@ -8,7 +8,7 @@ import org.example.domain.model.Task
 import org.example.domain.repository.TaskRepository
 import java.util.UUID
 
-class CsvTaskRepositoryImpl(
+class TaskRepositoryImpl(
     private val taskCsvParser: TaskCsvParser,
     private val fileDataSource: FileDataSource
 ) : BaseRepository(), TaskRepository {
