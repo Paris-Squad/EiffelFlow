@@ -2,13 +2,17 @@ package org.example.domain.usecase.user
 
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.mapper.toAuditLog
+import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 
 class UpdateUserUseCase(
     private val userRepository: UserRepository,
-    private val hashPasswordUseCase: HashPasswordUseCase
+    private val hashPasswordUseCase: HashPasswordUseCase,
+    private val auditRepository: AuditRepository
 ) {
     suspend fun updateUser(
         userName: String,
@@ -27,7 +31,16 @@ class UpdateUserUseCase(
             password = hashPasswordUseCase.hashPassword(newPassword),
             role = currentUser.role
         )
-        return userRepository.updateUser(updatedUser)
+        val result = userRepository.updateUser(updatedUser)
+        val auditLog = updatedUser.toAuditLog(
+            editor = currentUser,
+            actionType = AuditLogAction.UPDATE,
+            changedField = "user",
+            oldValue = currentUser.toString(),
+            newValue = updatedUser.toString()
+            )
+            auditRepository.createAuditLog(auditLog)
+        return result
     }
 
     private fun verifySessionActive() {

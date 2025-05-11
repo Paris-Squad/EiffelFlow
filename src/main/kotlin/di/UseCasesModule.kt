@@ -11,6 +11,7 @@ import org.example.domain.usecase.project.UpdateProjectUseCase
 import org.example.domain.usecase.task.CreateTaskUseCase
 import org.example.domain.usecase.task.DeleteTaskUseCase
 import org.example.domain.usecase.task.EditTaskUseCase
+import org.example.domain.usecase.task.GetTaskUseCase
 import org.example.domain.usecase.user.CreateUserUseCase
 import org.example.domain.usecase.user.DeleteUserUseCase
 import org.example.domain.usecase.user.UpdateUserUseCase
@@ -27,6 +28,7 @@ val useCasesModule = module {
     single { CreateTaskUseCase(get(), get()) }
     single { DeleteTaskUseCase(get(), get()) }
     single { EditTaskUseCase(get(), get()) }
+    single { GetTaskUseCase(get()) }
 
     //Audit
     single { GetProjectAuditUseCase(get()) }
@@ -42,7 +44,7 @@ val useCasesModule = module {
     factory { ValidateUserNameUseCase() }
 
     //User
-    factory { CreateUserUseCase(get(), get()) }
-    factory { DeleteUserUseCase(get()) }
-    factory { UpdateUserUseCase(get(), get()) }
+    factory { CreateUserUseCase(get(), get(),get()) }
+    factory { DeleteUserUseCase(get(),get()) }
+    factory { UpdateUserUseCase(get(), get(),get()) }
 }

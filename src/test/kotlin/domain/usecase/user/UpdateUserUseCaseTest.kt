@@ -5,6 +5,7 @@ import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.user.UpdateUserUseCase
@@ -19,6 +20,8 @@ class UpdateUserUseCaseTest {
     private val userRepository: UserRepository = mockk(relaxed = true)
     private val hashPasswordUseCase: HashPasswordUseCase = mockk(relaxed = true)
     private lateinit var updateUserUseCase: UpdateUserUseCase
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
+
 
     @BeforeEach
     fun setUp() {
@@ -27,7 +30,8 @@ class UpdateUserUseCaseTest {
         every { SessionManger.isLoggedIn() } returns true
         updateUserUseCase = UpdateUserUseCase(
             userRepository = userRepository,
-            hashPasswordUseCase = hashPasswordUseCase
+            hashPasswordUseCase = hashPasswordUseCase,
+            auditRepository = auditRepository
         )
     }
 

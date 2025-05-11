@@ -9,6 +9,7 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.test.runTest
 import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.user.DeleteUserUseCase
 import org.junit.jupiter.api.AfterEach
@@ -21,13 +22,15 @@ class DeleteUserUseCaseTest {
 
     private val userRepository: UserRepository = mockk(relaxed = true)
     private lateinit var deleteUserUseCase: DeleteUserUseCase
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
+
 
     @BeforeEach
     fun setUp() {
         mockkObject(SessionManger)
         every { SessionManger.getUser() } returns UserMock.adminUser
         every { SessionManger.isAdmin() } returns true
-        deleteUserUseCase = DeleteUserUseCase(userRepository)
+        deleteUserUseCase = DeleteUserUseCase(userRepository = userRepository, auditRepository = auditRepository)
     }
 
     @AfterEach

@@ -11,6 +11,7 @@ import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.model.RoleType
 import org.example.domain.model.User
+import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 import org.example.domain.usecase.user.CreateUserUseCase
@@ -25,6 +26,8 @@ class RegisterUseCaseTest {
 
     private val userRepository: UserRepository = mockk(relaxed = true)
     private val hashPasswordUseCase: HashPasswordUseCase = mockk(relaxed = true)
+    private val auditRepository: AuditRepository = mockk(relaxed = true)
+
 
     private lateinit var registerUseCase: CreateUserUseCase
 
@@ -34,7 +37,8 @@ class RegisterUseCaseTest {
         every { SessionManger.getUser() } returns adminUser
         every { SessionManger.isAdmin() } returns true
         registerUseCase = CreateUserUseCase(
-            userRepository, hashPasswordUseCase
+            userRepository, hashPasswordUseCase,
+            auditRepository = auditRepository
         )
     }
 
@@ -44,7 +48,7 @@ class RegisterUseCaseTest {
     }
 
     @Test
-    fun `register with admin caller role should succeed when all validations pass`() {
+    fun `register with admin role should succeed when all validations pass`() {
         runTest {
             // Given
             val createdUser = User(username = username, password = hashedPassword, role = mateRole)
@@ -91,6 +95,20 @@ class RegisterUseCaseTest {
                 registerUseCase.register(username, password, mateRole)
             }
             assertThat(exception.message).contains("User creation failed")
+        }
+    }
+
+    @Test
+    fun `register should throw AuthorizationException when user is not admin`() {
+        runTest {
+            // Given
+            every { SessionManger.isAdmin() } returns false
+
+            // When / Then
+            val exception = assertThrows<EiffelFlowException.AuthorizationException> {
+                registerUseCase.register(username, password, mateRole)
+            }
+            assertThat(exception.message).contains("Only admin can create or update user")
         }
     }
 
