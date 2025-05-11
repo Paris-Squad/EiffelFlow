@@ -1,4 +1,4 @@
-package data.local.csvrepository
+package data.local.repository
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import kotlinx.coroutines.test.runTest
-import org.example.data.local.csvrepository.CsvUserRepositoryImpl
+import org.example.data.local.csvrepository.UserRepositoryImpl
 import org.example.data.local.FileDataSource
 import org.example.data.utils.SessionManger
 import org.example.data.local.parser.UserCsvParser
@@ -30,15 +30,15 @@ import utils.UserMock.userToDelete
 import utils.UserMock.validUser
 import java.util.*
 
-class CsvUserRepositoryImplTest {
+class UserRepositoryImplTest {
     private val userMapper: UserCsvParser = mockk(relaxed = true)
     private val csvManager: FileDataSource = mockk(relaxed = true)
-    private lateinit var userRepository: CsvUserRepositoryImpl
+    private lateinit var userRepository: UserRepositoryImpl
 
     @BeforeEach
     fun setUp() {
         mockkObject(SessionManger)
-        userRepository = CsvUserRepositoryImpl(userMapper, csvManager)
+        userRepository = UserRepositoryImpl(userMapper, csvManager)
     }
 
     @AfterEach

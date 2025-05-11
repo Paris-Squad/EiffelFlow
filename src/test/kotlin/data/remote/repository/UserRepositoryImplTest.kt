@@ -1,11 +1,10 @@
-package data.remote.mongorepository
+package data.remote.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.mongodb.MongoException
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import data.mongorepository.MongoUserRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -25,7 +24,7 @@ import org.junit.jupiter.api.assertThrows
 import utils.UserMock
 import java.util.*
 
-class MongoUserRepositoryImplTest {
+class UserRepositoryImplTest {
 
     private val sessionManger: SessionManger = mockk(relaxed = true)
     private val userMapper: UserMapper = mockk(relaxed = true)
@@ -41,7 +40,7 @@ class MongoUserRepositoryImplTest {
             mockDatabase.getCollection<MongoUserDto>(MongoCollections.USERS)
         } returns usersCollection
         every { sessionManger.getUser() } returns UserMock.adminUser
-        userRepository = MongoUserRepositoryImpl(
+        userRepository = UserRepositoryImpl(
             database = mockDatabase,
             userMapper = userMapper
         )

@@ -8,7 +8,7 @@ import org.example.domain.model.Project
 import org.example.domain.repository.ProjectRepository
 import java.util.UUID
 
-class CsvProjectRepositoryImpl(
+class ProjectRepositoryImpl(
     private val projectCsvParser: ProjectCsvParser,
     private val fileDataSource: FileDataSource
 ) : BaseRepository(), ProjectRepository {

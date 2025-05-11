@@ -1,11 +1,10 @@
-package data.remote.mongorepository
+package data.remote.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.mongodb.MongoException
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import data.mongorepository.MongoAuthRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -45,7 +44,7 @@ class MongoAuthRepositoryImplTest {
             mockDatabase.getCollection<User>(MongoCollections.USERS)
         } returns usersCollection
 
-        authRepository = MongoAuthRepositoryImpl(
+        authRepository = AuthRepositoryImpl(
             database = mockDatabase,
             userMapper = userMapper
         )

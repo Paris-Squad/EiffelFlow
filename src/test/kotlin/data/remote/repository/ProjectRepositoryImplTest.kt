@@ -1,11 +1,10 @@
-package data.remote.mongorepository
+package data.remote.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.mongodb.MongoException
 import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
-import data.mongorepository.MongoProjectRepositoryImpl
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -29,7 +28,7 @@ import utils.ProjectsMock
 import utils.UserMock
 import java.util.UUID
 
-class MongoProjectRepositoryImplTest {
+class ProjectRepositoryImplTest {
 
     private val projectMapper : ProjectMapper= mockk(relaxed = true)
     private val sessionManger: SessionManger = mockk(relaxed = true)
@@ -49,7 +48,7 @@ class MongoProjectRepositoryImplTest {
 
         every { sessionManger.getUser() } returns UserMock.adminUser
 
-        projectRepository = MongoProjectRepositoryImpl(
+        projectRepository = ProjectRepositoryImpl(
            database =  mockDatabase,
             projectMapper = projectMapper
         )

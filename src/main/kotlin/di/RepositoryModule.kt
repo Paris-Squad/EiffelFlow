@@ -1,21 +1,38 @@
 package org.example.di
-
-import org.example.data.local.csvrepository.CsvAuditRepositoryImpl
-import org.example.data.local.csvrepository.CsvAuthRepositoryImpl
-import org.example.data.local.csvrepository.CsvProjectRepositoryImpl
-import org.example.data.local.csvrepository.CsvTaskRepositoryImpl
-import org.example.data.local.csvrepository.CsvUserRepositoryImpl
-import org.example.data.local.FileDataSource
-import org.example.data.local.parser.AuditCsvParser
-import org.example.data.local.parser.ProjectCsvParser
-import org.example.data.local.parser.TaskCsvParser
-import org.example.data.local.parser.UserCsvParser
-import org.example.domain.repository.*
+import data.remote.repository.AuditRepositoryImpl
+import data.remote.repository.AuthRepositoryImpl
+import data.remote.repository.ProjectRepositoryImpl
+import data.remote.repository.TaskRepositoryImpl
+import data.remote.repository.UserRepositoryImpl
+import org.example.domain.repository.AuditRepository
+import org.example.domain.repository.AuthRepository
+import org.example.domain.repository.ProjectRepository
+import org.example.domain.repository.TaskRepository
+import org.example.domain.repository.UserRepository
 import org.koin.dsl.module
-import java.io.File
 
-val csvModule = module {
+val repositoryModule = module {
     single<AuditRepository> {
+        AuditRepositoryImpl(
+            database = get(),
+            taskRepositoryProvider = lazy { get() },
+            auditLogMapper = get()
+        )
+    }
+    single<ProjectRepository> {
+        ProjectRepositoryImpl(database = get(), projectMapper = get())
+    }
+    single<TaskRepository> {
+        TaskRepositoryImpl(database = get(), taskMapper = get())
+    }
+    single<UserRepository> {
+        UserRepositoryImpl(database = get(), userMapper = get())
+    }
+    single<AuthRepository> {
+        AuthRepositoryImpl(database = get(), userMapper = get())
+    }
+
+    /*single<AuditRepository> {
         CsvAuditRepositoryImpl(
             auditCsvParser = get<AuditCsvParser>(),
             fileDataSource = FileDataSource(File(CsvAuditRepositoryImpl.FILE_NAME)),
@@ -46,5 +63,5 @@ val csvModule = module {
             usersFileDataSource = FileDataSource(File(CsvUserRepositoryImpl.FILE_NAME)),
             userCsvParser = get()
         )
-    }
+    }*/
 }
