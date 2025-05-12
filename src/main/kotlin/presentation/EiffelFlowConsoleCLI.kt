@@ -13,11 +13,11 @@ class EiffelFlowConsoleCLI {
         println("Welcome to the EiffelFlow.\nPlease wait Checking the current session...")
 
         runBlocking {
-           val  currentSession = currentSessionUseCase.getCurrentSessionUser()
+            val currentSession = currentSessionUseCase.getCurrentSessionUser()
             if (currentSession == null) {
                 println("You are not logged in. Please login First.")
                 loginUI(uiContainer)
-            }else{
+            } else {
                 println("Welcome back ${currentSession.username}")
                 startUI(uiContainer)
             }
@@ -25,7 +25,7 @@ class EiffelFlowConsoleCLI {
     }
 
     fun loginUI(uiContainer: UIContainer) {
-        while (SessionManger.isLoggedIn().not()){
+        while (SessionManger.isLoggedIn().not()) {
             uiContainer.loginCLI.start()
         }
         startUI(uiContainer)
@@ -33,7 +33,7 @@ class EiffelFlowConsoleCLI {
 
     fun logout(uiContainer: UIContainer) {
         uiContainer.logoutCLI.start()
-        while (SessionManger.isLoggedIn()){
+        while (SessionManger.isLoggedIn()) {
             startUI(uiContainer)
         }
         loginUI(uiContainer)
@@ -61,8 +61,9 @@ class EiffelFlowConsoleCLI {
             15. Update profile
             16. Delete User
             17. View all users
-            18. view user by ID
-            19. Logout
+            18. View projects in swimming lanes
+            19. View user by ID
+            20. Logout
             0. Exit
             """.trimIndent()
             )
@@ -88,14 +89,15 @@ class EiffelFlowConsoleCLI {
                 "15" -> uiContainer.updateUserCLI.start()
                 "16" -> uiContainer.deleteUserCLI.start()
                 "17" -> uiContainer.getUserCLI.viewAllUsers()
-                "18" -> uiContainer.getUserCLI.displayUserById()
-                "19" -> uiContainer.logoutCLI.start()
+                "18" -> uiContainer.showProjectSwimLanesCLI.showProjectsBySwimLanes()
+                "19" -> uiContainer.getUserCLI.displayUserById()
+                "20" -> uiContainer.logoutCLI.start()
                 "0" -> {
                     println("Thanks for using our app!")
                     break
                 }
 
-                else -> println("Invalid input. Please enter a number from 0 to 8.")
+                else -> println("Invalid input. Please enter a number from 0 to 20.")
             }
 
             println("\n-------------------------------\n")

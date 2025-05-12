@@ -16,6 +16,7 @@ import org.example.presentation.io.Printer
 import org.example.presentation.project.CreateProjectCLI
 import org.example.presentation.project.DeleteProjectCLI
 import org.example.presentation.project.GetProjectCLI
+import org.example.presentation.project.ShowProjectSwimLanesCLI
 import org.example.presentation.project.UpdateProjectCLI
 import org.example.presentation.task.CreateTaskCLI
 import org.example.presentation.task.DeleteTaskCLI
@@ -55,6 +56,7 @@ val uiModule = module {
     singleOf(::DeleteProjectCLI)
     singleOf(::GetProjectCLI)
     singleOf(::UpdateProjectCLI)
+    singleOf(::ShowProjectSwimLanesCLI)
 
     //Task
     singleOf(::CreateTaskCLI)
