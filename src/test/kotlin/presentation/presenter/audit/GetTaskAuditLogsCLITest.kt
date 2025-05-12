@@ -1,4 +1,4 @@
-package presentation.audit
+package presentation.presenter.audit
 
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
@@ -9,10 +9,8 @@ import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import utils.MockAuditLog
-import java.util.*
+import java.util.UUID
 
 class GetTaskAuditLogsCLITest {
     private val getTaskAuditLogsUseCase: GetTaskAuditUseCase = mockk()
@@ -55,21 +53,19 @@ class GetTaskAuditLogsCLITest {
     }
 
 
-    @ParameterizedTest
-    @ValueSource(strings = ["", " ", "null"])
-    fun `should show error when Task ID is empty or blank`(input: String) {
-        // Given
-        every { inputReader.readString() } returns if (input == "null") null else input
-        every { printer.displayLn(any()) } just Runs
+    @Test
+    fun `should print error message when Task ID is empty or null or blank`() {
 
-        // When
-        cli.start()
-
-        // Then
-        verify {
-            printer.displayLn("Task ID cannot be empty. Please provide a valid UUID.")
+        listOf(null, "", "   ").forEach {
+            // Given
+            every { inputReader.readString() } returns it
+            every { printer.displayLn(any()) } just Runs
+            // When
+            cli.start()
+            // Then
+            verify { printer.displayLn("Task ID cannot be empty. Please provide a valid UUID.") }
+            clearMocks(printer)
         }
-        coEvery { getTaskAuditLogsUseCase.getTaskAuditLogsById(any()) }
     }
 
 
