@@ -90,6 +90,7 @@ class EiffelFlowConsoleCLI {
                     logout(uiContainer)
                     break
                 }
+                "19" -> uiContainer.manageProjectStateCLI.start()
                 "0" -> {
                     println("Thanks for using our app!")
                     break
