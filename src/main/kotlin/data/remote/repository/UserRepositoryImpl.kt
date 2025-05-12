@@ -31,7 +31,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun updateUser(user: User): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val userDto = userMapper.toDto(user)
             val updates = Updates.combine(
                 Updates.set(MongoUserDto::username.name, userDto.username),
