@@ -14,4 +14,6 @@ abstract class EiffelFlowException(message: String?) : Exception(message) {
     class AuthorizationException(message: String?) : EiffelFlowException(message)
 
     class NotFoundException(message: String?) : EiffelFlowException(message)
+
+    class StateAlreadyExist(message: String?) : EiffelFlowException(message)
 }
