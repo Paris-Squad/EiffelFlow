@@ -54,7 +54,7 @@ class GetTaskAuditLogsCLITest {
 
 
     @Test
-    fun `should print error message when project ID is empty or null or blank`() {
+    fun `should print error message when Task ID is empty or null or blank`() {
 
         listOf(null, "", "   ").forEach {
             // Given
