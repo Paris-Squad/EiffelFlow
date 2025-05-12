@@ -1,13 +1,12 @@
 package org.example.presentation.audit
 
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.LocalDateTime
-import org.example.domain.model.AuditLogAction
+import org.example.domain.model.AuditLog
 import org.example.domain.usecase.audit.GetTaskAuditUseCase
 import org.example.presentation.BaseCli
+import org.example.presentation.helper.extensions.toFormattedDateTime
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
-import org.jetbrains.annotations.VisibleForTesting
 import java.util.UUID
 
 class GetTaskAuditLogsCLI(
@@ -15,7 +14,7 @@ class GetTaskAuditLogsCLI(
     private val inputReader: InputReader,
     private val printer: Printer
 ) : BaseCli(printer) {
-    fun getTaskAuditLogsInput() {
+    fun start() {
         tryStartCli {
             printer.displayLn("Enter Task ID to retrieve audit logs:")
             val taskIdInput = inputReader.readString()
@@ -25,19 +24,14 @@ class GetTaskAuditLogsCLI(
                 return@tryStartCli
             }
 
-            val taskId = try {
-                UUID.fromString(taskIdInput)
-            } catch (e: IllegalArgumentException){
-                printer.displayLn("Invalid Task ID format. Please enter a valid UUID.")
-                return@tryStartCli
-            }
+            val taskId = UUID.fromString(taskIdInput)
 
-            displayAuditLogsForTask(taskId)
+            getAuditLogsForTask(taskId)
 
         }
     }
 
-   private fun displayAuditLogsForTask(taskId: UUID) {
+    private fun getAuditLogsForTask(taskId: UUID) {
         runBlocking {
             val taskAuditLogs = getTaskAuditLogsUseCase.getTaskAuditLogsById(taskId)
             if (taskAuditLogs.isEmpty()) {
@@ -45,35 +39,26 @@ class GetTaskAuditLogsCLI(
                 return@runBlocking
             }
 
-            taskAuditLogs.forEach { auditLog ->
-                val actionType = when (auditLog.actionType) {
-                    AuditLogAction.CREATE -> "Created"
-                    AuditLogAction.UPDATE -> "Updated"
-                    AuditLogAction.DELETE -> "Deleted"
-                }
+            printer.displayLn("=== Audit Logs on Task: $taskId ===")
 
-                printer.displayLn("[Task] $actionType ${auditLog.itemName}")
-                printer.displayLn("  Audit ID     : ${auditLog.auditId}")
-                printer.displayLn("  Date         : ${auditLog.auditTime.date} / Time: ${formatTime(auditLog.auditTime)}")
-                printer.displayLn("  Modified By  : ${auditLog.editorName}")
-                printer.displayLn("  Field Changed: ${auditLog.changedField ?: "Not Available"}")
-                printer.displayLn("    Old        : ${auditLog.oldValue ?: "Not Available"}")
-                printer.displayLn("    New        : ${auditLog.newValue ?: "Not Available"}")
-                printer.displayLn("-".repeat(50))
-            }
+            taskAuditLogs.forEach { auditLog -> displayTaskAuditDetails(auditLog) }
+
+            printer.displayLn("=== End of Audit Logs ===")
         }
     }
 
-    @VisibleForTesting
-    internal fun formatTime(time: LocalDateTime): String {
-        val hour = time.hour
-        val minute = time.minute
-        val amPm = if (hour >= 12) "PM" else "AM"
-        val displayHour = when {
-            hour == 0 -> 12
-            hour > 12 -> hour - 12
-            else -> hour
-        }
-        return "$displayHour:${minute.toString().padStart(2, '0')} $amPm"
+
+    private fun displayTaskAuditDetails(auditLog: AuditLog) {
+        val paddedLabel = { label: String -> label.padEnd(15) }
+
+        printer.displayLn("[Task] ${auditLog.actionType.actionName} '${auditLog.itemName}'")
+        printer.displayLn("  ${paddedLabel("Audit ID")} : ${auditLog.auditId}")
+        printer.displayLn("  ${paddedLabel("Date & Time")} : ${auditLog.auditTime.toFormattedDateTime()}")
+        printer.displayLn("  ${paddedLabel("Modified By")} : ${auditLog.editorName}")
+        printer.displayLn("  ${paddedLabel("Field Changed")} : ${auditLog.changedField ?: "Not Available"}")
+        printer.displayLn("  ${paddedLabel("Old")} : ${auditLog.oldValue ?: "Not Available"}")
+        printer.displayLn("  ${paddedLabel("New")} : ${auditLog.newValue ?: "Not Available"}")
+        printer.displayLn("-".repeat(50))
     }
+
 }
