@@ -34,25 +34,22 @@ class UserRepositoryImplTest {
     private val userMapper: UserCsvParser = mockk(relaxed = true)
     private val csvManager: FileDataSource = mockk(relaxed = true)
     private lateinit var userRepository: UserRepositoryImpl
+    private val sessionManger: SessionManger = mockk(relaxed = true)
+
 
     @BeforeEach
     fun setUp() {
-        mockkObject(SessionManger)
         userRepository = UserRepositoryImpl(userMapper, csvManager)
     }
 
-    @AfterEach
-    fun tearDown() {
-        unmockkObject(SessionManger)
-    }
 
     //region createUser
     @Test
     fun `createUser should return the created user on success`() {
         runTest {
             // Given
-            every { SessionManger.isAdmin() } returns true
-            every { SessionManger.getUser() } returns adminUser
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { userMapper.serialize(validUser) } returns USER_CSV
             every { csvManager.readLinesFromFile() } returns emptyList()
             every { csvManager.writeLinesToFile(USER_CSV) } returns Unit
@@ -68,8 +65,8 @@ class UserRepositoryImplTest {
     fun `createUser should throw Exception when file operation fails`() {
         runTest {
             // Given
-            every { SessionManger.isAdmin() } returns true
-            every { SessionManger.getUser() } returns adminUser
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { userMapper.serialize(validUser) } returns USER_CSV
             every { csvManager.readLinesFromFile() } returns emptyList()
             every { csvManager.writeLinesToFile(USER_CSV) } throws fileNotFoundException
@@ -86,7 +83,7 @@ class UserRepositoryImplTest {
     fun `createUser should throw Exception when username is already taken`() {
         runTest{
         // Given
-        every { SessionManger.isAdmin() } returns true
+        every { sessionManger.isAdmin() } returns true
         every { csvManager.readLinesFromFile() } returns listOf("user1")
 
         val existingUserWithSameUsername = User(
@@ -115,7 +112,7 @@ class UserRepositoryImplTest {
     fun `updateUser should return the updated user on success`() {
         runTest {
             // Given
-            every { SessionManger.getUser() } returns adminUser
+            every { sessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns existingUser
             every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
@@ -149,7 +146,7 @@ class UserRepositoryImplTest {
     fun `updateUser should return Exception when file operation fails`() {
         runTest {
             // Given
-            every { SessionManger.getUser() } returns adminUser
+            every { sessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns existingUser
             every { userMapper.serialize(existingUser) } returns OLD_USER_CSV
@@ -172,8 +169,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should return the deleted user on success`() {
         runTest {
             // Given
-            every { SessionManger.isAdmin() } returns true
-            every { SessionManger.getUser() } returns adminUser
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns userToDelete
             every { userMapper.serialize(userToDelete) } returns USER_CSV
@@ -192,8 +189,8 @@ class UserRepositoryImplTest {
         runTest{
         //Given
         val nonExistentUserId = UUID.randomUUID()
-        every { SessionManger.isAdmin() } returns true
-        every { SessionManger.getUser() } returns adminUser
+        every { sessionManger.isAdmin() } returns true
+        every { sessionManger.getUser() } returns adminUser
         every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
         every { userMapper.parseCsvLine(any()) } returns validUser
 
@@ -208,8 +205,8 @@ class UserRepositoryImplTest {
     fun `deleteUser should throw Exception when file operation fails`() {
         runTest {
             // Given
-            every { SessionManger.isAdmin() } returns true
-            every { SessionManger.getUser() } returns adminUser
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { csvManager.readLinesFromFile() } returns listOf("line1", "line2")
             every { userMapper.parseCsvLine(any()) } returns userToDelete
             every { userMapper.serialize(userToDelete) } returns USER_CSV

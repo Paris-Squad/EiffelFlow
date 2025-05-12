@@ -15,7 +15,7 @@ class ProjectRepositoryImpl(
 
     @Throws(EiffelFlowException::class)
     override suspend fun createProject(project: Project): Project {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val csvLine = projectCsvParser.serialize(project)
             fileDataSource.writeLinesToFile(csvLine)
             project
@@ -24,7 +24,7 @@ class ProjectRepositoryImpl(
 
     @Throws(EiffelFlowException::class)
     override suspend fun updateProject(project: Project, oldProject: Project, changedField: String): Project {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val projectCsv = projectCsvParser.serialize(project)
             val oldProjectCsv = projectCsvParser.serialize(oldProject)
             fileDataSource.updateLinesToFile(projectCsv, oldProjectCsv)
@@ -34,7 +34,7 @@ class ProjectRepositoryImpl(
 
     @Throws(EiffelFlowException::class)
     override suspend fun deleteProject(projectId: UUID): Project {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val projects = getProjects()
 
             val projectToDelete = projects.find { it.projectId == projectId }
@@ -48,7 +48,7 @@ class ProjectRepositoryImpl(
 
     @Throws(EiffelFlowException::class)
     override suspend fun getProjects(): List<Project> {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
         }
@@ -56,7 +56,7 @@ class ProjectRepositoryImpl(
 
     @Throws(EiffelFlowException::class)
     override suspend fun getProjectById(projectId: UUID): Project {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             fileDataSource.readLinesFromFile()
                 .map(projectCsvParser::parseCsvLine)
                 .firstOrNull { it.projectId == projectId }

@@ -55,11 +55,11 @@ class AuditRepositoryImplTest {
     fun `createAuditLog should return failure when an exception is thrown`() {
         runTest {
             // Given
-            val exception = RuntimeException("Failed to write to file")
+            val exception = EiffelFlowException.IOException("Failed to write to file")
             every { csvStorageManager.writeLinesToFile(any()) } throws exception
 
             // When / then
-            assertThrows<RuntimeException> {
+            assertThrows<EiffelFlowException.IOException> {
                 auditRepository.createAuditLog(AUDIT_LOG)
             }
         }
@@ -226,10 +226,10 @@ class AuditRepositoryImplTest {
     fun `getProjectAuditLogById should throw when RuntimeException unexpected exception is thrown`() {
         runTest {
             // Given
-            every { csvStorageManager.readLinesFromFile() } throws RuntimeException("unexpected")
+            every { csvStorageManager.readLinesFromFile() } throws EiffelFlowException.IOException("unexpected")
 
             // When / Then
-            assertThrows<RuntimeException> {
+            assertThrows<EiffelFlowException.IOException> {
                 auditRepository.getProjectAuditLogById(UUID.randomUUID())
             }
         }

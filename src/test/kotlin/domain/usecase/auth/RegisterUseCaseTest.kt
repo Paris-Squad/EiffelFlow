@@ -98,20 +98,6 @@ class RegisterUseCaseTest {
         }
     }
 
-    @Test
-    fun `register should throw AuthorizationException when user is not admin`() {
-        runTest {
-            // Given
-            every { SessionManger.isAdmin() } returns false
-
-            // When / Then
-            val exception = assertThrows<EiffelFlowException.AuthorizationException> {
-                registerUseCase.register(username, password, mateRole)
-            }
-            assertThat(exception.message).contains("Only admin can create or update user")
-        }
-    }
-
     companion object {
         private const val username = "testuser"
         private const val password = "P@ssw0rd"

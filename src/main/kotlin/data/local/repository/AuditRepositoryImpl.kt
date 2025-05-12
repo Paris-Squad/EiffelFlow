@@ -16,7 +16,7 @@ class AuditRepositoryImpl(
     private val taskRepository: TaskRepository by taskRepositoryProvider
 
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
-        return wrapInTryCatch {
+        return executeSafely {
             val line = auditCsvParser.serialize(auditLog)
             fileDataSource.writeLinesToFile(line)
             auditLog
@@ -24,13 +24,13 @@ class AuditRepositoryImpl(
     }
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             getAuditLogs().filter { it.itemId == taskId }.sortedByDescending { it.auditTime }
         }
     }
 
     override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             val auditLogs = getAuditLogs()
 
             val auditLogsForProjectTasks = getAuditProjectTasks(projectId, auditLogs)
@@ -47,7 +47,7 @@ class AuditRepositoryImpl(
     private suspend fun getAuditProjectTasks(
         projectId: UUID, auditLogs: List<AuditLog>
     ): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             val tasksResult = taskRepository.getTasks()
             val projectTaskIds = tasksResult.filter { it.projectId == projectId }.map { it.taskId }.toSet()
 
@@ -57,7 +57,7 @@ class AuditRepositoryImpl(
     }
 
     override suspend fun getAuditLogs(): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             val lines = fileDataSource.readLinesFromFile()
 
             lines.mapNotNull { line ->

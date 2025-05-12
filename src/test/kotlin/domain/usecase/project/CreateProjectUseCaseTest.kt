@@ -67,19 +67,4 @@ class CreateProjectUseCaseTest {
         }
     }
 
-    @Test
-    fun `should throw AuthorizationException when user is not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.isAdmin() } returns false
-
-            // When / Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                createProjectUseCase.createProject(ProjectsMock.CORRECT_PROJECT)
-            }
-
-            coVerify(exactly = 0) { projectRepository.createProject(any()) }
-            coVerify(exactly = 0) { auditRepository.createAuditLog(any()) }
-        }
-    }
 }
