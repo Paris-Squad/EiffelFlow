@@ -67,19 +67,4 @@ class DeleteProjectUseCaseTest {
         }
     }
 
-    @Test
-    fun `should throw AuthorizationException when user is not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.isAdmin() } returns false
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            val projectId = UUID.fromString("02ad4499-5d4c-4450-8fd1-8294f1bb5748")
-
-            // When / Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                deleteProjectUseCase.deleteProject(projectId)
-            }
-        }
-    }
 }

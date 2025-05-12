@@ -12,10 +12,12 @@ import io.mockk.runs
 import kotlinx.coroutines.test.runTest
 import org.example.data.local.FileDataSource
 import org.example.data.local.parser.ProjectCsvParser
+import org.example.data.utils.SessionManger
 import org.example.domain.exception.EiffelFlowException
 import org.example.domain.repository.ProjectRepository
 import org.junit.jupiter.api.assertThrows
 import utils.ProjectsMock
+import utils.UserMock.adminUser
 import java.io.IOException
 
 class ProjectRepositoryImplTest {
@@ -24,6 +26,8 @@ class ProjectRepositoryImplTest {
     private val csvStorageManager: FileDataSource = mockk(relaxed = true)
     private val projectMapper: ProjectCsvParser = mockk(relaxed = true)
     private val changedField = "projectDescription"
+    private val sessionManger: SessionManger = mockk(relaxed = true)
+
 
     @BeforeEach
     fun setUp() {
@@ -38,6 +42,8 @@ class ProjectRepositoryImplTest {
     fun `createProject should return project when creation is successful`() {
         runTest {
             // Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { projectMapper.serialize(ProjectsMock.CORRECT_PROJECT) } returns ProjectsMock.CORRECT_CSV_STRING_LINE
             every { csvStorageManager.writeLinesToFile(ProjectsMock.CORRECT_CSV_STRING_LINE) } returns Unit
 
@@ -53,6 +59,8 @@ class ProjectRepositoryImplTest {
     fun `createProject should throw IOException when projectRepository fails`() {
         runTest{
             //Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every {
                 projectMapper.serialize(ProjectsMock.CORRECT_PROJECT)
             } throws Exception("Project creation failed")
@@ -74,6 +82,8 @@ class ProjectRepositoryImplTest {
     fun `updateProject should return success if the project is updated`() {
         runTest {
             // Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { projectMapper.serialize(ProjectsMock.CORRECT_PROJECT) } returns ProjectsMock.CORRECT_CSV_STRING_LINE
             every { projectMapper.serialize(ProjectsMock.updatedProject) } returns ProjectsMock.UPDATED_PROJECT_CSV
             every {
@@ -101,6 +111,8 @@ class ProjectRepositoryImplTest {
     fun `updateProject should throw IOException when fileDataSource throws exception`() {
         runTest {
             // Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             val exception = IOException("File write error")
 
             every {
@@ -134,6 +146,8 @@ class ProjectRepositoryImplTest {
     fun `deleteProject should return the deleted project`() {
         runTest {
             //  Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every {
                 csvStorageManager.readLinesFromFile()
             } returns ProjectsMock.CORRECT_CSV_STRING_LINE.split("\n")
@@ -155,6 +169,8 @@ class ProjectRepositoryImplTest {
     fun `deleteProject should throw IOException when project not found`() {
         runTest {
             // Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             val differentProjectId = UUID.fromString("11111111-1111-1111-1111-111111111111")
             every {
                 csvStorageManager.readLinesFromFile()
@@ -164,7 +180,7 @@ class ProjectRepositoryImplTest {
             } returns ProjectsMock.CORRECT_PROJECT
 
             // When / Then
-            assertThrows<EiffelFlowException.IOException> {
+            assertThrows<EiffelFlowException.NotFoundException> {
                 projectRepository.deleteProject(differentProjectId)
             }
         }
@@ -177,6 +193,8 @@ class ProjectRepositoryImplTest {
     fun `should return empty list of Projects when the file is empty`() {
         runTest {
             //Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every { csvStorageManager.readLinesFromFile() } returns emptyList()
 
             //When
@@ -191,6 +209,8 @@ class ProjectRepositoryImplTest {
     fun `should return List of Projects when there are projects exist in CSV file`() {
         runTest {
             //Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every {
                 projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
@@ -212,12 +232,14 @@ class ProjectRepositoryImplTest {
     fun `should throw NotFoundException when CSV file throw exception`() {
         runTest {
             //Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every {
                 csvStorageManager.readLinesFromFile()
             } throws IOException("Failed to read file")
 
             // When / Then
-            assertThrows<EiffelFlowException.NotFoundException> {
+            assertThrows<EiffelFlowException.IOException> {
                 projectRepository.getProjects()
             }
         }
@@ -229,6 +251,8 @@ class ProjectRepositoryImplTest {
     fun `should return Project when the given Id match project record exists in CSV file`() {
         runTest{
             //Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every {
                 projectMapper.parseCsvLine(ProjectsMock.CORRECT_CSV_STRING_LINE)
             } returns ProjectsMock.CORRECT_PROJECT
@@ -248,6 +272,8 @@ class ProjectRepositoryImplTest {
     @Test
     fun `should throw NotFoundException when searching for project doesn't exists in CSV file`() {
         runTest {
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             //When/ Them
             assertThrows<EiffelFlowException.NotFoundException> {
                 projectRepository.getProjectById(UUID.randomUUID())
@@ -260,12 +286,14 @@ class ProjectRepositoryImplTest {
     fun `should return NotFoundException when searching for project and CSV file throw exception`() {
         runTest {
             //Given
+            every { sessionManger.isAdmin() } returns true
+            every { sessionManger.getUser() } returns adminUser
             every {
                 csvStorageManager.readLinesFromFile()
             } throws IOException("Failed to read file")
 
             //When/ Them
-            assertThrows<EiffelFlowException.NotFoundException> {
+            assertThrows<EiffelFlowException.IOException> {
                 projectRepository.getProjectById(UUID.randomUUID())
             }
         }

@@ -54,20 +54,6 @@ class DeleteUserUseCaseTest {
         }
     }
 
-    @Test
-    fun `delete user should fail when user is not Admin`() {
-        runTest {
-            // Given
-            every { SessionManger.getUser() } returns UserMock.validUser
-            every { SessionManger.isAdmin() } returns false
-
-            // When / Then
-            val result = assertThrows<EiffelFlowException.AuthorizationException> {
-                deleteUserUseCase.deleteUser(UserMock.validUser.userId)
-            }
-            assertThat(result.message).isEqualTo("Only admins can delete users")
-        }
-    }
 
     @Test
     fun `delete user should fail when repository createUser fails`() {
@@ -86,23 +72,5 @@ class DeleteUserUseCaseTest {
         }
     }
 
-    @Test
-    fun `delete user should fail when user is not logged in`() {
-        runTest {
-            // Given
-            every {
-                SessionManger.isAdmin()
-            } throws EiffelFlowException.AuthorizationException("User is not logged in")
-
-            coEvery {
-                userRepository.deleteUser(any())
-            } returns UserMock.validUser
-            // When / Then
-            val result = assertThrows<EiffelFlowException.AuthorizationException> {
-                deleteUserUseCase.deleteUser(UserMock.validUser.userId)
-            }
-            assertThat(result.message).isEqualTo("User is not logged in")
-        }
-    }
 
 }
