@@ -23,7 +23,7 @@ class AuthRepositoryImpl(
     private val usersCollection = database.getCollection<MongoUserDto>(collectionName = MongoCollections.USERS)
 
     override suspend fun saveUserLogin(user: User): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val userDto = userMapper.toDto(user)
             authCollection.insertOne(userDto)
             user
@@ -31,9 +31,9 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun isUserLoggedIn(): Boolean {
-        return wrapInTryCatch {
+        return executeSafely {
             val currentUserDto = authCollection.find().firstOrNull()
-            currentUserDto ?: return@wrapInTryCatch false
+            currentUserDto ?: return@executeSafely false
             val currentUser = userMapper.fromDto(currentUserDto)
             SessionManger.login(currentUser)
             true
@@ -41,14 +41,14 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun clearLogin() {
-        return wrapInTryCatch {
+        return executeSafely {
             authCollection.deleteMany(Document())
             SessionManger.logout()
         }
     }
 
     override suspend fun loginUser(username: String, password: String): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val userDto = findUserByCredentials(username, password)
             userDto ?: throw EiffelFlowException.NotFoundException("Invalid Credentials")
 

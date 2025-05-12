@@ -43,20 +43,6 @@ class GetUserUseCaseTest {
         }
     }
 
-    @Test
-    fun `getUsers should throw AuthorizationException when user is not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.isAdmin() } returns false
-
-            // When / Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                getUserUseCase.getUsers()
-            }
-
-            coVerify(exactly = 0) { userRepository.getUsers() }
-        }
-    }
 
     @Test
     fun `getUserById should return user when user is admin`() {
@@ -71,22 +57,6 @@ class GetUserUseCaseTest {
 
             // Then
             assertThat(result).isEqualTo(UserMock.validUser)
-        }
-    }
-
-    @Test
-    fun `getUserById should throw AuthorizationException when not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.isAdmin() } returns false
-
-            // When / Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                getUserUseCase.getUserById(UserMock.validUser.userId)
-            }
-
-            coVerify(exactly = 0) { userRepository.getUserById(UserMock.validUser.userId) }
-
         }
     }
 

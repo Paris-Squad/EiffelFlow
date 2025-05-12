@@ -13,7 +13,7 @@ class UserRepositoryImpl(
     private val fileDataSource: FileDataSource,
 ) : BaseRepository(), UserRepository {
     override suspend fun createUser(user: User): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val userAsCsv = userCsvParser.serialize(user)
             val users = getUsers()
 
@@ -31,7 +31,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun updateUser(user: User): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val users = getUsers()
             val existingUser = users.find { it.userId == user.userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID ${user.userId} not found")
@@ -45,7 +45,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun deleteUser(userId: UUID): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val users = getUsers()
             val userToDelete = users.find { it.userId == userId }
                 ?: throw EiffelFlowException.NotFoundException("User with ID $userId not found")
@@ -58,7 +58,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun getUserById(userId: UUID): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
 
@@ -69,7 +69,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun getUsers(): List<User> {
-        return wrapInTryCatch {
+        return executeSafely {
             val lines = fileDataSource.readLinesFromFile()
             val users = lines.filter { it.isNotBlank() }.map { line -> userCsvParser.parseCsvLine(line) }
             users

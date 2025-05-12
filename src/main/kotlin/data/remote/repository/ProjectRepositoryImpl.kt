@@ -26,7 +26,7 @@ class ProjectRepositoryImpl(
     private val tasksCollection = database.getCollection<MongoTaskDto>(collectionName = MongoCollections.TASKS)
 
     override suspend fun createProject(project: Project): Project {
-        return wrapInTryCatch {
+        return executeSafely {
             if (project.taskStates.isEmpty()){
                 val defaultState = TaskState(name = "To Do")
                 project.taskStates = listOf(defaultState)
@@ -42,7 +42,7 @@ class ProjectRepositoryImpl(
         oldProject: Project,
         changedField: String
     ): Project {
-        return wrapInTryCatch {
+        return executeSafely {
             val projectDto = projectMapper.toDto(project)
             val updates = Updates.combine(
                 Updates.set(MongoProjectDto::projectName.name, projectDto.projectName),
@@ -62,7 +62,7 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun deleteProject(projectId: UUID): Project {
-        return wrapInTryCatch {
+        return executeSafely {
             val query = eq(MongoProjectDto::_id.name, projectId.toString())
             val deletedProjectDto = projectsCollection.findOneAndDelete(query)
             if (deletedProjectDto == null) {
@@ -80,7 +80,7 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun getProjectById(projectId: UUID): Project {
-        return wrapInTryCatch {
+        return executeSafely {
             val query = eq(MongoProjectDto::_id.name, projectId.toString())
             val projectDto = projectsCollection.find(query).firstOrNull()
             projectDto ?: throw EiffelFlowException.NotFoundException("Project with id $projectId not found")
@@ -90,7 +90,7 @@ class ProjectRepositoryImpl(
     }
 
     override suspend fun getProjects(): List<Project> {
-        return wrapInTryCatch {
+        return executeSafely {
             val projectsDto = projectsCollection.find().toList()
             projectsDto.map { projectMapper.fromDto(it) }
         }

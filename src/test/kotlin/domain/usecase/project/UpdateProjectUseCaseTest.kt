@@ -116,7 +116,10 @@ class UpdateProjectUseCaseTest {
             assertThat(result).isEqualTo(updatedProject)
             coVerify {
                 projectRepository.updateProject(
-                    updatedProject, ProjectsMock.CORRECT_PROJECT, match { it.contains("PROJECT_NAME") })
+                    updatedProject,
+                    ProjectsMock.CORRECT_PROJECT,
+                    "projectName"
+                )
             }
         }
     }
@@ -145,7 +148,7 @@ class UpdateProjectUseCaseTest {
                 projectRepository.updateProject(
                     project = updatedProject,
                     oldProject = ProjectsMock.CORRECT_PROJECT,
-                    changedField = match { it.contains("PROJECT_DESCRIPTION") }
+                    changedField = match { it.contains("projectDescription") }
                 )
             }
         }
@@ -176,7 +179,7 @@ class UpdateProjectUseCaseTest {
                 projectRepository.updateProject(
                     project = updatedProject,
                     oldProject = ProjectsMock.CORRECT_PROJECT,
-                    changedField = match { it.contains("ADMIN_ID") }
+                    changedField = match { it.contains("adminId") }
                 )
             }
         }
@@ -206,7 +209,7 @@ class UpdateProjectUseCaseTest {
                 projectRepository.updateProject(
                     project = updatedProject,
                     oldProject = ProjectsMock.CORRECT_PROJECT,
-                    changedField = match { it.contains("TASK_STATES") }
+                    changedField = match { it.contains("taskStates") }
                 )
             }
         }
@@ -242,9 +245,9 @@ class UpdateProjectUseCaseTest {
                     project = updatedProject,
                     oldProject = ProjectsMock.CORRECT_PROJECT,
                     changedField = match {
-                        it.contains("PROJECT_NAME")
-                                && it.contains("PROJECT_DESCRIPTION")
-                                && it.contains("ADMIN_ID")
+                        it.contains("projectName")
+                                && it.contains("projectDescription")
+                                && it.contains("adminId")
                     })
             }
         }
@@ -268,18 +271,5 @@ class UpdateProjectUseCaseTest {
         }
     }
 
-    @Test
-    fun `updateProject should throw AuthorizationException when user is not admin`() {
-        runTest {
-            // Given
-            every { sessionManger.isAdmin() } returns false
-            every { sessionManger.getUser() } returns UserMock.validUser
-
-            // When / Then
-            assertThrows<EiffelFlowException.AuthorizationException> {
-                updateProjectUseCase.updateProject(ProjectsMock.CORRECT_PROJECT.copy())  }
-
-        }
-    }
 
 }

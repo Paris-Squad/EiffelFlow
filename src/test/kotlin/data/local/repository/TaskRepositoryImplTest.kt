@@ -61,7 +61,7 @@ class TaskRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 taskRepository.createTask(TaskMock.validTask)
             }
-            assertThat(exception.message).contains("Can't create task")
+            assertThat(exception.message).contains("Can't perform this action")
         }
     }
     //endregion
@@ -98,7 +98,7 @@ class TaskRepositoryImplTest {
             }
 
             // Then
-            assertThat(exception.message).isEqualTo("Can't update task. $exceptionMessage")
+            assertThat(exception.message).isEqualTo("Can't perform this action because $exceptionMessage")
         }
     }
     //endregion
@@ -131,7 +131,6 @@ class TaskRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 taskRepository.deleteTask(nonExistentTaskId)
             }
-            assertThat(exception.message).contains("Can't delete task")
             assertThat(exception.message).contains("Task not found")
         }
     }
@@ -149,7 +148,7 @@ class TaskRepositoryImplTest {
             val exception = assertThrows<EiffelFlowException.IOException> {
                 taskRepository.deleteTask(taskId)
             }
-            assertThat(exception.message).contains("Can't delete task")
+            assertThat(exception.message).contains("Can't perform this action because")
         }
     }
     //endregion
@@ -197,7 +196,7 @@ class TaskRepositoryImplTest {
             }
 
             // Then
-            assertThat(exception.message).isEqualTo("Can't get tasks because $exceptionMessage")
+            assertThat(exception.message).isEqualTo("Can't perform this action because $exceptionMessage")
         }
     }
     //endregion
@@ -239,7 +238,6 @@ class TaskRepositoryImplTest {
             // Given
             val taskId = UUID.randomUUID()
             val lines = listOf("task1,csv,line", "task2,csv,line")
-            val exceptionMessage = "Task not found"
 
             every { fileDataSource.readLinesFromFile() } returns lines
             every { taskMapper.parseCsvLine(any()) } returns TaskMock.validTask.copy(taskId = UUID.randomUUID())
@@ -250,7 +248,7 @@ class TaskRepositoryImplTest {
             }
 
             // Then
-            assertThat(exception.message).isEqualTo("Can't get task with ID: $taskId because $exceptionMessage")
+            assertThat(exception.message).isEqualTo("Task not found")
         }
     }
     //endregion
