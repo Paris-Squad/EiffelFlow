@@ -78,14 +78,14 @@ class EiffelFlowConsoleCLI {
                 "7" -> uiContainer.createTaskCLI.start()
                 "8" -> uiContainer.editTaskCli.start()
                 "9" -> uiContainer.deleteTaskCLI.start()
-                "10" -> TODO("View all tasks")
-                "11" -> TODO("View task by ID")
+                "10" -> uiContainer.getTaskCLI.viewTasks()
+                "11" -> uiContainer.getTaskCLI.displayTaskById()
                 "12" -> uiContainer.getProjectAuditLogsCLI.start()
                 "13" -> uiContainer.getTaskAuditLogsCLI.start()
                 "14" -> uiContainer.getAuditLogsCLI.start()
                 "15" -> uiContainer.updateUserCLI.start()
                 "16" -> uiContainer.deleteUserCLI.start()
-                "17" -> TODO("View all users")
+                "17" -> uiContainer.getUserCLI.viewAllUsers()
                 "18" -> {
                     logout(uiContainer)
                     break
