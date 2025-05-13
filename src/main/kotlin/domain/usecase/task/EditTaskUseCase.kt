@@ -7,6 +7,7 @@ import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
 import org.example.domain.repository.AuditRepository
 import org.example.domain.repository.TaskRepository
+import org.example.domain.utils.getFieldChanges
 
 class EditTaskUseCase(
     private val taskRepository: TaskRepository ,
@@ -15,9 +16,13 @@ class EditTaskUseCase(
     suspend fun editTask(request: Task): Task {
         val originalTask = taskRepository.getTaskById(request.taskId)
 
-        if (originalTask == request) throw EiffelFlowException.IOException("No changes detected")
+        val changedFields = originalTask.getFieldChanges(request)
 
-        val changedField = detectChangedField(originalTask, request)
+        if (changedFields.isEmpty()) {
+            throw EiffelFlowException.IOException("No changes detected")
+        }
+
+         val changedField = changedFields.joinToString(", ") { it.fieldName }
 
         val updatedTask =  taskRepository.updateTask(
             task = request,
@@ -37,16 +42,4 @@ class EditTaskUseCase(
         return updatedTask
     }
 
-    private fun detectChangedField(original: Task, updated: Task): String {
-        val changes = mutableListOf<String>()
-
-        if (original.title != updated.title) changes.add("TITLE")
-        if (original.description != updated.description) changes.add("DESCRIPTION")
-        if (original.assignedId != updated.assignedId) changes.add("ASSIGNEE")
-        if (original.state != updated.state) changes.add("STATE")
-        if (original.role != updated.role) changes.add("ROLE")
-        if (original.projectId != updated.projectId) changes.add("PROJECT")
-
-        return changes.joinToString(", ") { it }
-    }
 }

@@ -46,7 +46,7 @@ class EditTaskUseCaseTest {
             assertThat(result).isEqualTo(inProgressTask)
             coVerify {
                 taskRepository.updateTask(
-                    inProgressTask, validTask, match { it.contains("STATE") })
+                    inProgressTask, validTask, match { it.contains("state") })
             }
         }
     }
@@ -96,7 +96,7 @@ class EditTaskUseCaseTest {
                     updatedTask,
                     originalTask,
 
-                    match { it.contains("TITLE") }
+                    match { it.contains("title") }
                 )
             }
         }
@@ -121,7 +121,7 @@ class EditTaskUseCaseTest {
                     updatedTask,
                     originalTask,
 
-                    match { it.contains("DESCRIPTION") })
+                    match { it.contains("description") })
             }
         }
     }
@@ -144,7 +144,7 @@ class EditTaskUseCaseTest {
                     updatedTask,
                     originalTask,
 
-                    match { it.contains("ASSIGNEE") }
+                    match { it.contains("assignedId") }
                 )
             }
         }
@@ -169,7 +169,7 @@ class EditTaskUseCaseTest {
                     updatedTask,
                     originalTask,
 
-                    match { it.contains("ROLE") }
+                    match { it.contains("role") }
                 )
             }
         }
@@ -195,7 +195,7 @@ class EditTaskUseCaseTest {
                     updatedTask,
                     originalTask,
 
-                    match { it.contains("PROJECT") }
+                    match { it.contains("projectId") }
                 )
             }
         }
@@ -220,7 +220,7 @@ class EditTaskUseCaseTest {
                     updatedTask,
                     originalTask,
 
-                    match { it.contains("STATE") }
+                    match { it.contains("state") }
                 )
             }
         }
@@ -261,9 +261,9 @@ class EditTaskUseCaseTest {
             coVerify {
                 taskRepository.updateTask(
                     updatedTask, originalTask, match {
-                        it.contains("TITLE") &&
-                                it.contains("DESCRIPTION") &&
-                                it.contains("ASSIGNEE")
+                        it.contains("title") &&
+                                it.contains("description") &&
+                                it.contains("assignedId")
                     })
             }
         }

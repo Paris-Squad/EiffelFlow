@@ -1,7 +1,6 @@
 package org.example.domain.usecase.user
 
 import org.example.data.utils.SessionManger
-import org.example.domain.exception.EiffelFlowException
 import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
@@ -14,7 +13,6 @@ class DeleteUserUseCase(
     private val auditRepository: AuditRepository
 ) {
     suspend fun deleteUser(userId: UUID): User {
-        validateAdminAccess()
         val deletedUser = userRepository.deleteUser(userId)
 
         val auditLog = deletedUser.toAuditLog(
@@ -26,9 +24,4 @@ class DeleteUserUseCase(
         return deletedUser
     }
 
-    private fun validateAdminAccess() {
-        require(SessionManger.isAdmin()) {
-            throw EiffelFlowException.AuthorizationException("Only admins can delete users")
-        }
-    }
 }

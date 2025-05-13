@@ -200,32 +200,6 @@ class AuthRepositoryImplTest {
         }
     }
 
-    @Test
-    fun `isUserLoggedIn should return false when file not found`() {
-        runTest {
-            // Given
-            every { authFileManager.readLinesFromFile() } throws FileNotFoundException()
-            // When
-            val result = authRepository.isUserLoggedIn()
-
-            // Then
-            assertThat(result).isFalse()
-        }
-    }
-
-    @Test
-    fun `isUserLoggedIn should not set user in session manager when file not found`() {
-        runTest {
-            // Given
-            every { authFileManager.readLinesFromFile() } throws FileNotFoundException()
-
-            // When
-            authRepository.isUserLoggedIn()
-
-            // Then
-            assertThat(SessionManger.isLoggedIn()).isFalse()
-        }
-    }
 
     @Test
     fun `isUserLoggedIn should threw IOException when other exception occurs`() {

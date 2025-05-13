@@ -13,7 +13,7 @@ class TaskRepositoryImpl(
     private val fileDataSource: FileDataSource
 ) : BaseRepository(), TaskRepository {
     override suspend fun createTask(task: Task): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val csvLine = taskCsvParser.serialize(task)
             fileDataSource.writeLinesToFile(csvLine)
             task
@@ -21,7 +21,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun updateTask(task: Task, oldTask: Task, changedField: String): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val taskCsv = taskCsvParser.serialize(task)
             val oldTaskCsv = taskCsvParser.serialize(oldTask)
             fileDataSource.updateLinesToFile(taskCsv, oldTaskCsv)
@@ -30,7 +30,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun deleteTask(taskId: UUID): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val lines = fileDataSource.readLinesFromFile()
             val taskLine = lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
                 ?: throw EiffelFlowException.IOException("Task not found")
@@ -42,7 +42,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun getTaskById(taskId: UUID): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val lines = fileDataSource.readLinesFromFile()
             lines.find { taskCsvParser.parseCsvLine(it).taskId == taskId }
                 ?.let { taskCsvParser.parseCsvLine(it) }
@@ -51,7 +51,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun getTasks(): List<Task> {
-        return wrapInTryCatch {
+        return executeSafely {
             val lines = fileDataSource.readLinesFromFile()
             if (lines.isEmpty()) {
                 throw EiffelFlowException.NotFoundException("No tasks found in the database. Please create a new task first.")

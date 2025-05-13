@@ -23,7 +23,7 @@ class UserRepositoryImpl(
     private val usersCollection = database.getCollection<MongoUserDto>(collectionName = MongoCollections.USERS)
 
     override suspend fun createUser(user: User): User {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val userDto = userMapper.toDto(user)
             usersCollection.insertOne(userDto)
             user
@@ -31,7 +31,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun updateUser(user: User): User {
-        return wrapInTryCatch {
+        return executeSafely {
             val userDto = userMapper.toDto(user)
             val updates = Updates.combine(
                 Updates.set(MongoUserDto::username.name, userDto.username),
@@ -49,7 +49,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun deleteUser(userId: UUID): User {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val query = eq(MongoUserDto::_id.name, userId.toString())
             val deletedUserDto = usersCollection.findOneAndDelete(query)
 
@@ -62,7 +62,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun getUserById(userId: UUID): User {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val query = eq(MongoUserDto::_id.name, userId.toString())
             val userDto = usersCollection.find(query).firstOrNull()
             userDto ?: throw EiffelFlowException.NotFoundException("User with id $userId not found")
@@ -72,7 +72,7 @@ class UserRepositoryImpl(
     }
 
     override suspend fun getUsers(): List<User> {
-        return wrapInTryCatch {
+        return executeIfAdmin {
             val usersDto = usersCollection.find().toList()
             usersDto.map { userMapper.fromDto(it) }
         }

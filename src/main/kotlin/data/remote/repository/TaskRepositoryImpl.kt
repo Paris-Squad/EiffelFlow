@@ -23,7 +23,7 @@ class TaskRepositoryImpl(
     private val tasksCollection = database.getCollection<MongoTaskDto>(collectionName = MongoCollections.TASKS)
 
     override suspend fun createTask(task: Task): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val taskDto = taskMapper.toDto(task)
             tasksCollection.insertOne(taskDto)
             task
@@ -35,7 +35,7 @@ class TaskRepositoryImpl(
         oldTask: Task,
         changedField: String
     ): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val taskDto = taskMapper.toDto(task)
             val updates = Updates.combine(
                 Updates.set(MongoTaskDto::title.name, taskDto.title),
@@ -58,7 +58,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun deleteTask(taskId: UUID): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val query = eq(MongoTaskDto::_id.name, taskId.toString())
             val deletedTaskDto = tasksCollection.findOneAndDelete(query)
             deletedTaskDto ?: throw EiffelFlowException.NotFoundException("Task with id $taskId not found")
@@ -69,7 +69,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun getTaskById(taskId: UUID): Task {
-        return wrapInTryCatch {
+        return executeSafely {
             val query = eq(MongoTaskDto::_id.name, taskId.toString())
             val taskDto = tasksCollection.find(query).firstOrNull()
             taskDto ?: throw EiffelFlowException.NotFoundException("Task with id $taskId not found")
@@ -78,7 +78,7 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun getTasks(): List<Task> {
-        return wrapInTryCatch {
+        return executeSafely {
             val tasksDto = tasksCollection.find().toList()
             tasksDto.map { taskMapper.fromDto(it) }
         }

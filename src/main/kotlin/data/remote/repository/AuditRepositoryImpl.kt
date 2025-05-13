@@ -25,7 +25,7 @@ class AuditRepositoryImpl(
         database.getCollection<MongoAuditLogDto>(collectionName = MongoCollections.AUDIT_LOGS)
 
     override suspend fun createAuditLog(auditLog: AuditLog): AuditLog {
-        return wrapInTryCatch {
+        return executeSafely {
             val auditLogDto = auditLogMapper.toDto(auditLog)
             auditLogsCollection.insertOne(auditLogDto)
             auditLog
@@ -33,13 +33,13 @@ class AuditRepositoryImpl(
     }
 
     override suspend fun getTaskAuditLogById(taskId: UUID): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             findAuditLogsByItemId(taskId).toList().sortedByDescending { it.auditTime }
         }
     }
 
     override suspend fun getProjectAuditLogById(projectId: UUID): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             val projectLogs = findAuditLogsByItemId(projectId).toList()
             val auditLogsForProjectTasks = getAuditProjectTasks(projectId, getAuditLogs())
             (projectLogs + auditLogsForProjectTasks).sortedByDescending { it.auditTime }
@@ -64,7 +64,7 @@ class AuditRepositoryImpl(
     }
 
     override suspend fun getAuditLogs(): List<AuditLog> {
-        return wrapInTryCatch {
+        return executeSafely {
             val auditLogsDto = auditLogsCollection.find().toList()
             auditLogsDto.map { auditLogMapper.fromDto(it) }
         }
