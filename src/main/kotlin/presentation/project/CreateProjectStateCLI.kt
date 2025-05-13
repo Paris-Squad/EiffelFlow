@@ -14,20 +14,9 @@ class CreateProjectStateCLI(
     private val printer: Printer
 ) : BaseCli(printer) {
 
-    fun start() {
+    fun start(projectId: UUID) {
         tryStartCli {
-            val projectIdStr = readNonBlankInput(
-                inputReader,
-                prompt = "Enter Project ID: ",
-                errorMessage = "Project ID cannot be empty."
-            ) ?: return@tryStartCli
-
-            val projectId = try {
-                UUID.fromString(projectIdStr)
-            } catch (e: Exception) {
-                printer.displayLn("Invalid UUID format.")
-                return@tryStartCli
-            }
+            printer.displayLn("Create New Project State")
 
             val newStateName = readNonBlankInput(
                 inputReader,
@@ -46,3 +35,5 @@ class CreateProjectStateCLI(
         }
     }
 }
+
+

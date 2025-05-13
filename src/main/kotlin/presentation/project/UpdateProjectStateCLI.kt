@@ -13,17 +13,9 @@ class UpdateProjectStateCLI(
     private val printer: Printer
 ) : BaseCli(printer) {
 
-    fun start() {
+    fun start(projectId: UUID, stateId: UUID) {
         tryStartCli {
-            val projectId = readUUID(
-                prompt = "Enter Project ID: ",
-                errorMsg = "Invalid or empty Project ID."
-            ) ?: return@tryStartCli
-
-            val stateId = readUUID(
-                prompt = "Enter State ID to update: ",
-                errorMsg = "Invalid or empty State ID."
-            ) ?: return@tryStartCli
+            printer.displayLn("Update Existing Task State")
 
             val newStateName = readNonBlankInput(
                 inputReader = inputReader,
@@ -37,16 +29,6 @@ class UpdateProjectStateCLI(
                 printer.displayLn("Project ID  : ${updatedProject.projectId}")
                 printer.displayLn("New State(s): ${updatedProject.taskStates}")
             }
-        }
-    }
-
-    private fun readUUID(prompt: String, errorMsg: String): UUID? {
-        val input = readNonBlankInput(inputReader, prompt, errorMsg)
-        return try {
-            UUID.fromString(input)
-        } catch (e: Exception) {
-            printer.displayLn("Invalid UUID format.")
-            null
         }
     }
 }
