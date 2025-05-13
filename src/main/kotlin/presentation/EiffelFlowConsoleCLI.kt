@@ -60,7 +60,8 @@ class EiffelFlowConsoleCLI {
             15. Update profile
             16. Delete User
             17. View all users
-            18. Logout
+            18. Manage Project state
+            19. Logout
             0. Exit
             """.trimIndent()
             )
@@ -86,7 +87,8 @@ class EiffelFlowConsoleCLI {
                 "15" -> uiContainer.updateUserCLI.start()
                 "16" -> uiContainer.deleteUserCLI.start()
                 "17" -> TODO("View all users")
-                "18" -> {
+                "18" -> uiContainer.manageProjectStateCLI.start()
+                "19" -> {
                     logout(uiContainer)
                     break
                 }

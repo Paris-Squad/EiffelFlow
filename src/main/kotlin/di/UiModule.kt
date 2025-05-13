@@ -14,9 +14,13 @@ import org.example.presentation.io.ConsoleReader
 import org.example.presentation.io.InputReader
 import org.example.presentation.io.Printer
 import org.example.presentation.project.CreateProjectCLI
+import org.example.presentation.project.CreateProjectStateCLI
 import org.example.presentation.project.DeleteProjectCLI
+import org.example.presentation.project.DeleteProjectStateCLI
 import org.example.presentation.project.GetProjectCLI
+import org.example.presentation.project.ManageProjectStateCLI
 import org.example.presentation.project.UpdateProjectCLI
+import org.example.presentation.project.UpdateProjectStateCLI
 import org.example.presentation.task.CreateTaskCLI
 import org.example.presentation.task.DeleteTaskCLI
 import org.example.presentation.task.EditTaskCli
@@ -55,6 +59,10 @@ val uiModule = module {
     singleOf(::DeleteProjectCLI)
     singleOf(::GetProjectCLI)
     singleOf(::UpdateProjectCLI)
+    singleOf(::CreateProjectStateCLI)
+    singleOf(::UpdateProjectStateCLI)
+    singleOf(::DeleteProjectStateCLI)
+    singleOf(::ManageProjectStateCLI)
 
     //Task
     singleOf(::CreateTaskCLI)
