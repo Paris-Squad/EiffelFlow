@@ -16,6 +16,7 @@ import org.example.domain.usecase.user.CreateUserUseCase
 import org.example.domain.usecase.user.DeleteUserUseCase
 import org.example.domain.usecase.user.GetUserUseCase
 import org.example.domain.usecase.user.UpdateUserUseCase
+import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 val useCasesModule = module {
@@ -47,7 +48,7 @@ val useCasesModule = module {
     //User
     factory { CreateUserUseCase(get(), get(),get()) }
     factory { DeleteUserUseCase(get(),get()) }
-    factory { UpdateUserUseCase(get(), get(),get()) }
+    factoryOf(::UpdateUserUseCase)
     factory { GetUserUseCase(get()) }
 
 }
