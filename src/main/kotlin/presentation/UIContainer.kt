@@ -9,6 +9,7 @@ import org.example.presentation.user.CreateUserCLI
 import org.example.presentation.project.CreateProjectCLI
 import org.example.presentation.project.DeleteProjectCLI
 import org.example.presentation.project.GetProjectCLI
+import org.example.presentation.project.ManageProjectStateCLI
 import org.example.presentation.project.UpdateProjectCLI
 import org.example.presentation.task.CreateTaskCLI
 import org.example.presentation.task.DeleteTaskCLI
@@ -35,5 +36,7 @@ data class UIContainer(
     val deleteUserCLI: DeleteUserCLI,
     val updateUserCLI: UpdateUserCLI,
     val getTaskCLI: GetTaskCLI,
-    val getUserCLI : GetUserCLI
+    val getUserCLI : GetUserCLI,
+    val manageProjectStateCLI : ManageProjectStateCLI
+
 )
