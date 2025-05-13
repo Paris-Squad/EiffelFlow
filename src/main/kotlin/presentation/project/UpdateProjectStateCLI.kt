@@ -20,7 +20,7 @@ class UpdateProjectStateCLI(
             val newStateName = readNonBlankInput(
                 inputReader = inputReader,
                 prompt = "Enter new state name:",
-                errorMessage = "State name cannot be empty."
+                errorMessage = "State name cannot be empty or blank."
             ) ?: return@tryStartCli
 
             runBlocking {

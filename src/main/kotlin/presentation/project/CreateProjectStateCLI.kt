@@ -21,7 +21,7 @@ class CreateProjectStateCLI(
             val newStateName = readNonBlankInput(
                 inputReader,
                 prompt = "Enter new state name:",
-                errorMessage = "State name cannot be empty."
+                errorMessage = "State name cannot be empty or blank."
             ) ?: return@tryStartCli
 
             val newState = TaskState(name = newStateName)
