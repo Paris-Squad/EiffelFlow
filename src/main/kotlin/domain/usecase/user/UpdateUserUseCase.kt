@@ -6,13 +6,15 @@ import org.example.domain.mapper.toAuditLog
 import org.example.domain.model.AuditLogAction
 import org.example.domain.model.User
 import org.example.domain.repository.AuditRepository
+import org.example.domain.repository.AuthRepository
 import org.example.domain.repository.UserRepository
 import org.example.domain.usecase.auth.HashPasswordUseCase
 
 class UpdateUserUseCase(
     private val userRepository: UserRepository,
     private val hashPasswordUseCase: HashPasswordUseCase,
-    private val auditRepository: AuditRepository
+    private val auditRepository: AuditRepository,
+    private val authRepository: AuthRepository
 ) {
     suspend fun updateUser(
         userName: String,
@@ -22,7 +24,8 @@ class UpdateUserUseCase(
 
         verifySessionActive()
 
-        validateCurrentPassword(currentPassword)
+        val currentPasswordHashed = hashPasswordUseCase.hashPassword(currentPassword)
+        validateCurrentPassword(currentPasswordHashed)
 
         val currentUser = SessionManger.getUser()
         val updatedUser = User(
@@ -38,8 +41,10 @@ class UpdateUserUseCase(
             changedField = "user",
             oldValue = currentUser.toString(),
             newValue = updatedUser.toString()
-            )
-            auditRepository.createAuditLog(auditLog)
+        )
+        auditRepository.createAuditLog(auditLog)
+
+        authRepository.saveUserLogin(result)
         return result
     }
 

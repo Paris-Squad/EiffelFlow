@@ -2,6 +2,7 @@ package data.remote.repository
 
 import com.mongodb.client.model.Filters.and
 import com.mongodb.client.model.Filters.eq
+import com.mongodb.client.model.ReplaceOptions
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.Document
@@ -25,7 +26,12 @@ class AuthRepositoryImpl(
     override suspend fun saveUserLogin(user: User): User {
         return executeSafely {
             val userDto = userMapper.toDto(user)
-            authCollection.insertOne(userDto)
+            authCollection.replaceOne(
+                filter = eq(MongoUserDto::_id.name, userDto._id),
+                replacement = userDto,
+                options = ReplaceOptions().upsert(true)
+            )
+            SessionManger.login(user)
             user
         }
     }
